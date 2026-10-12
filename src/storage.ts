@@ -1,6 +1,6 @@
 import { Directory, File, Paths } from 'expo-file-system';
 import * as DocumentPicker from 'expo-document-picker';
-import { Book, Note, Progress } from './types';
+import { Book, Consult, Note, Progress } from './types';
 
 const root = () => {
   const d = new Directory(Paths.document, 'books');
@@ -77,6 +77,29 @@ export function exportNotesFile(folder: string, book: Book, notes: Note[]): stri
     for (const n of ns) lines.push(`- [${fmt(n.time)}] “${n.quote}”`, `  ${n.text}`, '');
   }
   const f = new File(Paths.cache, `${folder} notes.md`);
+  if (f.exists) f.delete();
+  f.create();
+  f.write(lines.join('\n'));
+  return f.uri;
+}
+
+export const loadConsults = (folder: string) => readJson<Consult[]>(new File(root(), folder, 'consults.json'), []);
+export const saveConsults = (folder: string, list: Consult[]) => writeJson(new File(root(), folder, 'consults.json'), list);
+
+const fmt = (t: number) => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, '0')}`;
+
+export function exportConsultsFile(folder: string, book: Book, list: Consult[]): string {
+  const lines = [`# Claude consults — ${book.title}`, ''];
+  for (const s of book.sections) {
+    const cs = list.filter((c) => c.section === s.id).sort((a, b) => a.id - b.id);
+    if (!cs.length) continue;
+    lines.push(`## ${s.title}`, '');
+    for (const c of cs) {
+      lines.push(`### #C${c.id} · ${fmt(c.time)}${c.parent ? ` (follow-up to #C${c.parent})` : ''}`, `> ${c.quote}`, '', `**Q:** ${c.question}`, '');
+      lines.push(c.answer ? `**Claude:** ${c.answer}` : '_Waiting for answer_', '');
+    }
+  }
+  const f = new File(Paths.cache, `${folder} consults.md`);
   if (f.exists) f.delete();
   f.create();
   f.write(lines.join('\n'));

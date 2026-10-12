@@ -7,4 +7,5 @@ export const c = {
   gold: '#d9b45b',
   explain: '#8fb8de',
   line: '#3a3150',
+  claude: '#e0896a',
 };

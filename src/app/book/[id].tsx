@@ -1,9 +1,9 @@
 import { useCallback, useMemo, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { router, Stack, useFocusEffect, useLocalSearchParams } from 'expo-router';
-import { getBook, loadNotes, loadProgress } from '../../storage';
+import { getBook, loadConsults, loadNotes, loadProgress } from '../../storage';
 import { fmtHours, fmtTime } from '../../format';
-import { Note, Progress } from '../../types';
+import { Consult, Note, Progress } from '../../types';
 import { c } from '../../theme';
 
 export default function BookPage() {
@@ -11,11 +11,13 @@ export default function BookPage() {
   const item = useMemo(() => getBook(id), [id]);
   const [progress, setProgress] = useState<Progress>({ section: 0, time: 0 });
   const [notes, setNotes] = useState<Note[]>([]);
+  const [consults, setConsults] = useState<Consult[]>([]);
 
   useFocusEffect(
     useCallback(() => {
       setProgress(loadProgress(id));
       setNotes(loadNotes(id));
+      setConsults(loadConsults(id));
     }, [id])
   );
 
@@ -39,7 +41,7 @@ export default function BookPage() {
           <View style={s.head}>
             <Text style={s.title}>{book.title}</Text>
             <Text style={s.meta}>
-              {book.sections.length} sections · {fmtHours(total)} · {done.size} finished · {notes.length} notes
+              {book.sections.length} sections · {fmtHours(total)} · {done.size} finished · {notes.length} notes · ✦ {consults.length}
             </Text>
             <Pressable style={s.btn} onPress={() => open()}>
               <Text style={s.btnText}>{progress.time || progress.section ? 'Continue' : 'Start listening'}</Text>
@@ -54,6 +56,7 @@ export default function BookPage() {
         }
         renderItem={({ item: x, index }) => {
           const n = noteCount(x.id);
+          const k = consults.filter((y) => y.section === x.id).length;
           return (
             <Pressable style={[s.row, index === progress.section && s.rowOn]} onPress={() => open(index)}>
               <View style={s.rowTop}>
@@ -62,6 +65,7 @@ export default function BookPage() {
                   {x.title}
                 </Text>
                 <Text style={s.marks}>
+                  {k ? `✦${k} ` : ''}
                   {n ? `✎${n} ` : ''}
                   {done.has(x.id) ? '✓' : fmtTime(x.duration)}
                 </Text>

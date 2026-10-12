@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
+  Alert,
   FlatList,
   KeyboardAvoidingView,
   Modal,
@@ -15,14 +16,18 @@ import * as Sharing from 'expo-sharing';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   audioUri,
+  exportConsultsFile,
   exportNotesFile,
+  loadConsults,
   LibraryItem,
   loadNotes,
   loadProgress,
+  saveConsults,
   saveNotes,
   saveProgress,
 } from '../storage';
-import { Note, Para } from '../types';
+import { Consult, Note, Para } from '../types';
+import { AskDraft, AskSheet, buildPrompt, ConsultList, shareToClaude } from './Consults';
 import { c } from '../theme';
 
 const fmt = (t: number) => {
@@ -46,7 +51,9 @@ export default function Player({ item, start, onClose }: { item: LibraryItem; st
   const [sec, setSec] = useState(Math.min(saved.section, book.sections.length - 1));
   const [showText, setShowText] = useState(true);
   const [follow, setFollow] = useState(true);
-  const [panel, setPanel] = useState<'none' | 'chapters' | 'notes'>('none');
+  const [panel, setPanel] = useState<'none' | 'chapters' | 'notes' | 'consults'>('none');
+  const [consults, setConsults] = useState<Consult[]>(() => loadConsults(folder));
+  const [ask, setAsk] = useState<AskDraft | null>(null);
   const [notes, setNotes] = useState<Note[]>(() => loadNotes(folder));
   const [draft, setDraft] = useState<Draft | null>(null);
   const [rate, setRate] = useState(1);
@@ -154,6 +161,48 @@ export default function Player({ item, start, onClose }: { item: LibraryItem; st
     if (await Sharing.isAvailableAsync()) await Sharing.shareAsync(uri, { UTI: 'public.plain-text' });
   };
 
+  const quoteOf = (para: number) => {
+    const p = section.paras[para];
+    return p.text.slice(0, 280) + (p.text.length > 280 ? '…' : '');
+  };
+  const storeConsults = (next: Consult[]) => (setConsults(next), saveConsults(folder, next));
+  const startAsk = (para: number, time: number) => setAsk({ section: section.id, para, time, quote: quoteOf(para) });
+  const sendAsk = async (question: string) => {
+    if (!ask) return;
+    const cst: Consult = {
+      id: consults.reduce((m, x) => Math.max(m, x.id), 0) + 1,
+      section: ask.section,
+      para: ask.para,
+      time: ask.time,
+      quote: ask.quote,
+      question,
+      parent: ask.parent?.id,
+      status: 'asked',
+      created: Date.now(),
+    };
+    storeConsults([...consults, cst]);
+    setAsk(null);
+    player.pause();
+    await shareToClaude(buildPrompt(book, cst, notes, ask.parent));
+  };
+  const answerConsult = (cst: Consult, answer: string) =>
+    storeConsults(consults.map((x) => (x.id === cst.id ? { ...x, answer, status: 'answered', answered: Date.now() } : x)));
+  const exportConsults = async () => {
+    const uri = exportConsultsFile(folder, book, consults);
+    if (await Sharing.isAvailableAsync()) await Sharing.shareAsync(uri, { UTI: 'public.plain-text' });
+  };
+  const paraActions = (index: number, time: number) =>
+    Alert.alert('This passage', undefined, [
+      { text: '✎ Add note', onPress: () => newNote(index, time) },
+      { text: '✦ Ask Claude', onPress: () => startAsk(index, time) },
+      { text: 'Cancel', style: 'cancel' },
+    ]);
+
+  const asked = useMemo(
+    () => new Set(consults.filter((x) => x.section === section.id).map((x) => x.para)),
+    [consults, section]
+  );
+
   const noted = useMemo(
     () => new Set(notes.filter((n) => n.section === section.id).map((n) => n.para)),
     [notes, section]
@@ -166,6 +215,9 @@ export default function Player({ item, start, onClose }: { item: LibraryItem; st
           <Text style={s.link}>‹ Back</Text>
         </Pressable>
         <View style={s.topRight}>
+          <Pressable onPress={() => setPanel('consults')} hitSlop={8}>
+            <Text style={[s.link, { color: c.claude }]}>✦ {consults.length}</Text>
+          </Pressable>
           <Pressable onPress={() => setPanel('notes')} hitSlop={8}>
             <Text style={s.link}>Notes ({notes.length})</Text>
           </Pressable>
@@ -196,10 +248,11 @@ export default function Player({ item, start, onClose }: { item: LibraryItem; st
             renderItem={({ item: p, index }) => (
               <Pressable
                 onPress={() => goTo(sec, p.start + 0.01)}
-                onLongPress={() => newNote(index, p.start)}
+                onLongPress={() => paraActions(index, p.start)}
                 style={[s.para, index === current && s.paraOn]}
               >
                 <Text style={[s.pText, styleFor(p), index === current && s.pTextOn]}>
+                  {asked.has(index) ? '✦ ' : ''}
                   {noted.has(index) ? '✎ ' : ''}
                   {p.text}
                 </Text>
@@ -244,6 +297,7 @@ export default function Player({ item, start, onClose }: { item: LibraryItem; st
         <View style={s.row}>
           <Btn label={`${rate}×`} onPress={cycleRate} />
           <Btn label="✎ Note here" onPress={() => newNote(current, t)} wide />
+          <Btn label="✦ Ask" onPress={() => startAsk(current, t)} />
         </View>
       </View>
 
@@ -334,6 +388,22 @@ export default function Player({ item, start, onClose }: { item: LibraryItem; st
           </View>
         </KeyboardAvoidingView>
       </Modal>
+      <AskSheet draft={ask} onCancel={() => setAsk(null)} onSend={sendAsk} />
+      <ConsultList
+        visible={panel === 'consults'}
+        book={book}
+        consults={consults}
+        onClose={() => setPanel('none')}
+        onJump={(x) => (goTo(book.sections.findIndex((y) => y.id === x.section), x.time), setPanel('none'))}
+        onAnswer={answerConsult}
+        onResend={(x) => shareToClaude(buildPrompt(book, x, notes, consults.find((y) => y.id === x.parent)))}
+        onFollowUp={(x) => {
+          setPanel('none');
+          setTimeout(() => setAsk({ section: x.section, para: x.para, time: x.time, quote: x.quote, parent: x }), 450);
+        }}
+        onDelete={(x) => storeConsults(consults.filter((y) => y.id !== x.id))}
+        onExport={exportConsults}
+      />
     </SafeAreaView>
   );
 }

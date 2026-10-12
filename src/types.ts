@@ -17,3 +17,17 @@ export type Note = {
 };
 
 export type Progress = { section: number; time: number; done?: string[] };
+
+export type Consult = {
+  id: number;
+  section: string;
+  time: number;
+  para: number;
+  quote: string;
+  question: string;
+  answer?: string;
+  parent?: number;
+  status: 'asked' | 'answered';
+  created: number;
+  answered?: number;
+};

@@ -50,7 +50,7 @@ App: "Downloads" shows progress → one tap to import when ready
 
 > Copyrighted books and audio must stay in a **private** repo. This app repo is public only so its iOS builds are free.
 
-## Phase 4 — Ask Claude about the book 🔨
+## Phase 4 — Ask Claude about the book ✅
 
 Decided: questions go to the **Claude iPhone app** (TAROT project, included in the Pro plan), and answers come back into Tarot Reader so every consult stays organized.
 
@@ -64,11 +64,11 @@ Claude app: answer
         └─► status "answered", saved as a note marked ✦ Claude consult
 ```
 
-- 📋 `consults.json` per book: id, section, time, paragraph, question, answer, status, dates
-- 📋 Consults screen per book: filter by status (asked / answered) and by section; tap to jump to the passage
-- 📋 ✦ marker on paragraphs and in the section list wherever a consult exists
-- 📋 Follow-up question on an existing consult (keeps the same #ID thread)
-- 📋 Export consults (Markdown) to add to the TAROT project's knowledge
+- ✅ `consults.json` per book: id, section, time, paragraph, question, answer, status, dates
+- ✅ Consults screen per book: filter by status (waiting / answered); tap “Go to passage” to jump there
+- ✅ ✦ marker on paragraphs and in the section list wherever a consult exists
+- ✅ Follow-up question on an existing consult (keeps the same #ID thread)
+- ✅ Export consults (Markdown) to add to the TAROT project's knowledge
 - 📋 Option to convert an answer into a regular note, or keep it as a consult
 
 ## Phase 5 — Polish 📋

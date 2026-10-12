@@ -45,7 +45,7 @@ App: "Downloads" shows progress → one tap to import when ready
 - 📋 App settings: store a fine-grained GitHub token (access to the private repo only) in the iPhone keychain (`expo-secure-store`)
 - 📋 Upload screen, job status, download-and-import
 - 📋 Per-book instructions at upload time (e.g. "map each archetype to a tarot card with pop-culture examples")
-- ❓ **How Claude takes part.** Options: (a) Claude Code GitHub Action signed in with your Claude subscription, (b) I write the explanations here in chat when a new book arrives, and the workflow does the rest. To confirm: whether your plan allows (a).
+- ✅ **How Claude takes part (decided):** explanations and summaries are written in a Claude chat (TAROT project) when a new book arrives; the workflow does everything else.
 - ❓ **Private repo limits:** 2,000 free Actions minutes/month on Linux. One book ≈ 2–4 h of speech generation, so roughly 6–10 books/month. Fine for occasional use.
 
 > Copyrighted books and audio must stay in a **private** repo. This app repo is public only so its iOS builds are free.

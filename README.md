@@ -1,7 +1,73 @@
 # Tarot Reader
 
-Personal iPhone audiobook player with follow-along text and notes tied to the audio and the passage.
+A personal iPhone app for studying books by listening. Each book is read word for word by an AI voice, and every section ends with a short spoken explanation (Jungian archetypes, tarot meanings, pop-culture examples). The text follows along on screen, and you can take notes tied to the exact moment and passage.
 
-- **Live testing:** `npm install`, then `npx expo start` and scan the QR code with Expo Go.
-- **Installable app:** every push to `main` builds `TarotReader.ipa` and publishes it under Releases → `latest`. Install it with SideStore.
-- **Books:** import a `book.json` plus its `.m4a` files (made with the book2audio pipeline). Books and audio are never stored in this repo.
+Built for one person's study. Books and audio are **never** stored in this repository.
+
+## Features
+
+| | |
+|---|---|
+| **Library** | All imported books, with section count and total listening time |
+| **Follow-along text** | Current paragraph highlighted and auto-scrolled; tap a paragraph to jump there |
+| **Listen-only mode** | Hide the text; audio keeps playing in the background and on the lock screen |
+| **Two voices** | Book text and explanations use different voices, so you always know which is which |
+| **Notes** | "✎ Note here" or long-press a paragraph; each note stores the time *and* the passage. Tap a note to jump back; export all notes as Markdown |
+| **Playback** | Speed 0.8×–2×, ±15/30 s skips, previous/next section, progress saved automatically |
+
+Planned features are in [ROADMAP.md](ROADMAP.md).
+
+## How it fits together
+
+```
+Book (EPUB/PDF)
+   │  book2audio pipeline (Python, outside this repo)
+   │   1. split into sections
+   │   2. write an explanation per section (Claude)
+   │   3. synthesize speech (Kokoro, offline, free)
+   ▼
+book.json + 001.m4a … NNN.m4a   ──► imported into the app (Files)
+```
+
+`book.json` holds every section's title, audio file and paragraphs with start/end times, which is what makes the text follow along.
+
+## Installing on iPhone (no App Store, no Mac)
+
+Every push to `main` runs [`.github/workflows/build-ios.yml`](.github/workflows/build-ios.yml) on GitHub's macOS runners. It builds an **unsigned** `TarotReader.ipa` and publishes it under **Releases → latest**.
+
+1. **One-time setup (needs a computer once):** install **LocalDevVPN** (App Store) on the iPhone, then use [iloader](https://docs.sidestore.io) on the PC to install **SideStore** with your Apple ID.
+2. On the iPhone, download `TarotReader.ipa` from Releases in Safari, then open SideStore → **+** → select the file.
+3. Every 7 days: open SideStore (LocalDevVPN on, on Wi-Fi) and refresh. Books and notes are kept.
+
+> EAS Build isn't used: installing on a real iPhone through EAS requires a paid Apple Developer account. The GitHub workflow plus SideStore keeps everything free.
+
+## Adding a book
+
+1. Get the book's `book.json` and `.m4a` files onto the iPhone (Files / iCloud Drive).
+2. In the app: **Import book**, then select `book.json` **and** all the audio files together.
+3. Long-press a book in the Library to delete it.
+
+## Development
+
+```bash
+npm install
+npx expo start      # live preview in Expo Go (scan the QR code)
+npx tsc --noEmit    # typecheck
+npx expo lint       # lint
+```
+
+- Expo SDK 57, TypeScript. Check the versioned docs before touching Expo APIs (see [AGENTS.md](AGENTS.md)).
+- Add packages with `npx expo install`, never `npm install <pkg>`.
+- `ios/` and `android/` are generated: configure native behavior in `app.json`.
+- Background audio comes from the `expo-audio` config plugin. It works in installed builds; Expo Go may stop audio when the app is in the background.
+
+### Project layout
+
+```
+App.tsx              screen switching (moves to Expo Router, see roadmap)
+src/Library.tsx      book list and import
+src/Player.tsx       player, follow-along text, notes
+src/storage.ts       books, notes and progress on the device
+src/types.ts         book.json format
+src/theme.ts         colors
+```

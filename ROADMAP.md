@@ -15,14 +15,13 @@ Status: ✅ done · 🔨 next · 📋 planned · ❓ decision needed
 - ✅ Speed, skips, section navigation, saved progress
 - ✅ GitHub Actions builds an unsigned `.ipa` on every push → install with SideStore
 
-## Phase 2 — Book page in the Library 🔨
+## Phase 2 — Book page in the Library ✅
 
-Goal: choose a book, see what's inside, and start anywhere.
-
-- 🔨 Move navigation to **Expo Router** (`src/app/`), per AGENTS.md: `index` (Library) → `book/[id]` (book page) → `player/[id]`
-- 🔨 Book page: title, section count, total length, progress, note count, **Continue** button
-- 🔨 Section list: name, duration, a **1–2 line summary** of each section, ✓ when finished, ✎ when it has notes
-- 🔨 `book.json` gains a `summary` field per section, written by the pipeline (backfilled for the Rider-Waite book)
+- ✅ Navigation on **Expo Router** (`src/app/`): Library → `book/[id]` → `player/[id]`
+- ✅ Library cards show length and how many sections are finished
+- ✅ Book page: section count, total length, finished count, note count, **Continue** (with where you stopped)
+- ✅ Section list: number, title, duration, **1–2 line summary**, ✓ finished, ✎ note count; tap to start there
+- ✅ `book.json` carries a `summary` per section (from `summaries.json` in the pipeline)
 - 📋 Search across a book's text and notes
 
 ## Phase 3 — Add new books from the iPhone 📋
@@ -51,20 +50,26 @@ App: "Downloads" shows progress → one tap to import when ready
 
 > Copyrighted books and audio must stay in a **private** repo. This app repo is public only so its iOS builds are free.
 
-## Phase 4 — AI help about the book ❓
+## Phase 4 — Ask Claude about the book 🔨
 
-Goal: an "Ask about this" button while reading or listening.
+Decided: questions go to the **Claude iPhone app** (TAROT project, included in the Pro plan), and answers come back into Tarot Reader so every consult stays organized.
 
-Options:
+```
+Player: "Ask Claude" (current paragraph, or long-press any paragraph)
+  └─► new consult #C12: book · section · time · passage · your question · status "asked"
+        └─► share sheet → Claude app, with a ready-made prompt:
+              [Tarot Reader #C12] Book / Section / Time / Passage / Note context / Question
+Claude app: answer
+  └─► copy answer → back in Tarot Reader → "Paste answer" on #C12
+        └─► status "answered", saved as a note marked ✦ Claude consult
+```
 
-| Option | Cost | Experience |
-|---|---|---|
-| A. **Share to the Claude app**: sends the current passage + your question to the Claude iPhone app (TAROT project) | Included in your plan | Leaves Tarot Reader; full Claude with project context |
-| B. **In-app chat via Anthropic API** | Pay per use (small: cents per conversation), separate from your subscription | Stays in the app, knows the exact passage and your notes |
-| C. **Async via GitHub** (`@claude` comment on an issue) | Included if (a) above works | Answers in minutes, not live |
-
-- 📋 Whatever option is chosen: context = book title, current section, current paragraph, nearby notes
-- 📋 Save useful answers as notes
+- 📋 `consults.json` per book: id, section, time, paragraph, question, answer, status, dates
+- 📋 Consults screen per book: filter by status (asked / answered) and by section; tap to jump to the passage
+- 📋 ✦ marker on paragraphs and in the section list wherever a consult exists
+- 📋 Follow-up question on an existing consult (keeps the same #ID thread)
+- 📋 Export consults (Markdown) to add to the TAROT project's knowledge
+- 📋 Option to convert an answer into a regular note, or keep it as a consult
 
 ## Phase 5 — Polish 📋
 

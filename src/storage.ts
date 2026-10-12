@@ -32,6 +32,11 @@ export function listBooks(): LibraryItem[] {
     .sort((a, b) => a.book.title.localeCompare(b.book.title));
 }
 
+export function getBook(folder: string): LibraryItem | null {
+  const book = readJson<Book | null>(new File(root(), folder, 'book.json'), null);
+  return book ? { folder, book } : null;
+}
+
 export const audioUri = (folder: string, name: string) => new File(root(), folder, name).uri;
 
 export async function importBook(): Promise<string | null> {

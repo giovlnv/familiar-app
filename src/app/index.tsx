@@ -1,12 +1,14 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
-import { deleteBook, importBook, LibraryItem, listBooks } from './storage';
-import { c } from './theme';
+import { router, useFocusEffect } from 'expo-router';
+import { deleteBook, importBook, LibraryItem, listBooks, loadProgress } from '../storage';
+import { fmtHours } from '../format';
+import { c } from '../theme';
 
-export default function Library({ onOpen }: { onOpen: (item: LibraryItem) => void }) {
+export default function Library() {
   const [items, setItems] = useState<LibraryItem[]>([]);
   const refresh = useCallback(() => setItems(listBooks()), []);
-  useEffect(refresh, [refresh]);
+  useFocusEffect(refresh);
 
   const add = async () => {
     try {
@@ -26,24 +28,36 @@ export default function Library({ onOpen }: { onOpen: (item: LibraryItem) => voi
 
   return (
     <View style={s.wrap}>
-      <Text style={s.h1}>Library</Text>
       <FlatList
         data={items}
         keyExtractor={(i) => i.folder}
+        contentInsetAdjustmentBehavior="automatic"
         ListEmptyComponent={
           <Text style={s.empty}>
             No books yet. Tap “Import book” and select the book.json file plus all its .m4a audio files.
           </Text>
         }
-        renderItem={({ item }) => (
-          <Pressable style={s.card} onPress={() => onOpen(item)} onLongPress={() => remove(item)}>
-            <Text style={s.title}>{item.book.title}</Text>
-            <Text style={s.meta}>
-              {item.book.sections.length} sections ·{' '}
-              {Math.round(item.book.sections.reduce((t, x) => t + x.duration, 0) / 3600)} h
-            </Text>
-          </Pressable>
-        )}
+        renderItem={({ item }) => {
+          const n = item.book.sections.length;
+          const done = loadProgress(item.folder).done?.length ?? 0;
+          const total = item.book.sections.reduce((t, x) => t + x.duration, 0);
+          return (
+            <Pressable
+              style={s.card}
+              onPress={() => router.push({ pathname: '/book/[id]', params: { id: item.folder } })}
+              onLongPress={() => remove(item)}
+            >
+              <Text style={s.title}>{item.book.title}</Text>
+              <Text style={s.meta}>
+                {n} sections · {fmtHours(total)}
+                {done ? ` · ${done}/${n} finished` : ''}
+              </Text>
+              <View style={s.bar}>
+                <View style={[s.barFill, { width: `${(done / n) * 100}%` }]} />
+              </View>
+            </Pressable>
+          );
+        }}
       />
       <Pressable style={s.btn} onPress={add}>
         <Text style={s.btnText}>Import book</Text>
@@ -53,12 +67,13 @@ export default function Library({ onOpen }: { onOpen: (item: LibraryItem) => voi
 }
 
 const s = StyleSheet.create({
-  wrap: { flex: 1, padding: 16 },
-  h1: { color: c.gold, fontSize: 28, fontWeight: '700', marginBottom: 16 },
+  wrap: { flex: 1, padding: 16, backgroundColor: c.bg },
   empty: { color: c.dim, fontSize: 16, lineHeight: 22 },
   card: { backgroundColor: c.panel, borderRadius: 12, padding: 16, marginBottom: 12 },
   title: { color: c.text, fontSize: 18, fontWeight: '600' },
   meta: { color: c.dim, marginTop: 4 },
+  bar: { height: 3, backgroundColor: c.line, borderRadius: 2, marginTop: 10, overflow: 'hidden' },
+  barFill: { height: 3, backgroundColor: c.gold },
   btn: { backgroundColor: c.gold, borderRadius: 12, padding: 16, alignItems: 'center' },
   btnText: { color: c.bg, fontWeight: '700', fontSize: 16 },
 });

@@ -30,7 +30,12 @@
           "enableBackgroundPlayback": true
         }
       ],
-      "expo-sharing"
-    ]
+      "expo-sharing",
+      "expo-router"
+    ],
+    "scheme": "tarotreader",
+    "experiments": {
+      "typedRoutes": true
+    }
   }
 }

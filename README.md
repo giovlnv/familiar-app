@@ -8,7 +8,7 @@ Built for one person's study. Books and audio are **never** stored in this repos
 
 | | |
 |---|---|
-| **Library** | All imported books, with section count and total listening time |
+| **Library** | All imported books with length and progress; open a book to see every section with a 1–2 line summary, duration, ✓ finished and ✎ notes |
 | **Follow-along text** | Current paragraph highlighted and auto-scrolled; tap a paragraph to jump there |
 | **Listen-only mode** | Hide the text; audio keeps playing in the background and on the lock screen |
 | **Two voices** | Book text and explanations use different voices, so you always know which is which |
@@ -64,10 +64,13 @@ npx expo lint       # lint
 ### Project layout
 
 ```
-App.tsx              screen switching (moves to Expo Router, see roadmap)
-src/Library.tsx      book list and import
-src/Player.tsx       player, follow-along text, notes
-src/storage.ts       books, notes and progress on the device
-src/types.ts         book.json format
-src/theme.ts         colors
+src/app/_layout.tsx        navigation (Expo Router stack)
+src/app/index.tsx          Library: book list and import
+src/app/book/[id].tsx      Book page: sections, summaries, progress
+src/app/player/[id].tsx    Player screen
+src/components/Player.tsx  player, follow-along text, notes
+src/format.ts              time formatting
+src/storage.ts             books, notes and progress on the device
+src/types.ts               book.json format
+src/theme.ts               colors
 ```

@@ -21,9 +21,9 @@ import {
   loadProgress,
   saveNotes,
   saveProgress,
-} from './storage';
-import { Note, Para } from './types';
-import { c } from './theme';
+} from '../storage';
+import { Note, Para } from '../types';
+import { c } from '../theme';
 
 const fmt = (t: number) => {
   const h = Math.floor(t / 3600);
@@ -35,9 +35,14 @@ const RATES = [0.8, 1, 1.15, 1.3, 1.5, 1.75, 2];
 
 type Draft = { id?: string; para: number; time: number; quote: string; text: string };
 
-export default function Player({ item, onClose }: { item: LibraryItem; onClose: () => void }) {
+export default function Player({ item, start, onClose }: { item: LibraryItem; start?: number; onClose: () => void }) {
   const { book, folder } = item;
-  const saved = useMemo(() => loadProgress(folder), [folder]);
+  const saved = useMemo(() => {
+    const p = loadProgress(folder);
+    return start === undefined || start === p.section ? p : { ...p, section: start, time: 0 };
+  }, [folder, start]);
+  const done = useRef(new Set(saved.done ?? []));
+  const save = (section: number, time: number) => saveProgress(folder, { section, time, done: [...done.current] });
   const [sec, setSec] = useState(Math.min(saved.section, book.sections.length - 1));
   const [showText, setShowText] = useState(true);
   const [follow, setFollow] = useState(true);
@@ -62,26 +67,40 @@ export default function Player({ item, onClose }: { item: LibraryItem; onClose: 
     player.setActiveForLockScreen(true, { title: section.title, artist: book.title, albumTitle: book.title });
   }, [sec]);
 
-  useEffect(() => {
-    if (status.isLoaded && pending.current) {
-      const p = pending.current;
-      pending.current = null;
-      player.seekTo(p.time).then(() => {
-        player.setPlaybackRate(rate, 'high');
-        if (p.play) player.play();
-      });
+  const goTo = (i: number, time: number, play = status.playing) => {
+    if (i === sec) {
+      player.seekTo(time);
+      if (play) player.play();
+    } else {
+      pending.current = { time, play };
+      save(i, time);
+      setSec(i);
     }
-  }, [status.isLoaded, sec]);
+  };
+  const ready = status.isLoaded && Math.abs((status.duration || 0) - section.duration) < 3;
+  useEffect(() => {
+    if (!ready || !pending.current) return;
+    const p = pending.current;
+    pending.current = null;
+    player.seekTo(p.time).then(() => {
+      player.setPlaybackRate(rate, 'high');
+      if (p.play) player.play();
+    });
+  }, [ready, sec]);
 
   useEffect(() => {
-    if (status.didJustFinish && sec < book.sections.length - 1) goTo(sec + 1, 0, true);
+    if (!status.didJustFinish) return;
+    done.current.add(section.id);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (sec < book.sections.length - 1) goTo(sec + 1, 0, true);
+    else save(sec, 0);
   }, [status.didJustFinish]);
 
   const lastSave = useRef(0);
   useEffect(() => {
     if (Math.abs(t - lastSave.current) > 5) {
       lastSave.current = t;
-      saveProgress(folder, { section: sec, time: t });
+      save(sec, t);
     }
   }, [t]);
 
@@ -97,16 +116,6 @@ export default function Player({ item, onClose }: { item: LibraryItem; onClose: 
       list.current?.scrollToIndex({ index: current, viewPosition: 0.3, animated: true });
   }, [current, follow, showText]);
 
-  const goTo = (i: number, time: number, play = status.playing) => {
-    if (i === sec) {
-      player.seekTo(time);
-      if (play) player.play();
-    } else {
-      pending.current = { time, play };
-      saveProgress(folder, { section: i, time });
-      setSec(i);
-    }
-  };
   const skip = (d: number) => player.seekTo(Math.max(0, Math.min(t + d, status.duration || t + d)));
   const toggle = () => (status.playing ? player.pause() : player.play());
   const cycleRate = () => {
@@ -154,7 +163,7 @@ export default function Player({ item, onClose }: { item: LibraryItem; onClose: 
     <SafeAreaView style={s.wrap} edges={['top', 'bottom']}>
       <View style={s.top}>
         <Pressable onPress={onClose} hitSlop={12}>
-          <Text style={s.link}>‹ Library</Text>
+          <Text style={s.link}>‹ Back</Text>
         </Pressable>
         <View style={s.topRight}>
           <Pressable onPress={() => setPanel('notes')} hitSlop={8}>

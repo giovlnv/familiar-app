@@ -1,20 +1,23 @@
+import { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import Library from './src/Library';
+import Player from './src/Player';
+import { LibraryItem } from './src/storage';
+import { c } from './src/theme';
 
 export default function App() {
+  const [open, setOpen] = useState<LibraryItem | null>(null);
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <SafeAreaProvider>
+      <StatusBar style="light" />
+      {open ? (
+        <Player key={open.folder} item={open} onClose={() => setOpen(null)} />
+      ) : (
+        <SafeAreaView style={{ flex: 1, backgroundColor: c.bg }}>
+          <Library onOpen={setOpen} />
+        </SafeAreaView>
+      )}
+    </SafeAreaProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

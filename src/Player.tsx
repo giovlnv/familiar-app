@@ -1,0 +1,435 @@
+import { useEffect, useMemo, useRef, useState } from 'react';
+import {
+  FlatList,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
+import { setAudioModeAsync, useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
+import * as Sharing from 'expo-sharing';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import {
+  audioUri,
+  exportNotesFile,
+  LibraryItem,
+  loadNotes,
+  loadProgress,
+  saveNotes,
+  saveProgress,
+} from './storage';
+import { Note, Para } from './types';
+import { c } from './theme';
+
+const fmt = (t: number) => {
+  const h = Math.floor(t / 3600);
+  const m = Math.floor((t % 3600) / 60);
+  const s = String(Math.floor(t % 60)).padStart(2, '0');
+  return h ? `${h}:${String(m).padStart(2, '0')}:${s}` : `${m}:${s}`;
+};
+const RATES = [0.8, 1, 1.15, 1.3, 1.5, 1.75, 2];
+
+type Draft = { id?: string; para: number; time: number; quote: string; text: string };
+
+export default function Player({ item, onClose }: { item: LibraryItem; onClose: () => void }) {
+  const { book, folder } = item;
+  const saved = useMemo(() => loadProgress(folder), [folder]);
+  const [sec, setSec] = useState(Math.min(saved.section, book.sections.length - 1));
+  const [showText, setShowText] = useState(true);
+  const [follow, setFollow] = useState(true);
+  const [panel, setPanel] = useState<'none' | 'chapters' | 'notes'>('none');
+  const [notes, setNotes] = useState<Note[]>(() => loadNotes(folder));
+  const [draft, setDraft] = useState<Draft | null>(null);
+  const [rate, setRate] = useState(1);
+
+  const player = useAudioPlayer(null, { updateInterval: 250 });
+  const status = useAudioPlayerStatus(player);
+  const pending = useRef<{ time: number; play: boolean } | null>({ time: saved.time, play: false });
+  const list = useRef<FlatList<Para>>(null);
+  const section = book.sections[sec];
+  const t = status.currentTime ?? 0;
+
+  useEffect(() => {
+    setAudioModeAsync({ playsInSilentMode: true, shouldPlayInBackground: true, interruptionMode: 'doNotMix' });
+  }, []);
+
+  useEffect(() => {
+    player.replace({ uri: audioUri(folder, section.audio) });
+    player.setActiveForLockScreen(true, { title: section.title, artist: book.title, albumTitle: book.title });
+  }, [sec]);
+
+  useEffect(() => {
+    if (status.isLoaded && pending.current) {
+      const p = pending.current;
+      pending.current = null;
+      player.seekTo(p.time).then(() => {
+        player.setPlaybackRate(rate, 'high');
+        if (p.play) player.play();
+      });
+    }
+  }, [status.isLoaded, sec]);
+
+  useEffect(() => {
+    if (status.didJustFinish && sec < book.sections.length - 1) goTo(sec + 1, 0, true);
+  }, [status.didJustFinish]);
+
+  const lastSave = useRef(0);
+  useEffect(() => {
+    if (Math.abs(t - lastSave.current) > 5) {
+      lastSave.current = t;
+      saveProgress(folder, { section: sec, time: t });
+    }
+  }, [t]);
+
+  const current = useMemo(() => {
+    const ps = section.paras;
+    let i = 0;
+    while (i + 1 < ps.length && ps[i + 1].start <= t + 0.05) i++;
+    return i;
+  }, [t, section]);
+
+  useEffect(() => {
+    if (follow && showText && panel === 'none')
+      list.current?.scrollToIndex({ index: current, viewPosition: 0.3, animated: true });
+  }, [current, follow, showText]);
+
+  const goTo = (i: number, time: number, play = status.playing) => {
+    if (i === sec) {
+      player.seekTo(time);
+      if (play) player.play();
+    } else {
+      pending.current = { time, play };
+      saveProgress(folder, { section: i, time });
+      setSec(i);
+    }
+  };
+  const skip = (d: number) => player.seekTo(Math.max(0, Math.min(t + d, status.duration || t + d)));
+  const toggle = () => (status.playing ? player.pause() : player.play());
+  const cycleRate = () => {
+    const r = RATES[(RATES.indexOf(rate) + 1) % RATES.length];
+    setRate(r);
+    player.setPlaybackRate(r, 'high');
+  };
+
+  const newNote = (para: number, time: number) => {
+    const p = section.paras[para];
+    setDraft({ para, time, quote: p.text.slice(0, 140) + (p.text.length > 140 ? '…' : ''), text: '' });
+  };
+  const commit = () => {
+    if (!draft) return;
+    const rest = notes.filter((n) => n.id !== draft.id);
+    const next = draft.text.trim()
+      ? [
+          ...rest,
+          {
+            id: draft.id ?? String(Date.now()),
+            section: section.id,
+            time: draft.time,
+            para: draft.para,
+            quote: draft.quote,
+            text: draft.text.trim(),
+            created: Date.now(),
+          },
+        ]
+      : rest;
+    setNotes(next);
+    saveNotes(folder, next);
+    setDraft(null);
+  };
+  const share = async () => {
+    const uri = exportNotesFile(folder, book, notes);
+    if (await Sharing.isAvailableAsync()) await Sharing.shareAsync(uri, { UTI: 'public.plain-text' });
+  };
+
+  const noted = useMemo(
+    () => new Set(notes.filter((n) => n.section === section.id).map((n) => n.para)),
+    [notes, section]
+  );
+
+  return (
+    <SafeAreaView style={s.wrap} edges={['top', 'bottom']}>
+      <View style={s.top}>
+        <Pressable onPress={onClose} hitSlop={12}>
+          <Text style={s.link}>‹ Library</Text>
+        </Pressable>
+        <View style={s.topRight}>
+          <Pressable onPress={() => setPanel('notes')} hitSlop={8}>
+            <Text style={s.link}>Notes ({notes.length})</Text>
+          </Pressable>
+          <Pressable onPress={() => setShowText(!showText)} hitSlop={8}>
+            <Text style={s.link}>{showText ? 'Hide text' : 'Show text'}</Text>
+          </Pressable>
+        </View>
+      </View>
+
+      <Pressable onPress={() => setPanel('chapters')}>
+        <Text style={s.book}>{book.title}</Text>
+        <Text style={s.sec}>
+          {section.title} ▾
+        </Text>
+      </Pressable>
+
+      {showText ? (
+        <View style={{ flex: 1 }}>
+          <FlatList
+            ref={list}
+            data={section.paras}
+            keyExtractor={(_, i) => String(i)}
+            onScrollBeginDrag={() => setFollow(false)}
+            onScrollToIndexFailed={(e) =>
+              setTimeout(() => list.current?.scrollToIndex({ index: e.index, viewPosition: 0.3 }), 200)
+            }
+            contentContainerStyle={{ paddingBottom: 200 }}
+            renderItem={({ item: p, index }) => (
+              <Pressable
+                onPress={() => goTo(sec, p.start + 0.01)}
+                onLongPress={() => newNote(index, p.start)}
+                style={[s.para, index === current && s.paraOn]}
+              >
+                <Text style={[s.pText, styleFor(p), index === current && s.pTextOn]}>
+                  {noted.has(index) ? '✎ ' : ''}
+                  {p.text}
+                </Text>
+              </Pressable>
+            )}
+          />
+          {!follow && (
+            <Pressable style={s.follow} onPress={() => setFollow(true)}>
+              <Text style={s.followText}>Follow along</Text>
+            </Pressable>
+          )}
+        </View>
+      ) : (
+        <View style={s.mini}>
+          <Text style={s.miniKind}>{section.paras[current]?.kind.startsWith('explain') ? 'Explanation' : 'Reading'}</Text>
+          <Text style={s.miniText} numberOfLines={6}>
+            {section.paras[current]?.text}
+          </Text>
+        </View>
+      )}
+
+      <View style={s.controls}>
+        <View style={s.bar}>
+          <View style={[s.barFill, { width: `${status.duration ? (t / status.duration) * 100 : 0}%` }]} />
+        </View>
+        <View style={s.times}>
+          <Text style={s.time}>{fmt(t)}</Text>
+          <Text style={s.time}>
+            {sec + 1}/{book.sections.length}
+          </Text>
+          <Text style={s.time}>-{fmt(Math.max(0, (status.duration || 0) - t))}</Text>
+        </View>
+        <View style={s.row}>
+          <Btn label="⏮" onPress={() => (t > 5 ? goTo(sec, 0) : sec > 0 && goTo(sec - 1, 0))} />
+          <Btn label="↺15" onPress={() => skip(-15)} />
+          <Pressable style={s.play} onPress={toggle}>
+            <Text style={s.playText}>{status.playing ? '❚❚' : '▶'}</Text>
+          </Pressable>
+          <Btn label="30↻" onPress={() => skip(30)} />
+          <Btn label="⏭" onPress={() => sec < book.sections.length - 1 && goTo(sec + 1, 0)} />
+        </View>
+        <View style={s.row}>
+          <Btn label={`${rate}×`} onPress={cycleRate} />
+          <Btn label="✎ Note here" onPress={() => newNote(current, t)} wide />
+        </View>
+      </View>
+
+      <Modal visible={panel === 'chapters'} animationType="slide" onRequestClose={() => setPanel('none')}>
+        <SafeAreaView style={s.wrap}>
+          <Header title="Sections" onClose={() => setPanel('none')} />
+          <FlatList
+            data={book.sections}
+            keyExtractor={(x) => x.id}
+            initialScrollIndex={sec}
+            getItemLayout={(_, i) => ({ length: 52, offset: 52 * i, index: i })}
+            renderItem={({ item: x, index }) => (
+              <Pressable
+                style={[s.row2, index === sec && s.paraOn]}
+                onPress={() => (goTo(index, 0), setPanel('none'))}
+              >
+                <Text style={s.pText} numberOfLines={1}>
+                  {x.title}
+                </Text>
+                <Text style={s.time}>{fmt(x.duration)}</Text>
+              </Pressable>
+            )}
+          />
+        </SafeAreaView>
+      </Modal>
+
+      <Modal visible={panel === 'notes'} animationType="slide" onRequestClose={() => setPanel('none')}>
+        <SafeAreaView style={s.wrap}>
+          <Header title="Notes" onClose={() => setPanel('none')} action={notes.length ? ['Export', share] : undefined} />
+          <FlatList
+            data={[...notes].sort(
+              (a, b) =>
+                book.sections.findIndex((x) => x.id === a.section) -
+                  book.sections.findIndex((x) => x.id === b.section) || a.time - b.time
+            )}
+            keyExtractor={(n) => n.id}
+            ListEmptyComponent={
+              <Text style={s.empty}>
+                Tap “✎ Note here” while listening, or long-press any paragraph, to add a note.
+              </Text>
+            }
+            renderItem={({ item: n }) => {
+              const i = book.sections.findIndex((x) => x.id === n.section);
+              return (
+                <Pressable
+                  style={s.note}
+                  onPress={() => (goTo(i, n.time), setPanel('none'))}
+                  onLongPress={() => {
+                    setPanel('none');
+                    setDraft({ id: n.id, para: n.para, time: n.time, quote: n.quote, text: n.text });
+                  }}
+                >
+                  <Text style={s.noteMeta}>
+                    {book.sections[i]?.title} · {fmt(n.time)}
+                  </Text>
+                  <Text style={s.quote}>“{n.quote}”</Text>
+                  <Text style={s.pText}>{n.text}</Text>
+                </Pressable>
+              );
+            }}
+          />
+        </SafeAreaView>
+      </Modal>
+
+      <Modal visible={!!draft} transparent animationType="fade" onRequestClose={() => setDraft(null)}>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={s.dim}>
+          <View style={s.sheet}>
+            <Text style={s.noteMeta}>
+              {section.title} · {fmt(draft?.time ?? 0)}
+            </Text>
+            <Text style={s.quote} numberOfLines={3}>
+              “{draft?.quote}”
+            </Text>
+            <TextInput
+              autoFocus
+              multiline
+              placeholder="Your note…"
+              placeholderTextColor={c.dim}
+              style={s.input}
+              value={draft?.text}
+              onChangeText={(text) => setDraft((d) => (d ? { ...d, text } : d))}
+            />
+            <View style={s.row}>
+              <Btn label="Cancel" onPress={() => setDraft(null)} />
+              {draft?.id && <Btn label="Delete" onPress={() => setDraft((d) => (d ? { ...d, text: '' } : d))} />}
+              <Btn label="Save" onPress={commit} />
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+    </SafeAreaView>
+  );
+}
+
+const styleFor = (p: Para) =>
+  p.kind === 'title'
+    ? s.kTitle
+    : p.kind === 'head'
+      ? s.kHead
+      : p.kind === 'explainhead'
+        ? s.kExplainHead
+        : p.kind === 'explain'
+          ? s.kExplain
+          : null;
+
+const Btn = ({ label, onPress, wide }: { label: string; onPress: () => void; wide?: boolean }) => (
+  <Pressable style={[s.btn, wide && { flex: 1 }]} onPress={onPress} hitSlop={6}>
+    <Text style={s.btnText}>{label}</Text>
+  </Pressable>
+);
+
+const Header = ({
+  title,
+  onClose,
+  action,
+}: {
+  title: string;
+  onClose: () => void;
+  action?: [string, () => void];
+}) => (
+  <View style={s.top}>
+    <Text style={s.h2}>{title}</Text>
+    <View style={s.topRight}>
+      {action && (
+        <Pressable onPress={action[1]} hitSlop={8}>
+          <Text style={s.link}>{action[0]}</Text>
+        </Pressable>
+      )}
+      <Pressable onPress={onClose} hitSlop={8}>
+        <Text style={s.link}>Done</Text>
+      </Pressable>
+    </View>
+  </View>
+);
+
+const s = StyleSheet.create({
+  wrap: { flex: 1, backgroundColor: c.bg, paddingHorizontal: 16 },
+  top: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 10 },
+  topRight: { flexDirection: 'row', gap: 18 },
+  link: { color: c.gold, fontSize: 16 },
+  h2: { color: c.text, fontSize: 22, fontWeight: '700' },
+  book: { color: c.dim, fontSize: 13, marginTop: 4 },
+  sec: { color: c.text, fontSize: 20, fontWeight: '700', marginBottom: 10 },
+  para: { paddingVertical: 8, paddingHorizontal: 10, borderRadius: 10, marginBottom: 2 },
+  paraOn: { backgroundColor: c.raised },
+  pText: { color: c.dim, fontSize: 17, lineHeight: 26 },
+  pTextOn: { color: c.text },
+  kTitle: { fontSize: 22, fontWeight: '700', color: c.gold },
+  kHead: { fontSize: 15, fontWeight: '700', color: c.gold, textTransform: 'uppercase', letterSpacing: 1 },
+  kExplainHead: { fontSize: 15, fontWeight: '700', color: c.explain, textTransform: 'uppercase', letterSpacing: 1 },
+  kExplain: { color: c.explain },
+  follow: {
+    position: 'absolute',
+    bottom: 12,
+    alignSelf: 'center',
+    backgroundColor: c.gold,
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+    borderRadius: 20,
+  },
+  followText: { color: c.bg, fontWeight: '700' },
+  mini: { flex: 1, justifyContent: 'center' },
+  miniKind: { color: c.gold, fontWeight: '700', marginBottom: 10, textTransform: 'uppercase', letterSpacing: 1 },
+  miniText: { color: c.text, fontSize: 20, lineHeight: 30 },
+  controls: { borderTopWidth: 1, borderColor: c.line, paddingTop: 12, paddingBottom: 6, gap: 10 },
+  bar: { height: 4, backgroundColor: c.line, borderRadius: 2, overflow: 'hidden' },
+  barFill: { height: 4, backgroundColor: c.gold },
+  times: { flexDirection: 'row', justifyContent: 'space-between' },
+  time: { color: c.dim, fontSize: 13, fontVariant: ['tabular-nums'] },
+  row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 10 },
+  row2: {
+    height: 52,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 10,
+    borderRadius: 10,
+  },
+  btn: { backgroundColor: c.panel, paddingVertical: 12, paddingHorizontal: 14, borderRadius: 12, alignItems: 'center' },
+  btnText: { color: c.text, fontSize: 16 },
+  play: { backgroundColor: c.gold, width: 68, height: 68, borderRadius: 34, alignItems: 'center', justifyContent: 'center' },
+  playText: { color: c.bg, fontSize: 26, fontWeight: '700' },
+  empty: { color: c.dim, fontSize: 16, lineHeight: 22, marginTop: 20 },
+  note: { backgroundColor: c.panel, borderRadius: 12, padding: 14, marginBottom: 10 },
+  noteMeta: { color: c.gold, fontSize: 13, marginBottom: 6 },
+  quote: { color: c.dim, fontStyle: 'italic', marginBottom: 8 },
+  dim: { flex: 1, backgroundColor: '#000a', justifyContent: 'flex-end' },
+  sheet: { backgroundColor: c.panel, padding: 16, borderTopLeftRadius: 16, borderTopRightRadius: 16, gap: 8 },
+  input: {
+    minHeight: 110,
+    color: c.text,
+    fontSize: 17,
+    backgroundColor: c.bg,
+    borderRadius: 10,
+    padding: 12,
+    textAlignVertical: 'top',
+  },
+});

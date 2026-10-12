@@ -36,9 +36,11 @@ book.json + 001.m4a … NNN.m4a   ──► imported into the app (Files)
 
 Every push to `main` runs [`.github/workflows/build-ios.yml`](.github/workflows/build-ios.yml) on GitHub's macOS runners. It builds an **unsigned** `TarotReader.ipa` and publishes it under **Releases → latest**.
 
-1. **One-time setup (needs a computer once):** install **LocalDevVPN** (App Store) on the iPhone, then use [iloader](https://docs.sidestore.io) on the PC to install **SideStore** with your Apple ID.
-2. On the iPhone, download `TarotReader.ipa` from Releases in Safari, then open SideStore → **+** → select the file.
-3. Every 7 days: open SideStore (LocalDevVPN on, on Wi-Fi) and refresh. Books and notes are kept.
+Installed with **[Sideloadly](https://sideloadly.io)** on Windows (SideStore/iloader sign-in failed with Apple error -80045).
+
+1. Download `TarotReader.ipa` from Releases on the PC.
+2. Sideloadly → drag in the IPA → Apple ID → **Start** (iPhone on USB the first time).
+3. Sideloadly re-signs every few days (PC on, same Wi-Fi). Books and notes are kept across re-installs.
 
 > EAS Build isn't used: installing on a real iPhone through EAS requires a paid Apple Developer account. The GitHub workflow plus SideStore keeps everything free.
 

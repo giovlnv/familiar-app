@@ -24,7 +24,7 @@ Status: ✅ done · 🔨 next · 📋 planned · ❓ decision needed
 - ✅ `book.json` carries a `summary` per section (from `summaries.json` in the pipeline)
 - 📋 Search across a book's text and notes
 
-## Phase 3 — Add new books from the iPhone 📋
+## Phase 3 — Add new books from the iPhone 🔨
 
 Goal: pick an EPUB/PDF in the app and get a finished audiobook back later, without using the PC.
 
@@ -41,7 +41,7 @@ App: "Add book" → choose EPUB/PDF
 App: "Downloads" shows progress → one tap to import when ready
 ```
 
-- 📋 Move the `book2audio` pipeline into the private library repo (Python + Kokoro)
+- ✅ Private `tarot-library` repo with the pipeline (Python + Kokoro) and a **Generate audiobook** workflow: 6 parallel jobs → release zip with `book.json` + audio
 - 📋 App settings: store a fine-grained GitHub token (access to the private repo only) in the iPhone keychain (`expo-secure-store`)
 - 📋 Upload screen, job status, download-and-import
 - 📋 Per-book instructions at upload time (e.g. "map each archetype to a tarot card with pop-culture examples")

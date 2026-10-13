@@ -42,6 +42,7 @@ export type Tracker = {
   shelves?: Shelf[];
   favorites?: string[];
   lists?: RankedList[];
+  profile?: Profile;
 };
 
 export const STATUS_LABEL: Record<Status, string> = {
@@ -269,3 +270,9 @@ export const patchList = (id: string, fn: (l: RankedList) => void) =>
   });
 
 export const removeList = (id: string) => update((t) => (t.lists = t.lists?.filter((x) => x.id !== id)));
+
+export type Profile = { name?: string; username?: string; photo?: string };
+
+export const getProfile = (): Profile => load().profile ?? {};
+
+export const setProfile = (p: Profile) => update((t) => (t.profile = { ...t.profile, ...p }));

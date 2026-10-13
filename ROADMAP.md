@@ -11,6 +11,7 @@ Status: ✅ done · 🔨 next · 📋 planned · ❓ decision needed · Last rev
 ### Listening & notes
 - ✅ Word-for-word reading (US voice) + spoken explanation per section (UK voice), follow-along text, tap to seek
 - ✅ Background playback, lock-screen controls, saved progress, section list with 1–2 line summaries
+- ✅ Profile: photo, name and username at the top; settings behind the cog (top right) — app 1.1.0, needs the new .ipa
 - ✅ Seven color palettes in Settings → Colors (app reloads to apply); black-and-gold card + headphones icon (new .ipa)
 - ✅ Speed drop-up menu: 1.0x, 1.3x, 1.5x, 2.0x + custom 0.1–2.0 (iOS limit is 2.0x); skip back/forward 15 s
 - ✅ Minimize the player: floating card above the tab bar with the passage being read, on every page; pages leave room for it

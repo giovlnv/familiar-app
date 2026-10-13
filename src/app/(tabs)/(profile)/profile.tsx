@@ -8,11 +8,12 @@ import {
   useWindowDimensions,
   View,
 } from "react-native";
-import { router, useFocusEffect } from "expo-router";
+import { router, Stack, useFocusEffect } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { daysBetween, load, Tracker } from "../../../tracker";
 import { Chip, Cover } from "../../../components/ui";
 import { c } from "../../../theme";
+import ProfileHeader from "../../../components/ProfileHeader";
 
 type Metric = "books" | "pages" | "hours";
 const MONTHS = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
@@ -109,6 +110,16 @@ export default function Profile() {
 
   return (
     <ScrollView style={s.wrap} contentContainerStyle={{ paddingBottom: 40 + pad }}>
+      <Stack.Screen
+        options={{
+          headerRight: () => (
+            <Pressable hitSlop={10} onPress={() => router.push("/settings")} accessibilityLabel="Settings">
+              <Ionicons name="settings-outline" size={24} color={c.gold} />
+            </Pressable>
+          ),
+        }}
+      />
+      <ProfileHeader />
       <Text style={[s.h2, { marginTop: 14 }]}>Top 4</Text>
       <View style={s.favs}>
         {[0, 1, 2, 3].map((i) =>
@@ -270,11 +281,6 @@ export default function Profile() {
         fmt={String}
       />
 
-      <Pressable style={s.link} onPress={() => router.push("/settings")}>
-        <Ionicons name="cloud-upload-outline" size={18} color={c.gold} />
-        <Text style={s.linkText}>Colors, backup & settings</Text>
-        <Ionicons name="chevron-forward" size={16} color={c.dim} />
-      </Pressable>
     </ScrollView>
   );
 }

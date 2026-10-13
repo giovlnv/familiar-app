@@ -1,7 +1,7 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
-import { deleteBook, importBook, LibraryItem, listBooks, loadProgress } from '../storage';
+import { deleteBook, importBook, installSampleOnce, LibraryItem, listBooks, loadProgress } from '../storage';
 import { fmtHours } from '../format';
 import { c } from '../theme';
 
@@ -9,6 +9,9 @@ export default function Library() {
   const [items, setItems] = useState<LibraryItem[]>([]);
   const refresh = useCallback(() => setItems(listBooks()), []);
   useFocusEffect(refresh);
+  useEffect(() => {
+    installSampleOnce().then((added) => added && refresh()).catch(() => {});
+  }, [refresh]);
 
   const add = async () => {
     try {

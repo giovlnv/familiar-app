@@ -1,5 +1,6 @@
 import { Directory, File, Paths } from 'expo-file-system';
 import * as DocumentPicker from 'expo-document-picker';
+import { Asset } from 'expo-asset';
 import { Book, Consult, Note, Progress } from './types';
 
 const root = () => {
@@ -104,4 +105,26 @@ export function exportConsultsFile(folder: string, book: Book, list: Consult[]):
   f.create();
   f.write(lines.join('\n'));
   return f.uri;
+}
+
+const SAMPLE = 'Welcome to Tarot Reader sample';
+const sampleAudio: Record<string, number> = {
+  '001.m4a': require('../assets/sample/001.m4a'),
+  '002.m4a': require('../assets/sample/002.m4a'),
+};
+
+export async function installSampleOnce() {
+  const flag = new File(Paths.document, '.sample-installed');
+  if (flag.exists) return false;
+  const dir = new Directory(root(), SAMPLE);
+  dir.create({ idempotent: true });
+  for (const [name, mod] of Object.entries(sampleAudio)) {
+    const [asset] = await Asset.loadAsync(mod);
+    const dest = new File(dir, name);
+    if (dest.exists) dest.delete();
+    new File(asset.localUri!).copySync(dest);
+  }
+  writeJson(new File(dir, 'book.json'), require('../assets/sample/book.json'));
+  writeJson(flag, { at: Date.now() });
+  return true;
 }

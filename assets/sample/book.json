@@ -1,0 +1,125 @@
+{
+ "title": "Welcome to Tarot Reader (sample)",
+ "sections": [
+  {
+   "id": "001",
+   "title": "How this app works",
+   "summary": "A tour of the player: follow-along text, notes, listen-only mode and Ask Claude.",
+   "audio": "001.m4a",
+   "duration": 53.51,
+   "paras": [
+    {
+     "kind": "title",
+     "text": "How this app works",
+     "start": 0.0,
+     "end": 1.13
+    },
+    {
+     "kind": "book",
+     "text": "This is a short sample book, so you can explore Tarot Reader before importing a real one.",
+     "start": 2.13,
+     "end": 7.17
+    },
+    {
+     "kind": "book",
+     "text": "Each section is read aloud word for word, and the text follows along on screen. The paragraph being read is highlighted, and the page scrolls by itself. Tap any paragraph to jump there.",
+     "start": 7.87,
+     "end": 19.81
+    },
+    {
+     "kind": "book",
+     "text": "Long-press a paragraph to add a note, or to ask Claude about it. Notes remember both the moment in the audio and the passage.",
+     "start": 20.51,
+     "end": 27.89
+    },
+    {
+     "kind": "book",
+     "text": "Use Hide text to listen only. The audio keeps playing when you lock the phone or switch apps.",
+     "start": 28.59,
+     "end": 33.95
+    },
+    {
+     "kind": "explainhead",
+     "text": "Explanation",
+     "start": 35.85,
+     "end": 36.94
+    },
+    {
+     "kind": "explain",
+     "text": "At the end of every section, a second voice gives a short explanation. That way you always know when the book stops and the commentary starts.",
+     "start": 37.54,
+     "end": 45.17
+    },
+    {
+     "kind": "explain",
+     "text": "Try it now: tap the star button to ask Claude something about this passage, then come back and paste the answer into the consult.",
+     "start": 45.87,
+     "end": 52.81
+    }
+   ]
+  },
+  {
+   "id": "002",
+   "title": "I - The Magician (sample)",
+   "summary": "A short sample card: potential becoming real, and using what is already on your table.",
+   "audio": "002.m4a",
+   "duration": 49.28,
+   "paras": [
+    {
+     "kind": "title",
+     "text": "I - The Magician (sample)",
+     "start": 0.0,
+     "end": 1.62
+    },
+    {
+     "kind": "book",
+     "text": "The Magician stands at a table with the four tools of the tarot: a wand, a cup, a sword and a pentacle. One hand points to the sky, the other to the earth.",
+     "start": 2.62,
+     "end": 12.22
+    },
+    {
+     "kind": "head",
+     "text": "Basic meaning",
+     "start": 12.92,
+     "end": 13.99
+    },
+    {
+     "kind": "book",
+     "text": "The card speaks of potential becoming real: ideas turned into action, in a way only you could manage.",
+     "start": 14.49,
+     "end": 20.85
+    },
+    {
+     "kind": "head",
+     "text": "As the card for the day",
+     "start": 21.55,
+     "end": 22.87
+    },
+    {
+     "kind": "book",
+     "text": "Use what is already on your table.",
+     "start": 23.37,
+     "end": 25.18
+    },
+    {
+     "kind": "explainhead",
+     "text": "Explanation",
+     "start": 27.08,
+     "end": 28.17
+    },
+    {
+     "kind": "explain",
+     "text": "In Jungian terms, the Magician is the conscious self starting to act in the world, a bridge between what is possible and what gets made. Think of a young Frida Kahlo, picking up a brush in bed and inventing her own visual language.",
+     "start": 28.77,
+     "end": 41.4
+    },
+    {
+     "kind": "explain",
+     "text": "Keep in mind: uniqueness, initiative, the union of thought and deed. Ask yourself: what tools am I not using yet?",
+     "start": 42.1,
+     "end": 48.58
+    }
+   ]
+  }
+ ]
+}

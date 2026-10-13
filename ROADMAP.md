@@ -71,6 +71,11 @@ Claude app: answer
 - ✅ Export consults (Markdown) to add to the TAROT project's knowledge
 - 📋 Option to convert an answer into a regular note, or keep it as a consult
 
+## Phase 4.5 — Explore without a book, account & backup 🔨
+
+- ✅ Built-in sample book (2 short sections with audio) installed on first launch, so every screen can be explored; delete it like any book
+- ❓ Account / backup: Apple account sync isn't available with free signing; options are a backup file (Files / iCloud Drive) or automatic sync to the private GitHub repo
+
 ## Phase 5 — Polish 📋
 
 - 📋 Sleep timer

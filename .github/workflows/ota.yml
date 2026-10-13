@@ -15,7 +15,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Skip until set up
         id: ready
-        run: node -e "process.exit(require('./app.json').expo.updates?.url ? 0 : 1)" && echo ok=1 >> "$GITHUB_OUTPUT" || echo ok=0 >> "$GITHUB_OUTPUT"
+        run: |
+          if grep -q 'u.expo.dev' app.json; then echo ok=1 >> "$GITHUB_OUTPUT"; else echo ok=0 >> "$GITHUB_OUTPUT"; fi
       - if: steps.ready.outputs.ok == '1'
         uses: actions/setup-node@v4
         with:

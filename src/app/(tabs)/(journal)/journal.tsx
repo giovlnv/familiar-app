@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import { Pressable, ScrollView, SectionList, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, SectionList, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { router, Stack, useFocusEffect } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { birthCards, JournalData, loadJournal, mostDrawn, newReading, Reading } from '../../../journal';
@@ -7,6 +7,7 @@ import { getProfile, today } from '../../../tracker';
 import { cardName } from '../../../decks';
 import { CardImage } from '../../../components/Cards';
 import ReadingRow from '../../../components/ReadingRow';
+import CardSheet from '../../../components/CardSheet';
 import { Chip, fmtDate } from '../../../components/ui';
 import { usePad } from '../../../playback';
 import { c } from '../../../theme';
@@ -23,6 +24,8 @@ export default function Journal() {
   const [area, setArea] = useState<string | null>(null);
   const [month, setMonth] = useState(() => today().slice(0, 7));
   const [picked, setPicked] = useState<string | null>(null);
+  const [open, setOpen] = useState<{ id: string; role: string } | null>(null);
+  const { width } = useWindowDimensions();
   useFocusEffect(
     useCallback(() => {
       const refresh = () => (setJ(loadJournal()), setDob(getProfile().dob));
@@ -55,12 +58,22 @@ export default function Journal() {
     return out;
   }, [readings, view, month, picked]);
 
-  const tiles = [
-    birth && { label: 'Personality', card: birth.personality },
-    birth && { label: 'Essence', card: birth.essence },
-    birth && { label: `${new Date().getFullYear()} card`, card: birth.yearCard },
-    top && { label: `Most drawn · ${top[1]}×`, card: top[0] },
-  ].filter((x): x is { label: string; card: string } => !!x);
+  const ROLE: Record<string, string> = {
+    Personality: 'Your personality card: how you show up in the world and the lessons you meet outwardly. The sum of the digits of your birth date.',
+    Essence: 'Your essence card: the inner core beneath the personality, reduced from it to a single digit.',
+    Year: `Your card for ${new Date().getFullYear()}: the theme of the year, from your birth day and month plus the current year.`,
+  };
+  const born = birth
+    ? [
+        { label: 'Personality', card: birth.personality },
+        { label: 'Essence', card: birth.essence },
+        { label: 'Year', card: birth.yearCard },
+      ]
+    : [];
+  const areaCount = new Map<string, number>();
+  for (const r of j.readings) if (r.area) areaCount.set(r.area, (areaCount.get(r.area) ?? 0) + 1);
+  const topArea = [...areaCount.entries()].sort((a, b) => b[1] - a[1])[0];
+  const third = (width - 32 - 20) / 3;
 
   const header = (
     <View>
@@ -73,32 +86,44 @@ export default function Journal() {
           ),
         }}
       />
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.tiles}>
-        {tiles.map((x) => (
-          <View key={x.label} style={s.tile}>
-            <CardImage id={x.card} width={44} />
-            <View style={{ flexShrink: 1 }}>
-              <Text style={s.tileLabel}>{x.label}</Text>
+      <Text style={s.h3}>Your cards</Text>
+      {birth ? (
+        <View style={s.birthRow}>
+          {born.map((x) => (
+            <Pressable key={x.label} style={[s.birth, { width: third }]} onPress={() => setOpen({ id: x.card, role: ROLE[x.label] })}>
+              <CardImage id={x.card} width={third * 0.62} />
+              <Text style={s.tileLabel}>{x.label === 'Year' ? `${new Date().getFullYear()}` : x.label}</Text>
               <Text style={s.tileCard} numberOfLines={2}>
                 {short(x.card)}
               </Text>
-            </View>
-          </View>
-        ))}
-        <View style={[s.tile, { minWidth: 110 }]}>
-          <View>
-            <Text style={s.tileLabel}>This month</Text>
-            <Text style={s.big}>{thisMonth}</Text>
-            <Text style={s.tileLabel}>{j.readings.length} in total</Text>
-          </View>
+            </Pressable>
+          ))}
         </View>
-        {!birth && (
-          <Pressable style={[s.tile, { minWidth: 150 }]} onPress={() => router.push('/profile')}>
-            <Ionicons name="sparkles-outline" size={20} color={c.gold} />
-            <Text style={[s.tileLabel, { flexShrink: 1 }]}>Add your birth date in Profile to see your personality card</Text>
+      ) : (
+        <Pressable style={s.addBirth} onPress={() => router.push('/profile')}>
+          <Ionicons name="sparkles-outline" size={20} color={c.gold} />
+          <Text style={[s.tileLabel, { flex: 1 }]}>Add your birth date in Profile to see your personality, essence and year cards.</Text>
+        </Pressable>
+      )}
+
+      <Text style={s.h3}>Readings</Text>
+      <View style={s.stats}>
+        <View style={{ flex: 1, gap: 2 }}>
+          <Text style={s.big}>{thisMonth}</Text>
+          <Text style={s.tileLabel}>this month</Text>
+          <Text style={[s.statLine, { marginTop: 10 }]}>{j.readings.length} in total</Text>
+          {topArea && <Text style={s.statLine}>Most asked about: {topArea[0]}</Text>}
+        </View>
+        {top ? (
+          <Pressable style={{ alignItems: 'center', gap: 4, width: 96 }} onPress={() => setOpen({ id: top[0], role: `Your most drawn card · ${top[1]} times.` })}>
+            <CardImage id={top[0]} width={64} />
+            <Text style={s.tileLabel}>Most drawn · {top[1]}×</Text>
+            <Text style={[s.tileCard, { textAlign: 'center' }]} numberOfLines={2}>
+              {short(top[0])}
+            </Text>
           </Pressable>
-        )}
-      </ScrollView>
+        ) : null}
+      </View>
 
       <View style={s.views}>
         {(['timeline', 'calendar'] as const).map((v) => (
@@ -127,6 +152,7 @@ export default function Journal() {
           onPick={(d) => setPicked(picked === d ? null : d)}
         />
       )}
+      <CardSheet id={open?.id ?? null} role={open?.role} onClose={() => setOpen(null)} />
     </View>
   );
 
@@ -210,11 +236,15 @@ function Calendar({
 
 const s = StyleSheet.create({
   wrap: { flex: 1, backgroundColor: c.bg, paddingHorizontal: 16 },
-  tiles: { gap: 10, paddingVertical: 12 },
-  tile: { flexDirection: 'row', gap: 10, alignItems: 'center', backgroundColor: c.panel, borderRadius: 12, padding: 10, maxWidth: 190 },
+  h3: { color: c.text, fontSize: 17, fontWeight: '700', marginTop: 16, marginBottom: 8 },
+  birthRow: { flexDirection: 'row', gap: 10 },
+  birth: { backgroundColor: c.panel, borderRadius: 12, paddingVertical: 12, alignItems: 'center', gap: 4 },
+  addBirth: { flexDirection: 'row', gap: 10, alignItems: 'center', backgroundColor: c.panel, borderRadius: 12, padding: 14 },
+  stats: { flexDirection: 'row', alignItems: 'center', backgroundColor: c.panel, borderRadius: 14, padding: 16, marginBottom: 14 },
+  statLine: { color: c.text, fontSize: 14 },
   tileLabel: { color: c.dim, fontSize: 12 },
-  tileCard: { color: c.text, fontSize: 14, fontWeight: '600', marginTop: 2 },
-  big: { color: c.gold, fontSize: 24, fontWeight: '700' },
+  tileCard: { color: c.text, fontSize: 13, fontWeight: '600', textAlign: 'center', paddingHorizontal: 4 },
+  big: { color: c.gold, fontSize: 40, fontWeight: '700' },
   views: { flexDirection: 'row', backgroundColor: c.panel, borderRadius: 10, padding: 3 },
   view: { flex: 1, flexDirection: 'row', gap: 6, alignItems: 'center', justifyContent: 'center', paddingVertical: 7, borderRadius: 8 },
   viewOn: { backgroundColor: c.gold },

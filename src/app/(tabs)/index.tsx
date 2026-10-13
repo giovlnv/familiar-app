@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { getBook as getAudio, installSampleOnce, loadProgress } from '../../storage';
 import { syncAudioBooks, Tracker } from '../../tracker';
 import { Cover, fmtDate, Stars } from '../../components/ui';
@@ -61,7 +62,7 @@ export default function Home() {
                   />
                 </View>
               </View>
-              <Text style={s.play}>▶</Text>
+              <Ionicons name="play-circle" size={34} color={c.gold} />
             </Pressable>
           ))}
         </>
@@ -118,7 +119,6 @@ const s = StyleSheet.create({
   statLabel: { color: c.dim, fontSize: 15 },
   h2: { color: c.text, fontSize: 19, fontWeight: '700', marginTop: 24, marginBottom: 10 },
   listen: { flexDirection: 'row', gap: 12, alignItems: 'center', backgroundColor: c.panel, borderRadius: 12, padding: 10, marginBottom: 8 },
-  play: { color: c.gold, fontSize: 22, paddingHorizontal: 6 },
   title: { color: c.text, fontSize: 15, fontWeight: '600' },
   small: { color: c.text, fontSize: 12, marginTop: 5 },
   dim: { color: c.dim, marginTop: 2 },

@@ -9,11 +9,13 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { setAudioModeAsync, useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import * as Sharing from 'expo-sharing';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import {
   audioUri,
   exportConsultsFile,
@@ -57,6 +59,7 @@ export default function Player({ item, start, onClose }: { item: LibraryItem; st
   const [notes, setNotes] = useState<Note[]>(() => loadNotes(folder));
   const [draft, setDraft] = useState<Draft | null>(null);
   const [rate, setRate] = useState(1);
+  const { height: winH } = useWindowDimensions();
 
   const player = useAudioPlayer(null, { updateInterval: 250 });
   const status = useAudioPlayerStatus(player);
@@ -125,10 +128,13 @@ export default function Player({ item, start, onClose }: { item: LibraryItem; st
 
   const skip = (d: number) => player.seekTo(Math.max(0, Math.min(t + d, status.duration || t + d)));
   const toggle = () => (status.playing ? player.pause() : player.play());
-  const cycleRate = () => {
-    const r = RATES[(RATES.indexOf(rate) + 1) % RATES.length];
+  const [rateAt, setRateAt] = useState<{ x: number; y: number } | null>(null);
+  const rateBtn = useRef<View>(null);
+  const openRates = () => rateBtn.current?.measureInWindow((x, y) => setRateAt({ x, y }));
+  const pickRate = (r: number) => {
     setRate(r);
     player.setPlaybackRate(r, 'high');
+    setRateAt(null);
   };
 
   const newNote = (para: number, time: number) => {
@@ -193,8 +199,8 @@ export default function Player({ item, start, onClose }: { item: LibraryItem; st
   };
   const paraActions = (index: number, time: number) =>
     Alert.alert('This passage', undefined, [
-      { text: '✎ Add note', onPress: () => newNote(index, time) },
-      { text: '✦ Ask Claude', onPress: () => startAsk(index, time) },
+      { text: 'Add note', onPress: () => newNote(index, time) },
+      { text: 'Ask Claude', onPress: () => startAsk(index, time) },
       { text: 'Cancel', style: 'cancel' },
     ]);
 
@@ -212,17 +218,26 @@ export default function Player({ item, start, onClose }: { item: LibraryItem; st
     <SafeAreaView style={s.wrap} edges={['top', 'bottom']}>
       <View style={s.top}>
         <Pressable onPress={onClose} hitSlop={12}>
-          <Text style={s.link}>‹ Back</Text>
+          <View style={s.iconLink}>
+            <Ionicons name="chevron-back" size={20} color={c.gold} />
+            <Text style={s.link}>Back</Text>
+          </View>
         </Pressable>
         <View style={s.topRight}>
           <Pressable onPress={() => setPanel('consults')} hitSlop={8}>
-            <Text style={[s.link, { color: c.claude }]}>✦ {consults.length}</Text>
+            <View style={s.iconLink}>
+              <Ionicons name="sparkles-outline" size={17} color={c.claude} />
+              <Text style={[s.link, { color: c.claude }]}>{consults.length}</Text>
+            </View>
           </Pressable>
           <Pressable onPress={() => setPanel('notes')} hitSlop={8}>
-            <Text style={s.link}>Notes ({notes.length})</Text>
+            <View style={s.iconLink}>
+              <Ionicons name="create-outline" size={17} color={c.gold} />
+              <Text style={s.link}>{notes.length}</Text>
+            </View>
           </Pressable>
           <Pressable onPress={() => setShowText(!showText)} hitSlop={8}>
-            <Text style={s.link}>{showText ? 'Hide text' : 'Show text'}</Text>
+            <Ionicons name={showText ? 'eye-off-outline' : 'document-text-outline'} size={20} color={c.gold} />
           </Pressable>
         </View>
       </View>
@@ -230,7 +245,7 @@ export default function Player({ item, start, onClose }: { item: LibraryItem; st
       <Pressable onPress={() => setPanel('chapters')}>
         <Text style={s.book}>{book.title}</Text>
         <Text style={s.sec}>
-          {section.title} ▾
+          {section.title} <Ionicons name="chevron-down" size={16} color={c.dim} />
         </Text>
       </Pressable>
 
@@ -252,8 +267,9 @@ export default function Player({ item, start, onClose }: { item: LibraryItem; st
                 style={[s.para, index === current && s.paraOn]}
               >
                 <Text style={[s.pText, styleFor(p), index === current && s.pTextOn]}>
-                  {asked.has(index) ? '✦ ' : ''}
-                  {noted.has(index) ? '✎ ' : ''}
+                  {asked.has(index) && <Ionicons name="sparkles-outline" size={15} color={c.claude} />}
+                  {noted.has(index) && <Ionicons name="create-outline" size={15} color={c.gold} />}
+                  {(asked.has(index) || noted.has(index)) && ' '}
                   {p.text}
                 </Text>
               </Pressable>
@@ -286,20 +302,36 @@ export default function Player({ item, start, onClose }: { item: LibraryItem; st
           <Text style={s.time}>-{fmt(Math.max(0, (status.duration || 0) - t))}</Text>
         </View>
         <View style={s.row}>
-          <Btn label="⏮" onPress={() => (t > 5 ? goTo(sec, 0) : sec > 0 && goTo(sec - 1, 0))} />
-          <Btn label="↺15" onPress={() => skip(-15)} />
+          <Btn icon="play-skip-back" onPress={() => (t > 5 ? goTo(sec, 0) : sec > 0 && goTo(sec - 1, 0))} />
+          <Btn icon="arrow-undo" label="15" onPress={() => skip(-15)} />
           <Pressable style={s.play} onPress={toggle}>
-            <Text style={s.playText}>{status.playing ? '❚❚' : '▶'}</Text>
+            <Ionicons name={status.playing ? 'pause' : 'play'} size={30} color={c.bg} style={!status.playing && { marginLeft: 4 }} />
           </Pressable>
-          <Btn label="30↻" onPress={() => skip(30)} />
-          <Btn label="⏭" onPress={() => sec < book.sections.length - 1 && goTo(sec + 1, 0)} />
+          <Btn icon="arrow-redo" label="30" onPress={() => skip(30)} />
+          <Btn icon="play-skip-forward" onPress={() => sec < book.sections.length - 1 && goTo(sec + 1, 0)} />
         </View>
         <View style={s.row}>
-          <Btn label={`${rate}×`} onPress={cycleRate} />
-          <Btn label="✎ Note here" onPress={() => newNote(current, t)} wide />
-          <Btn label="✦ Ask" onPress={() => startAsk(current, t)} />
+          <View ref={rateBtn} collapsable={false}>
+            <Btn icon="speedometer-outline" label={`${rate}x`} trail="chevron-up" onPress={openRates} />
+          </View>
+          <Btn icon="create-outline" label="Note here" onPress={() => newNote(current, t)} wide />
+          <Btn icon="sparkles-outline" label="Ask" color={c.claude} onPress={() => startAsk(current, t)} />
         </View>
       </View>
+
+      <Modal visible={!!rateAt} transparent animationType="fade" onRequestClose={() => setRateAt(null)}>
+        <Pressable style={StyleSheet.absoluteFill} onPress={() => setRateAt(null)} />
+        {rateAt && (
+          <View style={[s.menu, { left: rateAt.x, bottom: winH - rateAt.y + 8 }]}>
+            {[...RATES].reverse().map((r) => (
+              <Pressable key={r} style={[s.menuItem, r === rate && s.menuOn]} onPress={() => pickRate(r)}>
+                <Text style={[s.menuText, r === rate && { color: c.gold, fontWeight: '700' }]}>{r}x</Text>
+                {r === rate && <Ionicons name="checkmark" size={16} color={c.gold} />}
+              </Pressable>
+            ))}
+          </View>
+        )}
+      </Modal>
 
       <Modal visible={panel === 'chapters'} animationType="slide" onRequestClose={() => setPanel('none')}>
         <SafeAreaView style={s.wrap}>
@@ -336,7 +368,7 @@ export default function Player({ item, start, onClose }: { item: LibraryItem; st
             keyExtractor={(n) => n.id}
             ListEmptyComponent={
               <Text style={s.empty}>
-                Tap “✎ Note here” while listening, or long-press any paragraph, to add a note.
+                Tap “Note here” while listening, or long-press any paragraph, to add a note.
               </Text>
             }
             renderItem={({ item: n }) => {
@@ -419,9 +451,26 @@ const styleFor = (p: Para) =>
           ? s.kExplain
           : null;
 
-const Btn = ({ label, onPress, wide }: { label: string; onPress: () => void; wide?: boolean }) => (
+type IconName = keyof typeof Ionicons.glyphMap;
+const Btn = ({
+  icon,
+  label,
+  trail,
+  color = c.text,
+  onPress,
+  wide,
+}: {
+  icon?: IconName;
+  label?: string;
+  trail?: IconName;
+  color?: string;
+  onPress: () => void;
+  wide?: boolean;
+}) => (
   <Pressable style={[s.btn, wide && { flex: 1 }]} onPress={onPress} hitSlop={6}>
-    <Text style={s.btnText}>{label}</Text>
+    {icon && <Ionicons name={icon} size={20} color={color} />}
+    {label && <Text style={[s.btnText, { color }]}>{label}</Text>}
+    {trail && <Ionicons name={trail} size={14} color={c.dim} />}
   </Pressable>
 );
 
@@ -492,10 +541,23 @@ const s = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 10,
   },
-  btn: { backgroundColor: c.panel, paddingVertical: 12, paddingHorizontal: 14, borderRadius: 12, alignItems: 'center' },
+  btn: {
+    flexDirection: 'row',
+    gap: 6,
+    backgroundColor: c.panel,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconLink: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  menu: { position: 'absolute', backgroundColor: c.raised, borderRadius: 12, paddingVertical: 6, minWidth: 110, borderWidth: 1, borderColor: c.line },
+  menuItem: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 16 },
+  menuOn: { backgroundColor: c.panel },
+  menuText: { color: c.text, fontSize: 16, fontVariant: ['tabular-nums'] },
   btnText: { color: c.text, fontSize: 16 },
   play: { backgroundColor: c.gold, width: 68, height: 68, borderRadius: 34, alignItems: 'center', justifyContent: 'center' },
-  playText: { color: c.bg, fontSize: 26, fontWeight: '700' },
   empty: { color: c.dim, fontSize: 16, lineHeight: 22, marginTop: 20 },
   note: { backgroundColor: c.panel, borderRadius: 12, padding: 14, marginBottom: 10 },
   noteMeta: { color: c.gold, fontSize: 13, marginBottom: 6 },

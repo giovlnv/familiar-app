@@ -8,13 +8,13 @@ Built for one person's study. Books and audio are **never** stored in this repos
 
 | | |
 |---|---|
-| **Library** | All imported books with length and progress; open a book to see every section with a 1–2 line summary, duration, ✓ finished and ✎ notes |
+| **Library** | All imported books with length and progress; open a book to see every section with a 1–2 line summary, duration, finished mark, notes and consults |
 | **Follow-along text** | Current paragraph highlighted and auto-scrolled; tap a paragraph to jump there |
 | **Listen-only mode** | Hide the text; audio keeps playing in the background and on the lock screen |
 | **Two voices** | Book text and explanations use different voices, so you always know which is which |
-| **Notes** | "✎ Note here" or long-press a paragraph; each note stores the time *and* the passage. Tap a note to jump back; export all notes as Markdown |
-| **Ask Claude** | “✦ Ask” or long-press a paragraph → your question plus the passage, section, time and your notes open in the Claude app as a numbered consult (#C1, #C2…). Copy Claude’s reply, then **Paste answer** in the ✦ consults list. Waiting/answered filters, follow-ups, jump to passage, export as Markdown |
-| **Playback** | Speed 0.8×–2×, ±15/30 s skips, previous/next section, progress saved automatically |
+| **Notes** | "Note here" or long-press a paragraph; each note stores the time *and* the passage. Tap a note to jump back; export all notes as Markdown |
+| **Ask Claude** | “Ask” or long-press a paragraph → your question plus the passage, section, time and your notes open in the Claude app as a numbered consult (#C1, #C2…). Copy Claude’s reply, then **Paste answer** in the consults list. Waiting/answered filters, follow-ups, jump to passage, export as Markdown |
+| **Playback** | Speed menu 0.8x–2x, ±15/30 s skips, previous/next section, progress saved automatically |
 
 Planned features are in [ROADMAP.md](ROADMAP.md).
 

@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { router, Stack, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { getBook, loadConsults, loadNotes, loadProgress } from '../../storage';
 import { fmtHours, fmtTime } from '../../format';
 import { Consult, Note, Progress } from '../../types';
@@ -41,7 +42,7 @@ export default function BookPage() {
           <View style={s.head}>
             <Text style={s.title}>{book.title}</Text>
             <Text style={s.meta}>
-              {book.sections.length} sections · {fmtHours(total)} · {done.size} finished · {notes.length} notes · ✦ {consults.length}
+              {book.sections.length} sections · {fmtHours(total)} · {done.size} finished · {notes.length} notes · {consults.length} consults
             </Text>
             <Pressable style={s.btn} onPress={() => open()}>
               <Text style={s.btnText}>{progress.time || progress.section ? 'Continue' : 'Start listening'}</Text>
@@ -65,9 +66,11 @@ export default function BookPage() {
                   {x.title}
                 </Text>
                 <Text style={s.marks}>
-                  {k ? `✦${k} ` : ''}
-                  {n ? `✎${n} ` : ''}
-                  {done.has(x.id) ? '✓' : fmtTime(x.duration)}
+                  {!!k && <Ionicons name="sparkles-outline" size={12} color={c.claude} />}
+                  {k ? `${k}  ` : ''}
+                  {!!n && <Ionicons name="create-outline" size={12} color={c.gold} />}
+                  {n ? `${n}  ` : ''}
+                  {done.has(x.id) ? <Ionicons name="checkmark-circle" size={14} color={c.gold} /> : fmtTime(x.duration)}
                 </Text>
               </View>
               {!!x.summary && (

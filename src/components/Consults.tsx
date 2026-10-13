@@ -14,6 +14,7 @@ import {
   View,
 } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Book, Consult, Note } from '../types';
 import { fmtTime } from '../format';
@@ -55,7 +56,7 @@ export function AskSheet({
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={s.dim}>
         <View style={s.sheet}>
           <Text style={s.meta}>
-            ✦ Ask Claude{draft?.parent ? ` · follow-up to #C${draft.parent.id}` : ''} · {fmtTime(draft?.time ?? 0)}
+            <Ionicons name="sparkles-outline" size={13} color={c.claude} /> Ask Claude{draft?.parent ? ` · follow-up to #C${draft.parent.id}` : ''} · {fmtTime(draft?.time ?? 0)}
           </Text>
           <Text style={s.quote} numberOfLines={3}>
             “{draft?.quote}”
@@ -125,7 +126,9 @@ export function ConsultList({
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
       <SafeAreaView style={s.wrap}>
         <View style={s.top}>
-          <Text style={s.h2}>✦ Claude consults</Text>
+          <Text style={s.h2}>
+            <Ionicons name="sparkles-outline" size={20} color={c.claude} /> Claude consults
+          </Text>
           <View style={s.topRight}>
             {!!consults.length && (
               <Pressable onPress={onExport} hitSlop={8}>
@@ -153,7 +156,7 @@ export function ConsultList({
           contentContainerStyle={{ paddingBottom: 40 }}
           ListEmptyComponent={
             <Text style={s.empty}>
-              Tap “✦ Ask” while listening, or long-press a paragraph, to ask Claude about a passage. Your question opens in
+              Tap “Ask” while listening, or long-press a paragraph, to ask Claude about a passage. Your question opens in
               the Claude app; copy the answer and paste it back here.
             </Text>
           }
@@ -183,7 +186,7 @@ export function ConsultList({
                       </ScrollView>
                     ) : null}
                     <View style={s.actions}>
-                      <Btn label={x.answer ? 'Replace answer' : '📋 Paste answer'} primary={!x.answer} onPress={() => paste(x)} />
+                      <Btn label={x.answer ? 'Replace answer' : 'Paste answer'} primary={!x.answer} onPress={() => paste(x)} />
                       {x.status === 'asked' && <Btn label="Send again" onPress={() => onResend(x)} />}
                       {x.answer && <Btn label="Follow-up" onPress={() => onFollowUp(x)} />}
                       <Btn label="Go to passage" onPress={() => onJump(x)} />

@@ -203,7 +203,7 @@ function LogSheet({
         <Text style={s.label}>Rating</Text>
         <View style={{ alignItems: 'center', paddingVertical: 6 }}>
           <Stars value={rating} size={34} onChange={setRating} />
-          <Text style={[s.dim, { marginTop: 6 }]}>{rating ? `${rating} ★` : 'Tap left or right half of a star'}</Text>
+          <Text style={[s.dim, { marginTop: 6 }]}>{rating ? `${rating} / 5` : 'Tap left or right half of a star'}</Text>
         </View>
         <View style={s.switchRow}>
           <Text style={s.rowText}>I’ve read this before</Text>

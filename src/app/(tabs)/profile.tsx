@@ -43,7 +43,7 @@ export default function Profile() {
         </View>
         <View style={s.histAxis}>
           <Text style={s.dim}>½</Text>
-          <Text style={s.dim}>{rated.length ? `avg ${avg.toFixed(1)} ★ · ${rated.length} rated` : 'no ratings yet'}</Text>
+          <Text style={s.dim}>{rated.length ? `avg ${avg.toFixed(1)} / 5 · ${rated.length} rated` : 'no ratings yet'}</Text>
           <Text style={s.dim}>5</Text>
         </View>
       </View>

@@ -9,7 +9,7 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { useFocusEffect } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import {
   backupToFile,
   getState,
@@ -278,6 +278,11 @@ export default function Settings() {
         <View style={s.row}>
           <Btn label="Save link" primary onPress={() => (setClaudeLink(claudeLink), Alert.alert("Saved"))} />
         </View>
+      </View>
+      <Text style={s.h2}>Voice lab</Text>
+      <Text style={s.p}>Test the Kokoro voice running on this iPhone, offline.</Text>
+      <View style={s.row}>
+        <Btn label="Open voice lab" onPress={() => router.push("/voice-lab")} />
       </View>
       <Text style={s.h2}>Genres</Text>
       <Text style={s.p}>

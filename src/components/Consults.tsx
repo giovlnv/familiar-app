@@ -229,11 +229,12 @@ export function ConsultList({
 }
 
 const linkFile = () => new File(Paths.document, 'claude-chat-link.txt');
+const DEFAULT_LINK = 'https://claude.ai/chat/594ac005-3036-4c48-9380-27914feafcee';
 export const getClaudeLink = () => {
   try {
-    return linkFile().exists ? linkFile().textSync().trim() : '';
+    return (linkFile().exists && linkFile().textSync().trim()) || DEFAULT_LINK;
   } catch {
-    return '';
+    return DEFAULT_LINK;
   }
 };
 export const setClaudeLink = (url: string) => {

@@ -50,7 +50,7 @@ Status: ✅ done · 🔨 next · 📋 planned · ❓ decision needed · Last rev
 
 ## Next 📋
 
-4. **Reading journal (tarot readings)** — the Journal tab (replaced Diary; the diary is now a Books/Diary toggle in Library), designed directly in the app
+4. ✅ **Reading journal** — Journal tab (replaced Diary; the diary is a Books/Diary toggle in Library): timeline with stats on top (personality, essence, year card from the birth date in Profile; most drawn; this month), calendar toggle, area filter; reading screen with everything below. Next: stats/search
    - Date and time, the question
    - For me or someone else: name, date of birth and short background (all optional), reusable people
    - Area: love/relationships, family, money, job, personal, spiritual, + custom

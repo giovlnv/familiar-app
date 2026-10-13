@@ -5,6 +5,7 @@ import { File, Paths } from 'expo-file-system';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { getProfile, Profile, setProfile } from '../tracker';
 import { Button } from './ui';
+import { parseDate, showDate } from '../journal';
 import { c } from '../theme';
 
 async function pickPhoto() {
@@ -35,6 +36,7 @@ export default function ProfileHeader() {
   const [p, setP] = useState<Profile>(getProfile);
   const [edit, setEdit] = useState(false);
   const [draft, setDraft] = useState<Profile>({});
+  const [dob, setDob] = useState('');
 
   const save = (patch: Profile) => {
     setProfile(patch);
@@ -43,7 +45,7 @@ export default function ProfileHeader() {
 
   return (
     <>
-      <Pressable style={s.head} onPress={() => (setDraft(p), setEdit(true))}>
+      <Pressable style={s.head} onPress={() => (setDraft(p), setDob(showDate(p.dob)), setEdit(true))}>
         <Avatar photo={p.photo} name={p.name} size={64} />
         <View style={{ flex: 1 }}>
           <Text style={s.name}>{p.name || 'Set up your profile'}</Text>
@@ -71,7 +73,21 @@ export default function ProfileHeader() {
             autoCapitalize="none"
             autoCorrect={false}
           />
-          <Button label="Save" primary onPress={() => (save({ name: draft.name?.trim(), username: draft.username }), setEdit(false))} />
+          <Text style={s.label}>Birth date</Text>
+          <TextInput
+            style={s.input}
+            value={dob}
+            onChangeText={setDob}
+            placeholder="DD/MM/YYYY"
+            placeholderTextColor={c.dim}
+            keyboardType="numbers-and-punctuation"
+          />
+          <Text style={s.hint}>Used for your personality, essence and year cards in the Journal.</Text>
+          <Button
+            label="Save"
+            primary
+            onPress={() => (save({ name: draft.name?.trim(), username: draft.username, dob: parseDate(dob) }), setEdit(false))}
+          />
         </View>
       </Modal>
     </>
@@ -88,5 +104,6 @@ const s = StyleSheet.create({
   sheet: { backgroundColor: c.panel, padding: 16, paddingBottom: 36, borderTopLeftRadius: 18, borderTopRightRadius: 18, gap: 10 },
   change: { color: c.gold, fontWeight: '600' },
   label: { color: c.dim, fontSize: 13, textTransform: 'uppercase', letterSpacing: 1, marginTop: 6 },
+  hint: { color: c.dim, fontSize: 12 },
   input: { backgroundColor: c.bg, color: c.text, borderRadius: 10, padding: 12, fontSize: 15 },
 });

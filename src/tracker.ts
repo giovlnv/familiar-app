@@ -1,5 +1,6 @@
 import { File, Paths } from "expo-file-system";
 import { listBooks } from "./storage";
+import type { JournalData } from "./journal";
 
 export type Status = "none" | "want" | "reading" | "read" | "dnf";
 
@@ -43,6 +44,7 @@ export type Tracker = {
   favorites?: string[];
   lists?: RankedList[];
   profile?: Profile;
+  journal?: JournalData;
 };
 
 export const STATUS_LABEL: Record<Status, string> = {
@@ -271,7 +273,7 @@ export const patchList = (id: string, fn: (l: RankedList) => void) =>
 
 export const removeList = (id: string) => update((t) => (t.lists = t.lists?.filter((x) => x.id !== id)));
 
-export type Profile = { name?: string; username?: string; photo?: string };
+export type Profile = { name?: string; username?: string; photo?: string; dob?: string };
 
 export const getProfile = (): Profile => load().profile ?? {};
 

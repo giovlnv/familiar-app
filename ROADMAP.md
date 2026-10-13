@@ -95,8 +95,13 @@ Decided: track every book (not only audiobooks), details and covers from Open Li
 - ✅ Speed drop-up menu, line icons instead of emoji, minimizable player with a mini bar while browsing
 - ✅ Stats on Profile: year / all-time filter; books, pages, hours listened, average rating, rereads; books/pages/hours by month (or by year); top authors; most listened; longest read; rating histogram
 - ✅ Listening time logged per day and per audiobook (synced with the tracker)
-- 📋 Stats still to do: genres/moods (Open Library subjects), reading pace (needs a start date when a book is marked Reading)
-- 📋 Shelves & lists, top 4 favorites, year in review
+- ✅ Start date (set automatically when a book is marked Reading, editable; also in the Log sheet) → days to finish per read, average pace, fastest read
+- ✅ Custom shelves (create from a book page, filter in Library, long-press to rename/delete)
+- ✅ Top 4 favorites on Profile
+- ✅ Year in review (books, pages, hours, highest rated, busiest month, top author, longest/shortest/fastest, every cover in order)
+- ✅ Import from Goodreads, StoryGraph or any CSV with a Title column (statuses, ratings, read dates and ranges, pages, ISBN covers, shelves/tags); re-importing merges instead of duplicating
+- 📋 Ordered lists (ranked, with notes per position)
+- 📋 Genres/moods from Open Library subjects
 
 ## Phase 5 — Polish 📋
 

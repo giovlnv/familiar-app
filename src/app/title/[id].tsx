@@ -1,10 +1,26 @@
-import { useCallback, useState } from 'react';
-import { Alert, Modal, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
-import { router, Stack, useFocusEffect, useLocalSearchParams } from 'expo-router';
-import Ionicons from '@expo/vector-icons/Ionicons';
-import { listBooks, loadConsults, loadNotes } from '../../storage';
+import { useCallback, useState } from "react";
+import {
+  Alert,
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  View,
+} from "react-native";
+import {
+  router,
+  Stack,
+  useFocusEffect,
+  useLocalSearchParams,
+} from "expo-router";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { listBooks, loadConsults, loadNotes } from "../../storage";
 import {
   addLog,
+  addShelf,
+  daysBetween,
   latestRating,
   load,
   logsFor,
@@ -16,17 +32,28 @@ import {
   syncAudioBooks,
   TBook,
   today,
+  toggleFavorite,
+  toggleShelf,
   Tracker,
-} from '../../tracker';
-import { Button, Chip, Cover, fmtDate, Stars } from '../../components/ui';
-import { c } from '../../theme';
+} from "../../tracker";
+import {
+  Button,
+  Chip,
+  Cover,
+  DateStepper,
+  fmtDate,
+  Stars,
+} from "../../components/ui";
+import { c } from "../../theme";
 
-const STATUSES: Status[] = ['want', 'reading', 'read', 'dnf'];
+const STATUSES: Status[] = ["want", "reading", "read", "dnf"];
 
 export default function Title() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [t, setT] = useState<Tracker>(() => load());
   const [logging, setLogging] = useState(false);
+  const [shelving, setShelving] = useState(false);
+  const [editStart, setEditStart] = useState(false);
   const refresh = useCallback(() => setT(syncAudioBooks()), []);
   useFocusEffect(refresh);
 
@@ -35,6 +62,8 @@ export default function Title() {
   const logs = logsFor(t, b.id);
   const notes = b.audio ? loadNotes(b.audio).length : 0;
   const consults = b.audio ? loadConsults(b.audio).length : 0;
+  const fav = !!t.favorites?.includes(b.id);
+  const myShelves = (t.shelves ?? []).filter((sh) => sh.books.includes(b.id));
 
   const set = (patch: Partial<TBook>) => {
     patchBook(b.id, patch);
@@ -42,18 +71,26 @@ export default function Title() {
   };
 
   const linkAudio = () => {
-    const free = listBooks().filter((a) => !t.books.some((x) => x.audio === a.folder && x.id !== b.id));
-    if (!free.length) return Alert.alert('No audiobooks', 'Import an audiobook in the Library first.');
-    Alert.alert('Link audiobook', undefined, [
+    const free = listBooks().filter(
+      (a) => !t.books.some((x) => x.audio === a.folder && x.id !== b.id),
+    );
+    if (!free.length)
+      return Alert.alert(
+        "No audiobooks",
+        "Import an audiobook in the Library first.",
+      );
+    Alert.alert("Link audiobook", undefined, [
       ...free.map((a) => ({
         text: a.book.title,
         onPress: () => {
-          const dup = t.books.find((x) => x.audio === a.folder && x.id !== b.id);
+          const dup = t.books.find(
+            (x) => x.audio === a.folder && x.id !== b.id,
+          );
           if (dup) removeBook(dup.id);
           set({ audio: a.folder });
         },
       })),
-      { text: 'Cancel', style: 'cancel' as const },
+      { text: "Cancel", style: "cancel" as const },
     ]);
   };
 
@@ -66,21 +103,45 @@ export default function Title() {
               hitSlop={10}
               onPress={() =>
                 Alert.alert(b.title, undefined, [
-                  { text: 'Find details on Open Library', onPress: () => router.push({ pathname: '/find', params: { id: b.id } }) },
-                  ...(b.audio ? [] : [{ text: 'Link audiobook', onPress: linkAudio }]),
                   {
-                    text: 'Remove from library',
-                    style: 'destructive' as const,
+                    text: fav
+                      ? "Remove from top 4 favorites"
+                      : "Add to top 4 favorites",
+                    onPress: () => {
+                      if (!fav && (t.favorites?.length ?? 0) >= 4)
+                        return Alert.alert(
+                          "Top 4 is full",
+                          "Remove a favorite on its book page first.",
+                        );
+                      toggleFavorite(b.id);
+                      refresh();
+                    },
+                  },
+                  {
+                    text: "Find details on Open Library",
+                    onPress: () =>
+                      router.push({ pathname: "/find", params: { id: b.id } }),
+                  },
+                  ...(b.audio
+                    ? []
+                    : [{ text: "Link audiobook", onPress: linkAudio }]),
+                  {
+                    text: "Remove from library",
+                    style: "destructive" as const,
                     onPress: () => {
                       removeBook(b.id);
                       router.back();
                     },
                   },
-                  { text: 'Cancel', style: 'cancel' as const },
+                  { text: "Cancel", style: "cancel" as const },
                 ])
               }
             >
-              <Ionicons name="ellipsis-horizontal-circle" size={24} color={c.gold} />
+              <Ionicons
+                name="ellipsis-horizontal-circle"
+                size={24}
+                color={c.gold}
+              />
             </Pressable>
           ),
         }}
@@ -89,39 +150,97 @@ export default function Title() {
         <Cover book={b} width={120} />
         <View style={{ flex: 1, gap: 4 }}>
           <Text style={s.title}>{b.title}</Text>
-          {!!b.authors.length && <Text style={s.author}>{b.authors.join(', ')}</Text>}
-          <Text style={s.dim}>{[b.year, b.pages && `${b.pages} pages`].filter(Boolean).join(' · ')}</Text>
-          <View style={{ marginTop: 8 }}>
+          {!!b.authors.length && (
+            <Text style={s.author}>{b.authors.join(", ")}</Text>
+          )}
+          <Text style={s.dim}>
+            {[b.year, b.pages && `${b.pages} pages`]
+              .filter(Boolean)
+              .join(" · ")}
+          </Text>
+          <View
+            style={{
+              marginTop: 8,
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 8,
+            }}
+          >
             <Stars value={latestRating(t, b.id)} size={20} />
+            {fav && <Ionicons name="heart" size={18} color={c.claude} />}
           </View>
         </View>
       </View>
 
       <View style={s.chips}>
         {STATUSES.map((st) => (
-          <Chip key={st} label={STATUS_LABEL[st]} on={b.status === st} onPress={() => set({ status: b.status === st ? 'none' : st })} />
+          <Chip
+            key={st}
+            label={STATUS_LABEL[st]}
+            on={b.status === st}
+            onPress={() => set({ status: b.status === st ? "none" : st })}
+          />
         ))}
       </View>
 
+      {(b.status === "reading" || b.started) && (
+        <Pressable style={s.row} onPress={() => setEditStart(true)}>
+          <Ionicons name="calendar-outline" size={18} color={c.gold} />
+          <Text style={s.rowText}>
+            {b.started
+              ? `Started ${fmtDate(b.started)} · day ${daysBetween(b.started, today())}`
+              : "Add start date"}
+          </Text>
+          <Ionicons name="create-outline" size={16} color={c.dim} />
+        </Pressable>
+      )}
+
+      <Pressable style={s.row} onPress={() => setShelving(true)}>
+        <Ionicons name="albums-outline" size={18} color={c.gold} />
+        <Text style={s.rowText} numberOfLines={2}>
+          {myShelves.length
+            ? myShelves.map((sh) => sh.name).join(" · ")
+            : "Add to shelf"}
+        </Text>
+        <Ionicons name="chevron-forward" size={16} color={c.dim} />
+      </Pressable>
+
       <View style={s.actions}>
         <View style={{ flex: 1 }}>
-          <Button label={logs.length ? 'Log again' : 'Log'} icon="checkmark-circle" primary onPress={() => setLogging(true)} />
+          <Button
+            label={logs.length ? "Log again" : "Log"}
+            icon="checkmark-circle"
+            primary
+            onPress={() => setLogging(true)}
+          />
         </View>
         {b.audio && (
           <View style={{ flex: 1 }}>
             <Button
               label="Listen"
               icon="headset"
-              onPress={() => router.push({ pathname: '/player/[id]', params: { id: b.audio! } })}
+              onPress={() =>
+                router.push({
+                  pathname: "/player/[id]",
+                  params: { id: b.audio! },
+                })
+              }
             />
           </View>
         )}
       </View>
 
       {b.audio && (
-        <Pressable style={s.row} onPress={() => router.push({ pathname: '/book/[id]', params: { id: b.audio! } })}>
+        <Pressable
+          style={s.row}
+          onPress={() =>
+            router.push({ pathname: "/book/[id]", params: { id: b.audio! } })
+          }
+        >
           <Ionicons name="list" size={18} color={c.gold} />
-          <Text style={s.rowText}>Sections, notes ({notes}) and consults ({consults})</Text>
+          <Text style={s.rowText}>
+            Sections, notes ({notes}) and consults ({consults})
+          </Text>
           <Ionicons name="chevron-forward" size={16} color={c.dim} />
         </Pressable>
       )}
@@ -133,14 +252,21 @@ export default function Title() {
             key={l.id}
             style={s.log}
             onLongPress={() =>
-              Alert.alert('Delete this entry?', fmtDate(l.date), [
-                { text: 'Cancel', style: 'cancel' },
-                { text: 'Delete', style: 'destructive', onPress: () => (removeLog(l.id), refresh()) },
+              Alert.alert("Delete this entry?", fmtDate(l.date), [
+                { text: "Cancel", style: "cancel" },
+                {
+                  text: "Delete",
+                  style: "destructive",
+                  onPress: () => (removeLog(l.id), refresh()),
+                },
               ])
             }
           >
             <Text style={s.logDate}>{fmtDate(l.date)}</Text>
             {l.reread && <Ionicons name="repeat" size={14} color={c.dim} />}
+            {l.started && (
+              <Text style={s.dim}>{daysBetween(l.started, l.date)} days</Text>
+            )}
             <View style={{ flex: 1 }} />
             <Stars value={l.rating} size={14} />
           </Pressable>
@@ -152,13 +278,95 @@ export default function Title() {
       <LogSheet
         visible={logging}
         isReread={logs.length > 0}
+        started={b.started}
         onClose={() => setLogging(false)}
-        onSave={(date, rating, reread) => {
-          addLog(b.id, date, rating, reread);
+        onSave={(date, rating, reread, started) => {
+          addLog(b.id, date, rating, reread, started);
           setLogging(false);
           refresh();
         }}
       />
+
+      <Modal
+        visible={editStart}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setEditStart(false)}
+      >
+        <Pressable style={s.dimBg} onPress={() => setEditStart(false)} />
+        <View style={s.sheet}>
+          <Text style={s.h2}>Started reading</Text>
+          <DateStepper
+            value={b.started ?? today()}
+            max={today()}
+            onChange={(d) => set({ started: d })}
+          />
+          <View style={s.quick}>
+            <Chip label="Today" onPress={() => set({ started: today() })} />
+            {b.started && (
+              <Chip
+                label="Clear"
+                onPress={() => (
+                  set({ started: undefined }),
+                  setEditStart(false)
+                )}
+              />
+            )}
+          </View>
+          <Button
+            label="Done"
+            primary
+            onPress={() => (
+              b.started || set({ started: today() }),
+              setEditStart(false)
+            )}
+          />
+        </View>
+      </Modal>
+
+      <Modal
+        visible={shelving}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShelving(false)}
+      >
+        <Pressable style={s.dimBg} onPress={() => setShelving(false)} />
+        <View style={[s.sheet, { maxHeight: "75%" }]}>
+          <Text style={s.h2}>Shelves</Text>
+          <ScrollView contentContainerStyle={{ gap: 2 }}>
+            {(t.shelves ?? []).map((sh) => {
+              const on = sh.books.includes(b.id);
+              return (
+                <Pressable
+                  key={sh.id}
+                  style={s.shelfRow}
+                  onPress={() => (toggleShelf(sh.id, b.id), refresh())}
+                >
+                  <Ionicons
+                    name={on ? "checkbox" : "square-outline"}
+                    size={20}
+                    color={on ? c.gold : c.dim}
+                  />
+                  <Text style={s.rowText}>{sh.name}</Text>
+                  <Text style={s.dim}>{sh.books.length}</Text>
+                </Pressable>
+              );
+            })}
+          </ScrollView>
+          <Button
+            label="New shelf"
+            icon="add"
+            onPress={() =>
+              Alert.prompt("New shelf", undefined, (name) => {
+                if (!name?.trim()) return;
+                toggleShelf(addShelf(name).id, b.id);
+                refresh();
+              })
+            }
+          />
+          <Button label="Done" primary onPress={() => setShelving(false)} />
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
@@ -166,21 +374,40 @@ export default function Title() {
 function LogSheet({
   visible,
   isReread,
+  started: initialStart,
   onClose,
   onSave,
 }: {
   visible: boolean;
   isReread: boolean;
+  started?: string;
   onClose: () => void;
-  onSave: (date: string, rating: number | undefined, reread: boolean) => void;
+  onSave: (
+    date: string,
+    rating: number | undefined,
+    reread: boolean,
+    started?: string,
+  ) => void;
 }) {
   const [offset, setOffset] = useState(0);
+  const [started, setStarted] = useState<string | undefined>(initialStart);
   const [rating, setRating] = useState<number | undefined>();
   const [reread, setReread] = useState(isReread);
   const date = today(offset);
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose} onShow={() => (setOffset(0), setRating(undefined), setReread(isReread))}>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="slide"
+      onRequestClose={onClose}
+      onShow={() => (
+        setOffset(0),
+        setRating(undefined),
+        setReread(isReread),
+        setStarted(initialStart)
+      )}
+    >
       <Pressable style={s.dimBg} onPress={onClose} />
       <View style={s.sheet}>
         <Text style={s.h2}>Log</Text>
@@ -189,27 +416,80 @@ function LogSheet({
           <Pressable onPress={() => setOffset(offset - 1)} hitSlop={10}>
             <Ionicons name="chevron-back" size={22} color={c.gold} />
           </Pressable>
-          <Text style={s.date}>{offset === 0 ? 'Today' : offset === -1 ? 'Yesterday' : fmtDate(date)}</Text>
-          <Pressable onPress={() => offset < 0 && setOffset(offset + 1)} hitSlop={10}>
-            <Ionicons name="chevron-forward" size={22} color={offset < 0 ? c.gold : c.line} />
+          <Text style={s.date}>
+            {offset === 0
+              ? "Today"
+              : offset === -1
+                ? "Yesterday"
+                : fmtDate(date)}
+          </Text>
+          <Pressable
+            onPress={() => offset < 0 && setOffset(offset + 1)}
+            hitSlop={10}
+          >
+            <Ionicons
+              name="chevron-forward"
+              size={22}
+              color={offset < 0 ? c.gold : c.line}
+            />
           </Pressable>
         </View>
         <View style={s.quick}>
           <Chip label="Today" on={offset === 0} onPress={() => setOffset(0)} />
-          <Chip label="Yesterday" on={offset === -1} onPress={() => setOffset(-1)} />
+          <Chip
+            label="Yesterday"
+            on={offset === -1}
+            onPress={() => setOffset(-1)}
+          />
           <Chip label="−7 days" onPress={() => setOffset(offset - 7)} />
           <Chip label="−30 days" onPress={() => setOffset(offset - 30)} />
         </View>
+        <View style={s.switchRow}>
+          <Text style={s.label}>Started on</Text>
+          <View style={{ flex: 1 }} />
+          <Switch
+            value={!!started}
+            onValueChange={(on) =>
+              setStarted(on ? (initialStart ?? date) : undefined)
+            }
+            trackColor={{ true: c.gold }}
+          />
+        </View>
+        {started && (
+          <>
+            <DateStepper value={started} max={date} onChange={setStarted} />
+            <Text style={[s.dim, { textAlign: "center" }]}>
+              {daysBetween(started, date)} days
+            </Text>
+          </>
+        )}
         <Text style={s.label}>Rating</Text>
-        <View style={{ alignItems: 'center', paddingVertical: 6 }}>
+        <View style={{ alignItems: "center", paddingVertical: 6 }}>
           <Stars value={rating} size={34} onChange={setRating} />
-          <Text style={[s.dim, { marginTop: 6 }]}>{rating ? `${rating} / 5` : 'Tap left or right half of a star'}</Text>
+          <Text style={[s.dim, { marginTop: 6 }]}>
+            {rating ? `${rating} / 5` : "Tap left or right half of a star"}
+          </Text>
         </View>
         <View style={s.switchRow}>
           <Text style={s.rowText}>I’ve read this before</Text>
-          <Switch value={reread} onValueChange={setReread} trackColor={{ true: c.gold }} />
+          <Switch
+            value={reread}
+            onValueChange={setReread}
+            trackColor={{ true: c.gold }}
+          />
         </View>
-        <Button label="Save" primary onPress={() => onSave(date, rating, reread)} />
+        <Button
+          label="Save"
+          primary
+          onPress={() =>
+            onSave(
+              date,
+              rating,
+              reread,
+              started && started <= date ? started : undefined,
+            )
+          }
+        />
       </View>
     </Modal>
   );
@@ -217,22 +497,67 @@ function LogSheet({
 
 const s = StyleSheet.create({
   wrap: { flex: 1, backgroundColor: c.bg, paddingHorizontal: 16 },
-  head: { flexDirection: 'row', gap: 16, marginTop: 8 },
-  title: { color: c.text, fontSize: 22, fontWeight: '700' },
+  head: { flexDirection: "row", gap: 16, marginTop: 8 },
+  title: { color: c.text, fontSize: 22, fontWeight: "700" },
   author: { color: c.gold, fontSize: 15 },
   dim: { color: c.dim },
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 18 },
-  actions: { flexDirection: 'row', gap: 10, marginTop: 16 },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: c.panel, borderRadius: 12, padding: 14, marginTop: 12 },
+  chips: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 18 },
+  actions: { flexDirection: "row", gap: 10, marginTop: 16 },
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    backgroundColor: c.panel,
+    borderRadius: 12,
+    padding: 14,
+    marginTop: 12,
+  },
   rowText: { color: c.text, flex: 1, fontSize: 15 },
-  h2: { color: c.text, fontSize: 19, fontWeight: '700', marginTop: 24, marginBottom: 10 },
-  log: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 10, borderBottomWidth: StyleSheet.hairlineWidth, borderColor: c.line },
+  h2: {
+    color: c.text,
+    fontSize: 19,
+    fontWeight: "700",
+    marginTop: 24,
+    marginBottom: 10,
+  },
+  log: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingVertical: 10,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderColor: c.line,
+  },
   logDate: { color: c.text, fontSize: 15 },
-  dimBg: { flex: 1, backgroundColor: '#000a' },
-  sheet: { backgroundColor: c.panel, padding: 16, paddingBottom: 36, borderTopLeftRadius: 18, borderTopRightRadius: 18, gap: 10 },
-  label: { color: c.dim, fontSize: 13, textTransform: 'uppercase', letterSpacing: 1, marginTop: 6 },
-  dateRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 8 },
-  date: { color: c.text, fontSize: 18, fontWeight: '600' },
-  quick: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  switchRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 6 },
+  dimBg: { flex: 1, backgroundColor: "#000a" },
+  sheet: {
+    backgroundColor: c.panel,
+    padding: 16,
+    paddingBottom: 36,
+    borderTopLeftRadius: 18,
+    borderTopRightRadius: 18,
+    gap: 10,
+  },
+  label: {
+    color: c.dim,
+    fontSize: 13,
+    textTransform: "uppercase",
+    letterSpacing: 1,
+    marginTop: 6,
+  },
+  dateRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 8,
+  },
+  date: { color: c.text, fontSize: 18, fontWeight: "600" },
+  quick: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  switchRow: { flexDirection: "row", alignItems: "center", paddingVertical: 6 },
+  shelfRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    paddingVertical: 10,
+  },
 });

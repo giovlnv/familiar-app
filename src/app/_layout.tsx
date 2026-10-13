@@ -52,12 +52,10 @@ export default function RootLayout() {
               name="(tabs)"
               options={{ headerShown: false, title: "Back" }}
             />
-            <Stack.Screen
-              name="settings"
-              options={{ title: "Backup & settings" }}
-            />
+            <Stack.Screen name="settings" options={{ title: "Settings" }} />
             <Stack.Screen name="book/[id]" options={{ title: "" }} />
             <Stack.Screen name="title/[id]" options={{ title: "" }} />
+            <Stack.Screen name="review/[year]" options={{ title: "" }} />
             <Stack.Screen
               name="find"
               options={{ title: "Find on Open Library", presentation: "modal" }}

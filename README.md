@@ -17,6 +17,8 @@ Built for one person's study. Books and audio are **never** stored in this repos
 | **Ask Claude** | “Ask” or long-press a paragraph → your question plus the passage, section, time and your notes open in the Claude app as a numbered consult (#C1, #C2…). Copy Claude’s reply, then **Paste answer** in the consults list. Waiting/answered filters, follow-ups, jump to passage, export as Markdown |
 | **Playback** | Speed menu 0.5x–2.0x plus custom, ±15/30 s skips, previous/next section, progress saved automatically |
 
+| **Reading tracker** | Every book, not only audiobooks: statuses, half-star ratings, rereads, start/finish dates, diary, custom shelves, top 4 favorites, stats and a yearly review. Import your Goodreads or StoryGraph history in Settings |
+
 Planned features are in [ROADMAP.md](ROADMAP.md).
 
 ## How it fits together
@@ -74,7 +76,9 @@ src/app/_layout.tsx        navigation (Expo Router stack)
 src/app/(tabs)/            Home, Library, Search, Diary, Profile tabs
 src/app/title/[id].tsx     Tracked book: status, rating, log, history
 src/app/find.tsx           Match a book to Open Library
-src/tracker.ts             books, statuses, diary logs, Open Library search
+src/tracker.ts             books, statuses, diary logs, shelves, favorites, Open Library search
+src/importer.ts            Goodreads / StoryGraph / generic CSV import
+src/app/review/[year].tsx  Year in review
 src/components/ui.tsx      Stars, Cover, Chip, Button
 src/app/book/[id].tsx      Book page: sections, summaries, progress
 src/app/player/[id].tsx    Player screen

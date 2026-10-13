@@ -42,6 +42,8 @@ Installed with **[Sideloadly](https://sideloadly.io)** on Windows (SideStore/ilo
 2. Sideloadly → drag in the IPA → Apple ID → **Start** (iPhone on USB the first time).
 3. Sideloadly re-signs every few days (PC on, same Wi-Fi). Books and notes are kept across re-installs.
 
+**Over-the-air updates:** every push to `main` also publishes the JavaScript bundle with EAS Update (channel `production`, runtime `1.0.0`). The app downloads it in the background and applies it the next time it goes to the background — no reinstall. Only native changes (new native modules, app.json native config) need a new `.ipa`; bump `version` in app.json when that happens.
+
 > EAS Build isn't used: installing on a real iPhone through EAS requires a paid Apple Developer account. The GitHub workflow plus Sideloadly keeps everything free.
 
 ## Adding a book

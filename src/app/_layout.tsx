@@ -1,13 +1,12 @@
 import { useEffect } from "react";
-import { AppState } from "react-native";
-import { View } from "react-native";
+import { Appearance, AppState, View } from "react-native";
 import { Stack } from "expo-router";
 import * as Updates from "expo-updates";
 import { pushToGithub } from "../sync";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { PlaybackProvider } from "../playback";
-import { c } from "../theme";
+import { c, mode, scheme } from "../theme";
 
 export default function RootLayout() {
   useEffect(() => {
@@ -21,7 +20,11 @@ export default function RootLayout() {
     };
     fetchUpdate();
     const sub = AppState.addEventListener("change", (st) => {
-      if (st === "active") fetchUpdate();
+      if (st === "active") {
+        fetchUpdate();
+        const now = Appearance.getColorScheme() === "light" ? "light" : "dark";
+        if (mode === "system" && now !== scheme) Updates.reloadAsync().catch(() => {});
+      }
       if (st === "background") {
         pushToGithub().finally(
           () => pending && Updates.reloadAsync().catch(() => {}),
@@ -34,7 +37,7 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <PlaybackProvider>
         <View style={{ flex: 1, backgroundColor: c.bg }}>
-          <StatusBar style="light" />
+          <StatusBar style={scheme === "dark" ? "light" : "dark"} />
           <Stack
             screenOptions={{
               headerStyle: { backgroundColor: c.bg },

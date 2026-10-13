@@ -22,7 +22,7 @@ import {
 } from "../../../sync";
 import * as Updates from "expo-updates";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { c, PALETTES, paletteId, setPalette } from "../../../theme";
+import { c, Mode, mode, PALETTES, paletteId, scheme, setMode, setPalette } from "../../../theme";
 import { fetchAllGenres } from "../../../genres";
 import { getClaudeLink, setClaudeLink } from "../../../components/Consults";
 import { defaultDeck, deleteDeck, downloadRws, importDeckFromFiles, importDeckFromUrl, listDecks, setDefaultDeck } from "../../../decks";
@@ -93,8 +93,28 @@ export default function Settings() {
   return (
     <ScrollView style={s.wrap} contentContainerStyle={{ paddingBottom: 60 + pad }}>
       <Text style={s.h2}>Colors</Text>
+      <View style={s.modes}>
+        {([
+          ["dark", "Dark", "moon-outline"],
+          ["light", "Light", "sunny-outline"],
+          ["system", "Phone setting", "phone-portrait-outline"],
+        ] as const).map(([m, label, icon]) => (
+          <Pressable
+            key={m}
+            style={[s.mode, mode === m && s.modeOn]}
+            onPress={() => {
+              if (m === mode) return;
+              setMode(m as Mode);
+              Updates.reloadAsync().catch(() => Alert.alert("Saved", "Close and reopen the app to see the change."));
+            }}
+          >
+            <Ionicons name={icon} size={15} color={mode === m ? c.bg : c.dim} />
+            <Text style={[s.modeText, mode === m && { color: c.bg }]}>{label}</Text>
+          </Pressable>
+        ))}
+      </View>
       <View style={[s.card, { gap: 2 }]}>
-        {PALETTES.map((p) => (
+        {PALETTES.map((p) => ({ ...p, c: scheme === "light" ? p.light : p.c })).map((p) => (
           <Pressable
             key={p.id}
             style={s.palette}
@@ -326,6 +346,10 @@ const s = StyleSheet.create({
     fontSize: 15,
   },
   row: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  modes: { flexDirection: "row", backgroundColor: c.panel, borderRadius: 10, padding: 3, marginBottom: 10 },
+  mode: { flex: 1, flexDirection: "row", gap: 5, alignItems: "center", justifyContent: "center", paddingVertical: 8, borderRadius: 8 },
+  modeOn: { backgroundColor: c.gold },
+  modeText: { color: c.dim, fontWeight: "600", fontSize: 13 },
   palette: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 8 },
   swatch: { flexDirection: "row", gap: 4, padding: 6, borderRadius: 8, borderWidth: 1 },
   dot: { width: 12, height: 12, borderRadius: 6 },

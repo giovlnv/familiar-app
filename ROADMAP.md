@@ -13,7 +13,7 @@ Status: ✅ done · 🔨 next · 📋 planned · ❓ decision needed · Last rev
 - ✅ Background playback, lock-screen controls, saved progress, section list with 1–2 line summaries
 - ✅ Profile: photo, name and username at the top; settings behind the cog (top right) — app 1.1.0, needs the new .ipa
 - ✅ Decks (Settings → Decks): Rider-Waite-Smith 1909 (public domain, Wikimedia Commons, hosted in this repo's `deck-rws` release), custom decks from images/.zip in Files or a zip link (cards matched by file name), one default deck used everywhere; card picker with upright/reversed ready for the journal
-- ✅ Seven color palettes in Settings → Colors (app reloads to apply); black-and-gold card + headphones icon (new .ipa)
+- ✅ Seven color palettes, each with dark and light versions; Dark / Light / Phone setting switch in Settings → Colors (app reloads to apply; Phone setting needs the next .ipa); black-and-gold card + headphones icon (new .ipa)
 - ✅ Speed drop-up menu: 1.0x, 1.3x, 1.5x, 2.0x + custom 0.1–2.0 (iOS limit is 2.0x); skip back/forward 15 s
 - ✅ Minimize the player: floating card above the tab bar with the passage being read, on every page; pages leave room for it
 - ✅ Notes tied to time + passage; export as Markdown

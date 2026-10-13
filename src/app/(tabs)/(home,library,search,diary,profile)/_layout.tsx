@@ -1,14 +1,14 @@
-import { Stack } from 'expo-router';
-import { c } from '../../../theme';
+import { Stack } from "expo-router";
+import { c } from "../../../theme";
 
-export const unstable_settings = { home: { anchor: 'index' } };
+export const unstable_settings = { home: { anchor: "index" } };
 
 const TITLES: Record<string, string> = {
-  '(home)': 'Home',
-  '(library)': 'Library',
-  '(search)': 'Search',
-  '(diary)': 'Diary',
-  '(profile)': 'Profile',
+  "(home)": "Home",
+  "(library)": "Library",
+  "(search)": "Search",
+  "(diary)": "Diary",
+  "(profile)": "Profile",
 };
 
 export default function TabStack({ segment }: { segment: string }) {
@@ -23,12 +23,21 @@ export default function TabStack({ segment }: { segment: string }) {
         contentStyle: { backgroundColor: c.bg },
       }}
     >
-      <Stack.Screen name={root === 'home' ? 'index' : root} options={{ title: TITLES[segment] }} />
-      <Stack.Screen name="settings" options={{ title: 'Settings' }} />
-      <Stack.Screen name="book/[id]" options={{ title: '' }} />
-      <Stack.Screen name="title/[id]" options={{ title: '' }} />
-      <Stack.Screen name="review/[year]" options={{ title: '' }} />
-      <Stack.Screen name="find" options={{ title: 'Find on Open Library', presentation: 'modal' }} />
+      <Stack.Screen
+        name={root === "home" ? "index" : root}
+        options={{ title: TITLES[segment] }}
+      />
+      <Stack.Screen name="settings" options={{ title: "Settings" }} />
+      <Stack.Screen name="book/[id]" options={{ title: "" }} />
+      <Stack.Screen name="title/[id]" options={{ title: "" }} />
+      <Stack.Screen name="review/[year]" options={{ title: "" }} />
+      <Stack.Screen name="add" options={{ title: "Add a book" }} />
+      <Stack.Screen name="jobs" options={{ title: "Books in progress" }} />
+      <Stack.Screen name="job/[slug]" options={{ title: "" }} />
+      <Stack.Screen
+        name="find"
+        options={{ title: "Find on Open Library", presentation: "modal" }}
+      />
     </Stack>
   );
 }

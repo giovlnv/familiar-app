@@ -1,0 +1,81 @@
+import { useCallback, useState } from 'react';
+import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { router, Stack, useFocusEffect } from 'expo-router';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { Job, listJobs, STAGE_LABEL } from '../../../jobs';
+import { usePad } from '../../../playback';
+import { c } from '../../../theme';
+
+const ICON: Record<string, keyof typeof Ionicons.glyphMap> = {
+  splitting: 'timer-outline',
+  review: 'list',
+  fix: 'sparkles-outline',
+  explanations: 'sparkles-outline',
+  voices: 'timer-outline',
+  ready: 'cloud-download-outline',
+  imported: 'checkmark-circle',
+  error: 'close',
+};
+
+export default function Jobs() {
+  const pad = usePad();
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState('');
+  const load = useCallback(() => {
+    setBusy(true);
+    listJobs()
+      .then((j) => (setJobs(j), setErr('')))
+      .catch((e) => setErr(String(e.message ?? e)))
+      .finally(() => setBusy(false));
+  }, []);
+  useFocusEffect(load);
+
+  return (
+    <FlatList
+      style={s.wrap}
+      data={jobs}
+      keyExtractor={(j) => j.slug}
+      contentContainerStyle={{ gap: 10, padding: 16, paddingBottom: 40 + pad }}
+      refreshControl={<RefreshControl refreshing={busy} onRefresh={load} tintColor={c.gold} />}
+      ListHeaderComponent={
+        <>
+          <Stack.Screen
+            options={{
+              headerRight: () => (
+                <Pressable hitSlop={10} onPress={() => router.push('/add')}>
+                  <Ionicons name="add" size={26} color={c.gold} />
+                </Pressable>
+              ),
+            }}
+          />
+          {!!err && <Text style={s.err}>{err}</Text>}
+        </>
+      }
+      ListEmptyComponent={busy ? null : <Text style={s.dim}>No books in progress. Tap + to add one.</Text>}
+      renderItem={({ item: j }) => (
+        <Pressable style={s.card} onPress={() => router.push({ pathname: '/job/[slug]', params: { slug: j.slug } })}>
+          <Ionicons name={ICON[j.stage]} size={22} color={j.stage === 'explanations' || j.stage === 'fix' ? c.claude : j.stage === 'error' ? c.claude : c.gold} />
+          <View style={{ flex: 1, gap: 2 }}>
+            <Text style={s.title} numberOfLines={2}>
+              {j.title}
+            </Text>
+            <Text style={[s.dim, j.stage === 'review' && { color: c.gold }]}>
+              {STAGE_LABEL[j.stage]}
+              {j.sections ? ` · ${j.sections.length} sections` : ''}
+            </Text>
+          </View>
+          <Ionicons name="chevron-forward" size={16} color={c.dim} />
+        </Pressable>
+      )}
+    />
+  );
+}
+
+const s = StyleSheet.create({
+  wrap: { flex: 1, backgroundColor: c.bg },
+  card: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: c.panel, borderRadius: 12, padding: 14 },
+  title: { color: c.text, fontSize: 15, fontWeight: '600' },
+  dim: { color: c.dim, fontSize: 13 },
+  err: { color: c.claude, marginBottom: 10 },
+});

@@ -17,7 +17,7 @@ import {
   useLocalSearchParams,
 } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { listBooks, loadConsults, loadNotes } from "../../../../storage";
+import { deleteBook, loadConsults, loadNotes } from "../../../../storage";
 import {
   addLog,
   patchList,
@@ -76,30 +76,6 @@ export default function Title() {
     refresh();
   };
 
-  const linkAudio = () => {
-    const free = listBooks().filter(
-      (a) => !t.books.some((x) => x.audio === a.folder && x.id !== b.id),
-    );
-    if (!free.length)
-      return Alert.alert(
-        "No audiobooks",
-        "Import an audiobook in the Library first.",
-      );
-    Alert.alert("Link audiobook", undefined, [
-      ...free.map((a) => ({
-        text: a.book.title,
-        onPress: () => {
-          const dup = t.books.find(
-            (x) => x.audio === a.folder && x.id !== b.id,
-          );
-          if (dup) removeBook(dup.id);
-          set({ audio: a.folder });
-        },
-      })),
-      { text: "Cancel", style: "cancel" as const },
-    ]);
-  };
-
   return (
     <ScrollView style={s.wrap} contentContainerStyle={{ paddingBottom: 50 + pad }}>
       <Stack.Screen
@@ -145,16 +121,26 @@ export default function Title() {
                     onPress: () =>
                       router.push({ pathname: "/find", params: { id: b.id } }),
                   },
-                  ...(b.audio
-                    ? []
-                    : [{ text: "Link audiobook", onPress: linkAudio }]),
                   {
-                    text: "Remove from library",
+                    text: "Delete audiobook",
                     style: "destructive" as const,
-                    onPress: () => {
-                      removeBook(b.id);
-                      router.back();
-                    },
+                    onPress: () =>
+                      Alert.alert(
+                        "Delete this audiobook?",
+                        "Audio, notes, consults, progress and its diary entries are removed from this iPhone.",
+                        [
+                          { text: "Cancel", style: "cancel" },
+                          {
+                            text: "Delete",
+                            style: "destructive",
+                            onPress: () => {
+                              if (b.audio) deleteBook(b.audio);
+                              removeBook(b.id);
+                              router.back();
+                            },
+                          },
+                        ],
+                      ),
                   },
                   { text: "Cancel", style: "cancel" as const },
                 ])

@@ -78,50 +78,38 @@ const update = (fn: (t: Tracker) => void) => {
   return t;
 };
 
+const prune = (t: Tracker, keep: (b: TBook) => boolean) => {
+  const before = t.books.length;
+  t.books = t.books.filter(keep);
+  if (t.books.length === before) return false;
+  const ids = new Set(t.books.map((b) => b.id));
+  t.logs = t.logs.filter((l) => ids.has(l.bookId));
+  t.favorites = t.favorites?.filter((f) => ids.has(f));
+  for (const sh of t.shelves ?? []) sh.books = sh.books.filter((x) => ids.has(x));
+  for (const l of t.lists ?? []) l.items = l.items.filter((x) => ids.has(x.bookId));
+  return true;
+};
+
 export function syncAudioBooks() {
-  const audio = listBooks();
   const t = load();
-  let changed = false;
-  for (const a of audio) {
+  let changed = prune(t, (b) => !!b.audio);
+  for (const a of listBooks()) {
     if (t.books.some((b) => b.audio === a.folder)) continue;
-    const byTitle = t.books.find(
-      (b) => !b.audio && b.title.toLowerCase() === a.book.title.toLowerCase(),
-    );
-    if (byTitle) byTitle.audio = a.folder;
-    else
-      t.books.push({
-        id: uid(),
-        title: a.book.title,
-        authors: [],
-        status: "reading",
-        audio: a.folder,
-        added: Date.now(),
-      });
+    t.books.push({
+      id: uid(),
+      title: a.book.title,
+      authors: [],
+      status: "reading",
+      audio: a.folder,
+      added: Date.now(),
+    });
     changed = true;
   }
-  const folders = new Set(audio.map((a) => a.folder));
-  for (const b of t.books)
-    if (b.audio && !folders.has(b.audio)) {
-      delete b.audio;
-      changed = true;
-    }
   if (changed) save(t);
   return t;
 }
 
 export const getBook = (id: string) => load().books.find((b) => b.id === id);
-
-export function addBook(
-  b: Omit<TBook, "id" | "added" | "status"> & { status?: Status },
-) {
-  const existing = b.olKey
-    ? load().books.find((x) => x.olKey === b.olKey)
-    : undefined;
-  if (existing) return existing;
-  const book: TBook = { status: "want", ...b, id: uid(), added: Date.now() };
-  update((t) => t.books.push(book));
-  return book;
-}
 
 export const patchBook = (id: string, patch: Partial<TBook>) =>
   update((t) => {
@@ -132,14 +120,7 @@ export const patchBook = (id: string, patch: Partial<TBook>) =>
     Object.assign(b, patch);
   });
 
-export const removeBook = (id: string) =>
-  update((t) => {
-    t.books = t.books.filter((b) => b.id !== id);
-    t.logs = t.logs.filter((l) => l.bookId !== id);
-    t.favorites = t.favorites?.filter((f) => f !== id);
-    for (const sh of t.shelves ?? [])
-      sh.books = sh.books.filter((x) => x !== id);
-  });
+export const removeBook = (id: string) => update((t) => prune(t, (b) => b.id !== id));
 
 export function addLog(
   bookId: string,

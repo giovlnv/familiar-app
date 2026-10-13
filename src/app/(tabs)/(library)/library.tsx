@@ -27,8 +27,8 @@ import { lastBackup } from "../../../sync";
 import { Chip, Cover, Stars } from "../../../components/ui";
 import { c } from "../../../theme";
 
-type Filter = "all" | Status | "audio" | `shelf:${string}`;
-const FILTERS: Filter[] = ["all", "reading", "want", "read", "dnf", "audio"];
+type Filter = "all" | Status | `shelf:${string}`;
+const FILTERS: Filter[] = ["all", "reading", "want", "read", "dnf"];
 
 export default function Library() {
   const pad = usePad();
@@ -110,7 +110,7 @@ export default function Library() {
               key={f}
               on={filter === f}
               onPress={() => setFilter(f)}
-              label={`${f === "all" ? "All" : f === "audio" ? "Audiobooks" : STATUS_LABEL[f as Status]} ${t.books.filter((b) => match(b, f)).length}`}
+              label={`${f === "all" ? "All" : STATUS_LABEL[f as Status]} ${t.books.filter((b) => match(b, f)).length}`}
             />
           ))}
           {(t.shelves ?? []).map((sh) => (
@@ -135,7 +135,7 @@ export default function Library() {
           <Text style={s.empty}>
             {shelf
               ? "This shelf is empty. Add books from their page."
-              : "Nothing here yet. Use Search to add books, import an audiobook, or import your Goodreads/StoryGraph history in Settings."}
+              : "No audiobooks yet. Add a book below to turn it into one."}
           </Text>
         }
         ListFooterComponent={
@@ -174,7 +174,7 @@ export default function Library() {
 }
 
 const match = (b: TBook, f: Filter) =>
-  f === "all" ? true : f === "audio" ? !!b.audio : b.status === f;
+  f === "all" || b.status === f;
 
 const s = StyleSheet.create({
   wrap: { flex: 1, backgroundColor: c.bg, paddingHorizontal: 16 },

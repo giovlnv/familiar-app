@@ -1,12 +1,11 @@
-import { fetchGenres, setGenres } from '../genres';
 import { usePad } from '../playback';
 import { useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
-import { addBook, OLResult, searchOpenLibrary } from '../tracker';
-import { Button, Cover } from './ui';
+import { OLResult, searchOpenLibrary } from '../tracker';
+import { Cover } from './ui';
 import { c } from '../theme';
 
-export default function SearchView({ onPick, manual }: { onPick: (r: OLResult) => void; manual?: (title: string) => void }) {
+export default function SearchView({ onPick }: { onPick: (r: OLResult) => void }) {
   const pad = usePad();
   const [q, setQ] = useState('');
   const [results, setResults] = useState<OLResult[]>([]);
@@ -45,13 +44,6 @@ export default function SearchView({ onPick, manual }: { onPick: (r: OLResult) =
         keyExtractor={(r) => r.olKey}
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{ paddingBottom: 40 + pad }}
-        ListFooterComponent={
-          manual && q.trim() && !busy ? (
-            <View style={{ marginTop: 16 }}>
-              <Button label={`Add “${q.trim()}” manually`} onPress={() => manual(q.trim())} icon="add" />
-            </View>
-          ) : null
-        }
         renderItem={({ item: r }) => (
           <Pressable style={s.row} onPress={() => onPick(r)}>
             <Cover book={{ coverId: r.coverId, title: r.title }} width={48} />
@@ -70,12 +62,6 @@ export default function SearchView({ onPick, manual }: { onPick: (r: OLResult) =
     </View>
   );
 }
-
-export const addFromResult = (r: OLResult) => {
-  const b = addBook({ title: r.title, authors: r.authors, year: r.year, pages: r.pages, coverId: r.coverId, olKey: r.olKey });
-  if (!b.genres?.length) fetchGenres(b).then(({ top }) => top.length && setGenres(b.id, top, false)).catch(() => {});
-  return b;
-};
 
 const s = StyleSheet.create({
   wrap: { flex: 1, backgroundColor: c.bg, paddingHorizontal: 16, paddingTop: 12 },

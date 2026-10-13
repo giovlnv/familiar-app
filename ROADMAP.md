@@ -22,14 +22,14 @@ Status: ✅ done · 🔨 next · 📋 planned · ❓ decision needed · Last rev
 - ✅ Books in progress: split → **you confirm the sections** (or send a fix note) → Claude writes explanations in the TAROT chat → voices on GitHub → download & import in the app (audio branch deleted afterwards; zip kept in Releases)
 - ✅ Manual import of `book.json` + audio files still available
 
-### Reading tracker (Apple Books × StoryGraph × Letterboxd)
+### Audiobook tracker (Apple Books × StoryGraph × Letterboxd)
 - ✅ Bottom tabs; each tab keeps its own history (tap the active tab again to go back to its start); tab bar on every screen
-- ✅ Open Library search, covers (by id or ISBN), manual add
-- ✅ Statuses, half-star ratings, rereads, start/finish dates, pace, diary
+- ✅ Audiobooks only (13 Oct 2026): manual adds, Goodreads/StoryGraph/CSV import and their data removed
+- ✅ Open Library search: apply details/cover to an audiobook, or start an upload with the title filled in
+- ✅ Statuses, half-star ratings, rereads/relistens, start/finish dates, pace, diary
 - ✅ Stats (year / all time): books, pages, hours listened, avg rating, avg days to finish, by-month chart, top authors, genres, most listened, longest read, ratings
 - ✅ Shelves, Top 4 favorites, Year in review, ranked lists with notes (share as image after the next reinstall, text until then)
 - ✅ Genres: top 5 from Goodreads + Amazon + Open Library, editable, bulk fetch
-- ✅ Goodreads / StoryGraph / generic CSV import (merges, no duplicates)
 
 ### Infrastructure
 - ✅ GitHub Actions builds the `.ipa` (installed with Sideloadly); silent over-the-air updates for everything that isn't native
@@ -46,7 +46,7 @@ Status: ✅ done · 🔨 next · 📋 planned · ❓ decision needed · Last rev
 
 ## Next 📋
 
-4. **Reading journal (tarot readings)**
+4. **Reading journal (tarot readings)** — designed directly in the app (no Figma step first)
    - Date and time, the question
    - For me or someone else: name, date of birth and short background (all optional), reusable people
    - Area: love/relationships, family, money, job, personal, spiritual, + custom
@@ -57,10 +57,10 @@ Status: ✅ done · 🔨 next · 📋 planned · ❓ decision needed · Last rev
    - Later: stats (most drawn cards, areas, people), search
 5. **Moods** picked when logging a book; mood stats
 6. **Sleep timer**: 5–60 min, end of section, **end of the explanation**
-7. ❓ Notification when a book finishes generating (needs a reinstall)
 
 ## Later 📋
 
+- Notification when a book finishes generating (needs a reinstall)
 - Search across a book's text and notes
 - Bookmarks without text; highlight colors for notes
 - Home-screen widget / Siri shortcut "continue my book"

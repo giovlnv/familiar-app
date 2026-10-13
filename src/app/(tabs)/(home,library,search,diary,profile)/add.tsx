@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import * as DocumentPicker from 'expo-document-picker';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { uploadBook } from '../../../jobs';
@@ -11,7 +11,8 @@ import { c } from '../../../theme';
 export default function AddBook() {
   const pad = usePad();
   const [file, setFile] = useState<{ uri: string; name: string; size?: number } | null>(null);
-  const [title, setTitle] = useState('');
+  const params = useLocalSearchParams<{ title?: string }>();
+  const [title, setTitle] = useState(params.title ?? '');
   const [instructions, setInstructions] = useState('');
   const [lang, setLang] = useState('en');
   const [busy, setBusy] = useState(false);

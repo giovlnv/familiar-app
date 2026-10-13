@@ -21,7 +21,6 @@ import {
   SyncState,
 } from "../../../sync";
 import { c } from "../../../theme";
-import { pickAndImport } from "../../../importer";
 import { fetchAllGenres } from "../../../genres";
 
 const when = (t?: number) => (t ? new Date(t).toLocaleString() : "never");
@@ -66,22 +65,6 @@ export default function Settings() {
       genreRun.current,
     );
     if (!n) setGenreMsg("Done · every book already has genres");
-  };
-
-  const importCsv = async () => {
-    setBusy(true);
-    try {
-      const r = await pickAndImport();
-      if (r)
-        Alert.alert(
-          "Import finished",
-          `${r.books} new books, ${r.updated} updated, ${r.logs} diary entries, ${r.shelves} new shelves${r.skipped ? `, ${r.skipped} rows skipped` : ""}.`,
-        );
-    } catch (e) {
-      Alert.alert("Import failed", String((e as Error).message ?? e));
-    } finally {
-      setBusy(false);
-    }
   };
 
   return (
@@ -169,18 +152,6 @@ export default function Settings() {
         </View>
       </View>
 
-      <Text style={s.h2}>Import reading history</Text>
-      <Text style={s.p}>
-        Goodreads (My Books → Import and export → Export library), StoryGraph
-        (Manage account → Export) or any CSV with a Title column. Books,
-        statuses, ratings, read dates, page counts and shelves are added;
-        running it again won’t create duplicates.
-      </Text>
-      <View style={s.card}>
-        <View style={s.row}>
-          <Btn label="Choose CSV file" primary onPress={importCsv} />
-        </View>
-      </View>
       {busy && <Text style={s.meta}>Working…</Text>}
     </ScrollView>
   );

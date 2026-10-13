@@ -20,6 +20,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { listBooks, loadConsults, loadNotes } from "../../../../storage";
 import {
   addLog,
+  patchList,
   addShelf,
   daysBetween,
   latestRating,
@@ -47,6 +48,7 @@ import {
 } from "../../../../components/ui";
 import { c } from "../../../../theme";
 import { GenreSheet } from "../../../../components/GenreSheet";
+import { newList } from "../lists";
 
 const STATUSES: Status[] = ["want", "reading", "read", "dnf"];
 
@@ -107,6 +109,23 @@ export default function Title() {
               hitSlop={10}
               onPress={() =>
                 Alert.alert(b.title, undefined, [
+                  {
+                    text: "Add to a list",
+                    onPress: () => {
+                      const lists = t.lists ?? [];
+                      const add = (id: string) => {
+                        patchList(id, (l) => {
+                          if (!l.items.some((x) => x.bookId === b.id)) l.items.push({ bookId: b.id });
+                        });
+                        refresh();
+                      };
+                      Alert.alert("Add to a list", undefined, [
+                        ...lists.map((l) => ({ text: l.name, onPress: () => add(l.id) })),
+                        { text: "New list…", onPress: () => newList(add) },
+                        { text: "Cancel", style: "cancel" as const },
+                      ]);
+                    },
+                  },
                   {
                     text: fav
                       ? "Remove from top 4 favorites"

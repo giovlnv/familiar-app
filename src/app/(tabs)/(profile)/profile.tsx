@@ -257,6 +257,12 @@ export default function Profile() {
         </Pressable>
       )}
 
+      <Pressable style={s.link} onPress={() => router.push("/lists")}>
+        <Ionicons name="list" size={18} color={c.gold} />
+        <Text style={s.linkText}>Lists ({t.lists?.length ?? 0})</Text>
+        <Ionicons name="chevron-forward" size={16} color={c.dim} />
+      </Pressable>
+
       <Text style={s.h2}>Ratings</Text>
       <Bars
         values={dist}

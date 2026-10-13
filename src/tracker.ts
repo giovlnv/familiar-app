@@ -33,12 +33,15 @@ export type Log = {
 
 export type Shelf = { id: string; name: string; books: string[] };
 
+export type RankedList = { id: string; name: string; items: { bookId: string; note?: string }[]; created: number };
+
 export type Tracker = {
   books: TBook[];
   logs: Log[];
   listened?: Record<string, Record<string, number>>;
   shelves?: Shelf[];
   favorites?: string[];
+  lists?: RankedList[];
 };
 
 export const STATUS_LABEL: Record<Status, string> = {
@@ -271,3 +274,17 @@ export function addListening(folder: string, seconds: number) {
     day[folder] = Math.round((day[folder] ?? 0) + seconds);
   });
 }
+
+export const addList = (name: string) => {
+  const l: RankedList = { id: uid(), name: name.trim(), items: [], created: Date.now() };
+  update((t) => (t.lists ??= []).push(l));
+  return l;
+};
+
+export const patchList = (id: string, fn: (l: RankedList) => void) =>
+  update((t) => {
+    const l = t.lists?.find((x) => x.id === id);
+    if (l) fn(l);
+  });
+
+export const removeList = (id: string) => update((t) => (t.lists = t.lists?.filter((x) => x.id !== id)));

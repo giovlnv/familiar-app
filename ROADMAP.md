@@ -42,9 +42,9 @@ App: "Downloads" shows progress → one tap to import when ready
 ```
 
 - ✅ Private `tarot-library` repo with the pipeline (Python + Kokoro) and a **Generate audiobook** workflow: 6 parallel jobs → release zip with `book.json` + audio
-- 📋 App settings: store a fine-grained GitHub token (access to the private repo only) in the iPhone keychain (`expo-secure-store`)
-- 📋 Upload screen, job status, download-and-import
-- 📋 Per-book instructions at upload time (e.g. "map each archetype to a tarot card with pop-culture examples")
+- ✅ GitHub key stored in the iPhone keychain (`expo-secure-store`)
+- ✅ Add a book from the app: EPUB/PDF upload (two-column PDFs supported), per-book instructions, language
+- ✅ Books in progress: split → you confirm the sections (or send a fix note) → Claude writes explanations in the TAROT chat → voices on GitHub → download & import in the app
 - ✅ **How Claude takes part (decided):** explanations and summaries are written in a Claude chat (TAROT project) when a new book arrives; the workflow does everything else.
 - ❓ **Private repo limits:** 2,000 free Actions minutes/month on Linux. One book ≈ 2–4 h of speech generation, so roughly 6–10 books/month. Fine for occasional use.
 
@@ -69,7 +69,7 @@ Claude app: answer
 - ✅ ✦ marker on paragraphs and in the section list wherever a consult exists
 - ✅ Follow-up question on an existing consult (keeps the same #ID thread)
 - ✅ Export consults (Markdown) to add to the TAROT project's knowledge
-- 📋 Option to convert an answer into a regular note, or keep it as a consult
+- ✅ Save an answer as a regular note (keep the consult too, or move it)
 
 ## Phase 4.5 — Explore without a book, account & backup 🔨
 
@@ -100,8 +100,21 @@ Decided: track every book (not only audiobooks), details and covers from Open Li
 - ✅ Top 4 favorites on Profile
 - ✅ Year in review (books, pages, hours, highest rated, busiest month, top author, longest/shortest/fastest, every cover in order)
 - ✅ Import from Goodreads, StoryGraph or any CSV with a Title column (statuses, ratings, read dates and ranges, pages, ISBN covers, shelves/tags); re-importing merges instead of duplicating
-- 📋 Ordered lists (ranked, with notes per position)
-- 📋 Genres/moods from Open Library subjects
+- ✅ Ranked lists with a note per position; share as an image (after the next reinstall) or text
+- ✅ Genres: top 5 merged from Goodreads, Amazon and Open Library, editable; bulk fetch in Settings; genre stats
+- 📋 Moods (picked when logging)
+
+## Phase 7 — Reading journal (tarot readings) 📋
+
+Track every tarot reading:
+- Date and time, the question
+- For myself or for someone else — if someone else: name, date of birth and a short background (all optional), reusable across readings
+- Area: relationship/love, family, money, job, personal, spiritual… plus custom areas
+- Layout/spread (one card, three cards, Celtic Cross… plus custom layouts with named positions)
+- Cards drawn, per position (upright/reversed), linked to the card's section in the audiobooks
+- My interpretation, a bullet list of major points, and unanswered questions
+- Ask Claude about the open questions (same consult flow as the audiobooks) and save the answers into the reading
+- Later: stats (most drawn cards, areas, people), search
 
 ## Phase 5 — Polish 📋
 

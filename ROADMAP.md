@@ -11,10 +11,11 @@ Status: ✅ done · 🔨 next · 📋 planned · ❓ decision needed · Last rev
 ### Listening & notes
 - ✅ Word-for-word reading (US voice) + spoken explanation per section (UK voice), follow-along text, tap to seek
 - ✅ Background playback, lock-screen controls, saved progress, section list with 1–2 line summaries
-- ✅ Speed drop-up menu 0.5x–2.0x + custom (iOS limit is 2.0x)
+- ✅ Speed drop-up menu: 1.0x, 1.3x, 1.5x, 2.0x + custom 0.1–2.0 (iOS limit is 2.0x); skip back/forward 15 s
 - ✅ Minimize the player: floating card above the tab bar with the passage being read, on every page; pages leave room for it
 - ✅ Notes tied to time + passage; export as Markdown
 - ✅ Ask Claude: numbered consults (#C1…), paste answers, follow-ups, export; save an answer as a note (keep or move)
+- ✅ "Send to Claude" copies the message and opens your saved Claude chat (link in Settings)
 
 ### Adding books
 - ✅ Private `tarot-library` repo with the pipeline (Kokoro TTS, 6 parallel GitHub jobs, release zip)
@@ -40,13 +41,13 @@ Status: ✅ done · 🔨 next · 📋 planned · ❓ decision needed · Last rev
 
 ## Now 🔨
 
-1. ❓ **Figma comments**: add the `FIGMA_TOKEN` secret so the *Read Figma comments* workflow can read them; then build what they ask for
+1. ✅ **Figma comments** (13 Oct): read through the API (`FIGMA_TOKEN`); the workflow also saves node context + screenshots, so it no longer uses the Figma MCP call limit
 2. 🔨 **Verify on the phone**: reinstall (image sharing), download the "Pipeline test" book, try genres fetch and lists
 3. 🔨 **First real book through the upload flow** (fix whatever the real split shows)
 
 ## Next 📋
 
-4. **Reading journal (tarot readings)** — designed directly in the app (no Figma step first)
+4. **Reading journal (tarot readings)** — its own tab, designed directly in the app (no Figma step first)
    - Date and time, the question
    - For me or someone else: name, date of birth and short background (all optional), reusable people
    - Area: love/relationships, family, money, job, personal, spiritual, + custom
@@ -64,7 +65,8 @@ Status: ✅ done · 🔨 next · 📋 planned · ❓ decision needed · Last rev
 - Search across a book's text and notes
 - Bookmarks without text; highlight colors for notes
 - Home-screen widget / Siri shortcut "continue my book"
-- App icon and splash screen
+- App icon and splash screen (needs a reinstall)
+- CarPlay: a dedicated CarPlay app needs an Apple entitlement a sideloaded app can’t get; audio already plays through CarPlay’s Now Playing
 - Portuguese books (Brazilian voice)
 - Moods/genres cleanup tools; shareable Year in review image
 

@@ -22,6 +22,7 @@ import {
 } from "../../../sync";
 import { c } from "../../../theme";
 import { fetchAllGenres } from "../../../genres";
+import { getClaudeLink, setClaudeLink } from "../../../components/Consults";
 
 const when = (t?: number) => (t ? new Date(t).toLocaleString() : "never");
 
@@ -31,6 +32,7 @@ export default function Settings() {
   const [hasToken, setHasToken] = useState(false);
   const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState(false);
+  const [claudeLink, setLinkDraft] = useState(getClaudeLink);
 
   const refresh = useCallback(() => {
     setStateView(getState());
@@ -138,6 +140,25 @@ export default function Settings() {
             label="Restore from file"
             onPress={() => confirm(() => run(restoreFromFile, "Restored"))}
           />
+        </View>
+      </View>
+      <Text style={s.h2}>Claude chat</Text>
+      <Text style={s.p}>
+        “Send to Claude” copies the message and opens this chat. Paste it there.
+      </Text>
+      <View style={s.card}>
+        <TextInput
+          style={s.input}
+          placeholder="https://claude.ai/chat/…"
+          placeholderTextColor={c.dim}
+          autoCapitalize="none"
+          autoCorrect={false}
+          keyboardType="url"
+          value={claudeLink}
+          onChangeText={setLinkDraft}
+        />
+        <View style={s.row}>
+          <Btn label="Save link" primary onPress={() => (setClaudeLink(claudeLink), Alert.alert("Saved"))} />
         </View>
       </View>
       <Text style={s.h2}>Genres</Text>

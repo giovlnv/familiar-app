@@ -3,6 +3,7 @@ import {
   Alert,
   FlatList,
   KeyboardAvoidingView,
+  Linking,
   Modal,
   Platform,
   Pressable,
@@ -14,6 +15,7 @@ import {
   View,
 } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
+import { File, Paths } from 'expo-file-system';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Book, Consult, Note } from '../types';
@@ -226,7 +228,42 @@ export function ConsultList({
   );
 }
 
-export const shareToClaude = (message: string) => Share.share({ message });
+const linkFile = () => new File(Paths.document, 'claude-chat-link.txt');
+export const getClaudeLink = () => {
+  try {
+    return linkFile().exists ? linkFile().textSync().trim() : '';
+  } catch {
+    return '';
+  }
+};
+export const setClaudeLink = (url: string) => {
+  const f = linkFile();
+  if (!f.exists) f.create();
+  f.write(url.trim());
+};
+
+const askForLink = () =>
+  new Promise<string>((done) =>
+    Alert.prompt(
+      'Claude chat link',
+      'Paste the link of the chat where consults go (claude.ai/chat/…). You can change it in Settings.',
+      (v) => {
+        const url = v?.trim() ?? '';
+        if (/^https?:\/\//.test(url)) setClaudeLink(url);
+        done(getClaudeLink());
+      },
+      'plain-text',
+      '',
+      'url',
+    ),
+  );
+
+export async function shareToClaude(message: string) {
+  await Clipboard.setStringAsync(message);
+  const url = getClaudeLink() || (await askForLink());
+  if (!url) return Share.share({ message });
+  await Linking.openURL(url);
+}
 
 const Btn = ({ label, onPress, primary }: { label: string; onPress: () => void; primary?: boolean }) => (
   <Pressable style={[s.btn, primary && s.btnPrimary]} onPress={onPress} hitSlop={6}>

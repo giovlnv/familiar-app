@@ -41,7 +41,7 @@ const fmt = (t: number) => {
   const s = String(Math.floor(t % 60)).padStart(2, "0");
   return h ? `${h}:${String(m).padStart(2, "0")}:${s}` : `${m}:${s}`;
 };
-const RATES = [0.5, 0.8, 1, 1.3, 1.5, 1.8, 2];
+const RATES = [1, 1.3, 1.5, 2];
 const fmtRate = (r: number) =>
   `${r.toFixed(r * 10 === Math.round(r * 10) ? 1 : 2)}x`;
 
@@ -340,7 +340,7 @@ export default function Player({
               style={!status.playing && { marginLeft: 4 }}
             />
           </Pressable>
-          <Btn icon="arrow-redo" label="30" onPress={() => skip(30)} />
+          <Btn icon="arrow-redo" label="15" onPress={() => skip(15)} />
           <Btn
             icon="play-skip-forward"
             onPress={() => sec < book.sections.length - 1 && goTo(sec + 1, 0)}

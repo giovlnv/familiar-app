@@ -2,11 +2,11 @@ import { useCallback, useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { getBook as getAudio, installSampleOnce, loadProgress } from '../../storage';
-import { syncAudioBooks, Tracker } from '../../tracker';
-import { Cover, fmtDate, Stars } from '../../components/ui';
-import { fmtTime } from '../../format';
-import { c } from '../../theme';
+import { getBook as getAudio, installSampleOnce, loadProgress } from '../../../storage';
+import { syncAudioBooks, Tracker } from '../../../tracker';
+import { Cover, fmtDate, Stars } from '../../../components/ui';
+import { fmtTime } from '../../../format';
+import { c } from '../../../theme';
 
 export default function Home() {
   const [t, setT] = useState<Tracker>({ books: [], logs: [] });

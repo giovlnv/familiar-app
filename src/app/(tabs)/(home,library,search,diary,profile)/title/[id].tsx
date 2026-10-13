@@ -16,7 +16,7 @@ import {
   useLocalSearchParams,
 } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { listBooks, loadConsults, loadNotes } from "../../storage";
+import { listBooks, loadConsults, loadNotes } from "../../../../storage";
 import {
   addLog,
   addShelf,
@@ -35,7 +35,7 @@ import {
   toggleFavorite,
   toggleShelf,
   Tracker,
-} from "../../tracker";
+} from "../../../../tracker";
 import {
   Button,
   Chip,
@@ -43,8 +43,8 @@ import {
   DateStepper,
   fmtDate,
   Stars,
-} from "../../components/ui";
-import { c } from "../../theme";
+} from "../../../../components/ui";
+import { c } from "../../../../theme";
 
 const STATUSES: Status[] = ["want", "reading", "read", "dnf"];
 

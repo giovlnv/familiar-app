@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { router, useFocusEffect } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { importBook, installSampleOnce } from "../../storage";
+import { importBook, installSampleOnce } from "../../../storage";
 import {
   latestRating,
   removeShelf,
@@ -21,10 +21,10 @@ import {
   syncAudioBooks,
   TBook,
   Tracker,
-} from "../../tracker";
-import { lastBackup } from "../../sync";
-import { Chip, Cover, Stars } from "../../components/ui";
-import { c } from "../../theme";
+} from "../../../tracker";
+import { lastBackup } from "../../../sync";
+import { Chip, Cover, Stars } from "../../../components/ui";
+import { c } from "../../../theme";
 
 type Filter = "all" | Status | "audio" | `shelf:${string}`;
 const FILTERS: Filter[] = ["all", "reading", "want", "read", "dnf", "audio"];

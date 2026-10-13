@@ -2,10 +2,10 @@ import { useCallback, useMemo, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { router, Stack, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { getBook, loadConsults, loadNotes, loadProgress } from '../../storage';
-import { fmtHours, fmtTime } from '../../format';
-import { Consult, Note, Progress } from '../../types';
-import { c } from '../../theme';
+import { getBook, loadConsults, loadNotes, loadProgress } from '../../../../storage';
+import { fmtHours, fmtTime } from '../../../../format';
+import { Consult, Note, Progress } from '../../../../types';
+import { c } from '../../../../theme';
 
 export default function BookPage() {
   const { id } = useLocalSearchParams<{ id: string }>();

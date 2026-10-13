@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import SearchView from '../components/SearchView';
-import { patchBook } from '../tracker';
+import SearchView from '../../../components/SearchView';
+import { patchBook } from '../../../tracker';
 
 export default function Find() {
   const { id } = useLocalSearchParams<{ id: string }>();

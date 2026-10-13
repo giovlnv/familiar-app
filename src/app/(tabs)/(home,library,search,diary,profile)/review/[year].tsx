@@ -8,9 +8,9 @@ import {
   View,
 } from "react-native";
 import { router, Stack, useLocalSearchParams } from "expo-router";
-import { daysBetween, load, TBook } from "../../tracker";
-import { Cover, Stars } from "../../components/ui";
-import { c } from "../../theme";
+import { daysBetween, load, TBook } from "../../../../tracker";
+import { Cover, Stars } from "../../../../components/ui";
+import { c } from "../../../../theme";
 
 const MONTHS = [
   "January",

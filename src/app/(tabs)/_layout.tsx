@@ -21,6 +21,7 @@ export default function TabsLayout() {
         </>
       )}
       screenOptions={{
+        headerShown: false,
         tabBarActiveTintColor: c.gold,
         tabBarInactiveTintColor: c.dim,
         tabBarStyle: { backgroundColor: c.bg, borderTopColor: c.line },
@@ -30,11 +31,11 @@ export default function TabsLayout() {
         sceneStyle: { backgroundColor: c.bg },
       }}
     >
-      <Tabs.Screen name="index" options={{ title: 'Home', tabBarIcon: icon('home') }} />
-      <Tabs.Screen name="library" options={{ title: 'Library', tabBarIcon: icon('library') }} />
-      <Tabs.Screen name="search" options={{ title: 'Search', tabBarIcon: icon('search') }} />
-      <Tabs.Screen name="diary" options={{ title: 'Diary', tabBarIcon: icon('calendar') }} />
-      <Tabs.Screen name="profile" options={{ title: 'Profile', tabBarIcon: icon('person-circle') }} />
+      <Tabs.Screen name="(home)" options={{ title: 'Home', tabBarIcon: icon('home') }} />
+      <Tabs.Screen name="(library)" options={{ title: 'Library', tabBarIcon: icon('library') }} />
+      <Tabs.Screen name="(search)" options={{ title: 'Search', tabBarIcon: icon('search') }} />
+      <Tabs.Screen name="(diary)" options={{ title: 'Diary', tabBarIcon: icon('calendar') }} />
+      <Tabs.Screen name="(profile)" options={{ title: 'Profile', tabBarIcon: icon('person-circle') }} />
     </Tabs>
   );
 }

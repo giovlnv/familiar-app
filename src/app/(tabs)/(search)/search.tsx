@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
-import SearchView, { addFromResult } from '../../components/SearchView';
-import { addBook } from '../../tracker';
+import SearchView, { addFromResult } from '../../../components/SearchView';
+import { addBook } from '../../../tracker';
 
 const open = (id: string) => router.push({ pathname: '/title/[id]', params: { id } });
 

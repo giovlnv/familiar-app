@@ -18,9 +18,9 @@ import {
   restoreFromFile,
   setToken,
   SyncState,
-} from "../sync";
-import { c } from "../theme";
-import { pickAndImport } from "../importer";
+} from "../../../sync";
+import { c } from "../../../theme";
+import { pickAndImport } from "../../../importer";
 
 const when = (t?: number) => (t ? new Date(t).toLocaleString() : "never");
 

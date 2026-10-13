@@ -2,9 +2,9 @@ import { useCallback, useState } from 'react';
 import { Pressable, SectionList, StyleSheet, Text, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { load, Tracker } from '../../tracker';
-import { Cover, fmtDate, Stars } from '../../components/ui';
-import { c } from '../../theme';
+import { load, Tracker } from '../../../tracker';
+import { Cover, fmtDate, Stars } from '../../../components/ui';
+import { c } from '../../../theme';
 
 export default function Diary() {
   const [t, setT] = useState<Tracker>({ books: [], logs: [] });

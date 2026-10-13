@@ -1,16 +1,12 @@
 import { useEffect } from "react";
 import { AppState } from "react-native";
 import { View } from "react-native";
-import { Stack, useSegments } from "expo-router";
+import { Stack } from "expo-router";
 import * as Updates from "expo-updates";
 import { pushToGithub } from "../sync";
 import { StatusBar } from "expo-status-bar";
-import {
-  SafeAreaProvider,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import { PlaybackProvider } from "../playback";
-import MiniPlayer from "../components/MiniPlayer";
 import { c } from "../theme";
 
 export default function RootLayout() {
@@ -48,35 +44,11 @@ export default function RootLayout() {
               contentStyle: { backgroundColor: c.bg },
             }}
           >
-            <Stack.Screen
-              name="(tabs)"
-              options={{ headerShown: false, title: "Back" }}
-            />
-            <Stack.Screen name="settings" options={{ title: "Settings" }} />
-            <Stack.Screen name="book/[id]" options={{ title: "" }} />
-            <Stack.Screen name="title/[id]" options={{ title: "" }} />
-            <Stack.Screen name="review/[year]" options={{ title: "" }} />
-            <Stack.Screen
-              name="find"
-              options={{ title: "Find on Open Library", presentation: "modal" }}
-            />
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="player/[id]" options={{ headerShown: false }} />
           </Stack>
-          <StackMini />
         </View>
       </PlaybackProvider>
     </SafeAreaProvider>
-  );
-}
-
-function StackMini() {
-  const seg = useSegments();
-  const { bottom } = useSafeAreaInsets();
-  if (seg[0] === "(tabs)" || seg[0] === "player" || seg[0] === "find")
-    return null;
-  return (
-    <View style={{ paddingBottom: bottom, backgroundColor: c.panel }}>
-      <MiniPlayer />
-    </View>
   );
 }

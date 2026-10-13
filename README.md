@@ -72,7 +72,8 @@ npx expo lint       # lint
 ### Project layout
 
 ```
-src/app/_layout.tsx        navigation (Expo Router stack)
+src/app/_layout.tsx        root stack (tabs + full-screen player)
+src/app/(tabs)/(home,library,search,diary,profile)/  shared screens; each tab keeps its own history (tap a tab twice to go back to its start)
 src/app/(tabs)/            Home, Library, Search, Diary, Profile tabs
 src/app/title/[id].tsx     Tracked book: status, rating, log, history
 src/app/find.tsx           Match a book to Open Library

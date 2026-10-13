@@ -9,9 +9,9 @@ import {
 } from "react-native";
 import { router, useFocusEffect } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { daysBetween, load, Tracker } from "../../tracker";
-import { Chip, Cover } from "../../components/ui";
-import { c } from "../../theme";
+import { daysBetween, load, Tracker } from "../../../tracker";
+import { Chip, Cover } from "../../../components/ui";
+import { c } from "../../../theme";
 
 type Metric = "books" | "pages" | "hours";
 const MONTHS = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];

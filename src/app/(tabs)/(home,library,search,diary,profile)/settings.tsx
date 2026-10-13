@@ -20,7 +20,9 @@ import {
   setToken,
   SyncState,
 } from "../../../sync";
-import { c } from "../../../theme";
+import * as Updates from "expo-updates";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { c, PALETTES, paletteId, setPalette } from "../../../theme";
 import { fetchAllGenres } from "../../../genres";
 import { getClaudeLink, setClaudeLink } from "../../../components/Consults";
 
@@ -71,6 +73,29 @@ export default function Settings() {
 
   return (
     <ScrollView style={s.wrap} contentContainerStyle={{ paddingBottom: 60 + pad }}>
+      <Text style={s.h2}>Colors</Text>
+      <View style={[s.card, { gap: 2 }]}>
+        {PALETTES.map((p) => (
+          <Pressable
+            key={p.id}
+            style={s.palette}
+            onPress={() => {
+              if (p.id === paletteId) return;
+              setPalette(p.id);
+              Updates.reloadAsync().catch(() => Alert.alert("Saved", "Close and reopen the app to see the new colors."));
+            }}
+          >
+            <View style={[s.swatch, { backgroundColor: p.c.bg, borderColor: p.c.line }]}>
+              <View style={[s.dot, { backgroundColor: p.c.gold }]} />
+              <View style={[s.dot, { backgroundColor: p.c.explain }]} />
+              <View style={[s.dot, { backgroundColor: p.c.claude }]} />
+            </View>
+            <Text style={[s.paletteName, p.id === paletteId && { color: c.gold, fontWeight: "700" }]}>{p.name}</Text>
+            {p.id === paletteId && <Ionicons name="checkmark" size={18} color={c.gold} />}
+          </Pressable>
+        ))}
+      </View>
+
       <Text style={s.h2}>Automatic backup · GitHub</Text>
       <Text style={s.p}>
         Notes, Claude consults and progress are saved to your private
@@ -228,6 +253,10 @@ const s = StyleSheet.create({
     fontSize: 15,
   },
   row: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  palette: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 8 },
+  swatch: { flexDirection: "row", gap: 4, padding: 6, borderRadius: 8, borderWidth: 1 },
+  dot: { width: 12, height: 12, borderRadius: 6 },
+  paletteName: { color: c.text, fontSize: 15, flex: 1 },
   btn: {
     backgroundColor: c.raised,
     paddingVertical: 11,

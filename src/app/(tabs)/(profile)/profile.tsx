@@ -272,7 +272,7 @@ export default function Profile() {
 
       <Pressable style={s.link} onPress={() => router.push("/settings")}>
         <Ionicons name="cloud-upload-outline" size={18} color={c.gold} />
-        <Text style={s.linkText}>Backup & settings</Text>
+        <Text style={s.linkText}>Colors, backup & settings</Text>
         <Ionicons name="chevron-forward" size={16} color={c.dim} />
       </Pressable>
     </ScrollView>

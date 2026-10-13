@@ -11,6 +11,7 @@ Status: ✅ done · 🔨 next · 📋 planned · ❓ decision needed · Last rev
 ### Listening & notes
 - ✅ Word-for-word reading (US voice) + spoken explanation per section (UK voice), follow-along text, tap to seek
 - ✅ Background playback, lock-screen controls, saved progress, section list with 1–2 line summaries
+- ✅ Seven color palettes in Settings → Colors (app reloads to apply); black-and-gold card + headphones icon (new .ipa)
 - ✅ Speed drop-up menu: 1.0x, 1.3x, 1.5x, 2.0x + custom 0.1–2.0 (iOS limit is 2.0x); skip back/forward 15 s
 - ✅ Minimize the player: floating card above the tab bar with the passage being read, on every page; pages leave room for it
 - ✅ Notes tied to time + passage; export as Markdown
@@ -65,7 +66,7 @@ Status: ✅ done · 🔨 next · 📋 planned · ❓ decision needed · Last rev
 - Search across a book's text and notes
 - Bookmarks without text; highlight colors for notes
 - Home-screen widget / Siri shortcut "continue my book"
-- App icon and splash screen (needs a reinstall)
+- Splash screen
 - CarPlay: a dedicated CarPlay app needs an Apple entitlement a sideloaded app can’t get; audio already plays through CarPlay’s Now Playing
 - Portuguese books (Brazilian voice)
 - Moods/genres cleanup tools; shareable Year in review image

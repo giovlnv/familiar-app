@@ -1,3 +1,4 @@
+import { usePad } from '../playback';
 import { useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { addBook, OLResult, searchOpenLibrary } from '../tracker';
@@ -5,6 +6,7 @@ import { Button, Cover } from './ui';
 import { c } from '../theme';
 
 export default function SearchView({ onPick, manual }: { onPick: (r: OLResult) => void; manual?: (title: string) => void }) {
+  const pad = usePad();
   const [q, setQ] = useState('');
   const [results, setResults] = useState<OLResult[]>([]);
   const [busy, setBusy] = useState(false);
@@ -41,7 +43,7 @@ export default function SearchView({ onPick, manual }: { onPick: (r: OLResult) =
         data={results}
         keyExtractor={(r) => r.olKey}
         keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{ paddingBottom: 40 }}
+        contentContainerStyle={{ paddingBottom: 40 + pad }}
         ListFooterComponent={
           manual && q.trim() && !busy ? (
             <View style={{ marginTop: 16 }}>

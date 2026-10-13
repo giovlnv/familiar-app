@@ -1,3 +1,4 @@
+import { usePad } from '../../../playback';
 import { useCallback, useState } from 'react';
 import { Pressable, SectionList, StyleSheet, Text, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
@@ -7,6 +8,7 @@ import { Cover, fmtDate, Stars } from '../../../components/ui';
 import { c } from '../../../theme';
 
 export default function Diary() {
+  const pad = usePad();
   const [t, setT] = useState<Tracker>({ books: [], logs: [] });
   useFocusEffect(useCallback(() => setT(load()), []));
 
@@ -26,7 +28,7 @@ export default function Diary() {
       sections={sections}
       keyExtractor={(l) => l.id}
       stickySectionHeadersEnabled={false}
-      contentContainerStyle={{ paddingBottom: 40 }}
+      contentContainerStyle={{ paddingBottom: 40 + pad }}
       ListEmptyComponent={
         <Text style={s.empty}>Your diary is empty. Open a book and tap “Log” when you finish it.</Text>
       }

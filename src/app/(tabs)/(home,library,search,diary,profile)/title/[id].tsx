@@ -1,3 +1,4 @@
+import { usePad } from '../../../../playback';
 import { useCallback, useState } from "react";
 import {
   Alert,
@@ -49,6 +50,7 @@ import { c } from "../../../../theme";
 const STATUSES: Status[] = ["want", "reading", "read", "dnf"];
 
 export default function Title() {
+  const pad = usePad();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [t, setT] = useState<Tracker>(() => load());
   const [logging, setLogging] = useState(false);
@@ -95,7 +97,7 @@ export default function Title() {
   };
 
   return (
-    <ScrollView style={s.wrap} contentContainerStyle={{ paddingBottom: 50 }}>
+    <ScrollView style={s.wrap} contentContainerStyle={{ paddingBottom: 50 + pad }}>
       <Stack.Screen
         options={{
           headerRight: () => (

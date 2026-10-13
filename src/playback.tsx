@@ -16,10 +16,16 @@ type Playback = {
   toggle: () => void;
   setRate: (r: number) => void;
   stop: () => void;
+  miniH: number;
+  setMiniH: (h: number) => void;
 };
 
 const Ctx = createContext<Playback | null>(null);
 export const usePlayback = () => useContext(Ctx)!;
+export const usePad = () => {
+  const { item, miniH } = usePlayback();
+  return item ? miniH : 0;
+};
 
 export function PlaybackProvider({ children }: { children: ReactNode }) {
   const player = useAudioPlayer(null, { updateInterval: 250 });
@@ -27,6 +33,7 @@ export function PlaybackProvider({ children }: { children: ReactNode }) {
   const [item, setItem] = useState<LibraryItem | null>(null);
   const [sec, setSec] = useState(0);
   const [rate, setRateState] = useState(1);
+  const [miniH, setMiniH] = useState(0);
   const done = useRef(new Set<string>());
   const pending = useRef<{ time: number; play: boolean } | null>(null);
   const t = status.currentTime ?? 0;
@@ -127,6 +134,8 @@ export function PlaybackProvider({ children }: { children: ReactNode }) {
       setRateState(r);
       player.setPlaybackRate(r, 'high');
     },
+    miniH,
+    setMiniH,
     stop: () => {
       flushHeard();
       save(sec, t);

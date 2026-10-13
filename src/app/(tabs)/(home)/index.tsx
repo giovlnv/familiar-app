@@ -1,3 +1,4 @@
+import { usePad } from '../../../playback';
 import { useCallback, useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
@@ -9,6 +10,7 @@ import { fmtTime } from '../../../format';
 import { c } from '../../../theme';
 
 export default function Home() {
+  const pad = usePad();
   const [t, setT] = useState<Tracker>({ books: [], logs: [] });
   const refresh = useCallback(() => setT(syncAudioBooks()), []);
   useFocusEffect(refresh);
@@ -33,7 +35,7 @@ export default function Home() {
   const openTitle = (id: string) => router.push({ pathname: '/title/[id]', params: { id } });
 
   return (
-    <ScrollView style={s.wrap} contentContainerStyle={{ paddingBottom: 40 }}>
+    <ScrollView style={s.wrap} contentContainerStyle={{ paddingBottom: 40 + pad }}>
       <View style={s.stat}>
         <Text style={s.statNum}>{readThisYear}</Text>
         <Text style={s.statLabel}>books finished in {year}</Text>

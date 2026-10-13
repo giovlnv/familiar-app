@@ -1,3 +1,4 @@
+import { usePad } from '../../../../playback';
 import { useCallback, useMemo, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { router, Stack, useFocusEffect, useLocalSearchParams } from 'expo-router';
@@ -8,6 +9,7 @@ import { Consult, Note, Progress } from '../../../../types';
 import { c } from '../../../../theme';
 
 export default function BookPage() {
+  const pad = usePad();
   const { id } = useLocalSearchParams<{ id: string }>();
   const item = useMemo(() => getBook(id), [id]);
   const [progress, setProgress] = useState<Progress>({ section: 0, time: 0 });
@@ -37,7 +39,7 @@ export default function BookPage() {
       <FlatList
         data={book.sections}
         keyExtractor={(x) => x.id}
-        contentContainerStyle={{ paddingBottom: 40 }}
+        contentContainerStyle={{ paddingBottom: 40 + pad }}
         ListHeaderComponent={
           <View style={s.head}>
             <Text style={s.title}>{book.title}</Text>

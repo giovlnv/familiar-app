@@ -1,3 +1,4 @@
+import { usePad } from '../../../playback';
 import { useCallback, useEffect, useState } from "react";
 import {
   Alert,
@@ -30,6 +31,7 @@ type Filter = "all" | Status | "audio" | `shelf:${string}`;
 const FILTERS: Filter[] = ["all", "reading", "want", "read", "dnf", "audio"];
 
 export default function Library() {
+  const pad = usePad();
   const [t, setT] = useState<Tracker>({ books: [], logs: [] });
   const [filter, setFilter] = useState<Filter>("all");
   const [stale, setStale] = useState(false);
@@ -128,7 +130,7 @@ export default function Library() {
         numColumns={cols}
         keyExtractor={(b) => b.id}
         columnWrapperStyle={{ gap: 14 }}
-        contentContainerStyle={{ gap: 18, paddingBottom: 30 }}
+        contentContainerStyle={{ gap: 18, paddingBottom: 30 + pad }}
         ListEmptyComponent={
           <Text style={s.empty}>
             {shelf

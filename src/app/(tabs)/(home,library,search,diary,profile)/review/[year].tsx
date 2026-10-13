@@ -1,3 +1,4 @@
+import { usePad } from '../../../../playback';
 import { useMemo } from "react";
 import {
   Pressable,
@@ -28,6 +29,7 @@ const MONTHS = [
 ];
 
 export default function Review() {
+  const pad = usePad();
   const { year } = useLocalSearchParams<{ year: string }>();
   const { width } = useWindowDimensions();
   const t = useMemo(() => load(), []);
@@ -74,7 +76,7 @@ export default function Review() {
   ];
 
   return (
-    <ScrollView style={s.wrap} contentContainerStyle={{ paddingBottom: 50 }}>
+    <ScrollView style={s.wrap} contentContainerStyle={{ paddingBottom: 50 + pad }}>
       <Stack.Screen options={{ title: `${year} in review` }} />
       <View style={s.facts}>
         {facts.map(([k, v]) => (

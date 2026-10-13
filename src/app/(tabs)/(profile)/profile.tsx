@@ -1,3 +1,4 @@
+import { usePad } from '../../../playback';
 import { useCallback, useState } from "react";
 import {
   Pressable,
@@ -17,6 +18,7 @@ type Metric = "books" | "pages" | "hours";
 const MONTHS = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
 
 export default function Profile() {
+  const pad = usePad();
   const [t, setT] = useState<Tracker>({ books: [], logs: [] });
   const [year, setYear] = useState(String(new Date().getFullYear()));
   const [metric, setMetric] = useState<Metric>("books");
@@ -105,7 +107,7 @@ export default function Profile() {
   ] as const;
 
   return (
-    <ScrollView style={s.wrap} contentContainerStyle={{ paddingBottom: 40 }}>
+    <ScrollView style={s.wrap} contentContainerStyle={{ paddingBottom: 40 + pad }}>
       <Text style={[s.h2, { marginTop: 14 }]}>Top 4</Text>
       <View style={s.favs}>
         {[0, 1, 2, 3].map((i) =>

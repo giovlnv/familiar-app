@@ -6,7 +6,7 @@ import { usePlayback } from '../playback';
 import { c } from '../theme';
 
 export default function MiniPlayer() {
-  const { item, sec, t, status, toggle, skip, stop } = usePlayback();
+  const { item, sec, t, status, toggle, skip, stop, setMiniH } = usePlayback();
   const section = item?.book.sections[sec];
   const para = useMemo(() => {
     const ps = section?.paras ?? [];
@@ -18,7 +18,7 @@ export default function MiniPlayer() {
   const explain = para?.kind.startsWith('explain');
   const open = () => router.push({ pathname: '/player/[id]', params: { id: item.folder } });
   return (
-    <View style={s.card}>
+    <View style={s.card} onLayout={(e) => setMiniH(e.nativeEvent.layout.height + 16)}>
       <View style={s.bar}>
         <View style={[s.fill, { width: `${status.duration ? (t / status.duration) * 100 : 0}%` }]} />
       </View>

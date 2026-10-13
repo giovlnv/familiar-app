@@ -1,3 +1,4 @@
+import { usePad } from '../../../playback';
 import { useCallback, useState } from "react";
 import {
   Alert,
@@ -25,6 +26,7 @@ import { pickAndImport } from "../../../importer";
 const when = (t?: number) => (t ? new Date(t).toLocaleString() : "never");
 
 export default function Settings() {
+  const pad = usePad();
   const [state, setStateView] = useState<SyncState>({});
   const [hasToken, setHasToken] = useState(false);
   const [draft, setDraft] = useState("");
@@ -70,7 +72,7 @@ export default function Settings() {
   };
 
   return (
-    <ScrollView style={s.wrap} contentContainerStyle={{ paddingBottom: 60 }}>
+    <ScrollView style={s.wrap} contentContainerStyle={{ paddingBottom: 60 + pad }}>
       <Text style={s.h2}>Automatic backup · GitHub</Text>
       <Text style={s.p}>
         Notes, Claude consults and progress are saved to your private

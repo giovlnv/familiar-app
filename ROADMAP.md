@@ -74,7 +74,10 @@ Claude app: answer
 ## Phase 4.5 — Explore without a book, account & backup 🔨
 
 - ✅ Built-in sample book (2 short sections with audio) installed on first launch, so every screen can be explored; delete it like any book
-- ❓ Account / backup: Apple account sync isn't available with free signing; options are a backup file (Files / iCloud Drive) or automatic sync to the private GitHub repo
+- ✅ Backup & settings screen (⚙︎ in the Library)
+- ✅ Automatic sync of notes, consults and progress to `tarot-library/userdata/backup.json` whenever the app goes to the background (GitHub key stored in the iPhone keychain); Sync now / Restore from GitHub
+- ✅ Manual backup file to Files / iCloud Drive, restore from file, reminder banner after 7 days
+- ℹ️ Apple-account sign-in / iCloud sync needs a paid Apple Developer account, so it isn't used
 
 ## Phase 5 — Polish 📋
 

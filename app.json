@@ -32,7 +32,8 @@
       ],
       "expo-sharing",
       "expo-router",
-      "expo-asset"
+      "expo-asset",
+      "expo-secure-store"
     ],
     "scheme": "tarotreader",
     "experiments": {

@@ -1,0 +1,21 @@
+name: Publish Rider-Waite-Smith deck
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  deck:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 scripts/fetch_rws.py
+      - name: Publish release
+        run: |
+          gh release delete deck-rws --yes --cleanup-tag || true
+          gh release create deck-rws deck/* --title "Rider-Waite-Smith deck (public domain)" \
+            --notes "1909 Pamela Colman Smith artwork from Wikimedia Commons (public domain). Downloaded by the app from Settings → Decks."

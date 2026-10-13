@@ -25,6 +25,8 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { c, PALETTES, paletteId, setPalette } from "../../../theme";
 import { fetchAllGenres } from "../../../genres";
 import { getClaudeLink, setClaudeLink } from "../../../components/Consults";
+import { defaultDeck, deleteDeck, downloadRws, importDeckFromFiles, importDeckFromUrl, listDecks, setDefaultDeck } from "../../../decks";
+import { CardImage, CardPicker, useDecks } from "../../../components/Cards";
 
 const when = (t?: number) => (t ? new Date(t).toLocaleString() : "never");
 
@@ -35,6 +37,23 @@ export default function Settings() {
   const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState(false);
   const [claudeLink, setLinkDraft] = useState(getClaudeLink);
+  useDecks();
+  const [deckMsg, setDeckMsg] = useState("");
+  const [browse, setBrowse] = useState<string | null>(null);
+  const decks = listDecks();
+  const deckRun = async (fn: () => Promise<unknown>) => {
+    try {
+      await fn();
+    } catch (e) {
+      Alert.alert("Deck", String((e as Error).message ?? e));
+    } finally {
+      setDeckMsg((m) => (m.startsWith("Downloading") ? "" : m));
+    }
+  };
+  const report = (r: { matched: number; skipped: string[] } | null) =>
+    r && setDeckMsg(`${r.matched} of 78 cards found${r.skipped.length ? ` · ${r.skipped.length} files not recognised` : ""}`);
+  const askName = (then: (name: string) => void) =>
+    Alert.prompt("Deck name", undefined, (n) => n?.trim() && then(n.trim()), "plain-text", "");
 
   const refresh = useCallback(() => {
     setStateView(getState());
@@ -167,6 +186,60 @@ export default function Settings() {
           />
         </View>
       </View>
+      <Text style={s.h2}>Decks</Text>
+      <Text style={s.p}>
+        The default deck is used for every card in the app. Changing it updates all your readings.
+      </Text>
+      <View style={[s.card, { gap: 2 }]}>
+        {decks.map((d) => (
+          <Pressable
+            key={d.id}
+            style={s.palette}
+            onPress={() => setDefaultDeck(d.id)}
+            onLongPress={() =>
+              Alert.alert(d.name, `${d.cards.length} cards · ${d.source ?? ""}`, [
+                { text: "View cards", onPress: () => setBrowse(d.id) },
+                { text: "Delete deck", style: "destructive", onPress: () => deleteDeck(d.id) },
+                { text: "Cancel", style: "cancel" },
+              ])
+            }
+          >
+            <CardImage id="m17" width={26} deck={d.id} />
+            <View style={{ flex: 1 }}>
+              <Text style={[s.paletteName, d.id === defaultDeck() && { color: c.gold, fontWeight: "700" }]}>{d.name}</Text>
+              <Text style={s.meta}>{d.cards.length} cards · hold for options</Text>
+            </View>
+            {d.id === defaultDeck() && <Ionicons name="checkmark" size={18} color={c.gold} />}
+          </Pressable>
+        ))}
+        {!!deckMsg && <Text style={s.meta}>{deckMsg}</Text>}
+        <View style={[s.row, { marginTop: 8 }]}>
+          {!decks.some((d) => d.id === "rws" && d.cards.length === 78) && (
+            <Btn
+              label="Get Rider-Waite-Smith"
+              primary
+              onPress={() => deckRun(() => downloadRws((n, t) => setDeckMsg(`Downloading ${n}/${t}`)))}
+            />
+          )}
+          <Btn label="Import from Files" onPress={() => askName((n) => deckRun(async () => report(await importDeckFromFiles(n))))} />
+          <Btn
+            label="Download from link"
+            onPress={() =>
+              askName((n) =>
+                Alert.prompt("Zip link", "A direct link to a .zip of card images", (url) =>
+                  url?.trim() && deckRun(async () => (setDeckMsg("Downloading…"), report(await importDeckFromUrl(n, url.trim())))),
+                ),
+              )
+            }
+          />
+          {!!decks.length && <Btn label="View cards" onPress={() => setBrowse(defaultDeck())} />}
+        </View>
+        <Text style={[s.meta, { marginTop: 6 }]}>
+          Custom decks: pick the card images (or one .zip). Files are matched by name, like “the-fool.jpg”, “cups01.png” or “queen of swords.jpg”.
+        </Text>
+      </View>
+      <CardPicker visible={!!browse} deck={browse ?? undefined} title="Cards" onClose={() => setBrowse(null)} />
+
       <Text style={s.h2}>Claude chat</Text>
       <Text style={s.p}>
         “Send to Claude” copies the message and opens this chat. Paste it there.

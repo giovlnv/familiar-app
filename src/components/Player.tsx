@@ -12,25 +12,22 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
-import { setAudioModeAsync, useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import * as Sharing from 'expo-sharing';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import {
-  audioUri,
   exportConsultsFile,
   exportNotesFile,
   loadConsults,
   LibraryItem,
   loadNotes,
-  loadProgress,
   saveConsults,
   saveNotes,
-  saveProgress,
 } from '../storage';
 import { Consult, Note, Para } from '../types';
 import { AskDraft, AskSheet, buildPrompt, ConsultList, shareToClaude } from './Consults';
 import { c } from '../theme';
+import { usePlayback } from '../playback';
 
 const fmt = (t: number) => {
   const h = Math.floor(t / 3600);
@@ -44,13 +41,10 @@ type Draft = { id?: string; para: number; time: number; quote: string; text: str
 
 export default function Player({ item, start, onClose }: { item: LibraryItem; start?: number; onClose: () => void }) {
   const { book, folder } = item;
-  const saved = useMemo(() => {
-    const p = loadProgress(folder);
-    return start === undefined || start === p.section ? p : { ...p, section: start, time: 0 };
-  }, [folder, start]);
-  const done = useRef(new Set(saved.done ?? []));
-  const save = (section: number, time: number) => saveProgress(folder, { section, time, done: [...done.current] });
-  const [sec, setSec] = useState(Math.min(saved.section, book.sections.length - 1));
+  const pb = usePlayback();
+  const { player, status, t, rate, goTo, skip, toggle } = pb;
+  useEffect(() => pb.open(item, start), [item.folder, start]);
+  const sec = pb.item?.folder === folder ? pb.sec : 0;
   const [showText, setShowText] = useState(true);
   const [follow, setFollow] = useState(true);
   const [panel, setPanel] = useState<'none' | 'chapters' | 'notes' | 'consults'>('none');
@@ -58,61 +52,9 @@ export default function Player({ item, start, onClose }: { item: LibraryItem; st
   const [ask, setAsk] = useState<AskDraft | null>(null);
   const [notes, setNotes] = useState<Note[]>(() => loadNotes(folder));
   const [draft, setDraft] = useState<Draft | null>(null);
-  const [rate, setRate] = useState(1);
   const { height: winH } = useWindowDimensions();
-
-  const player = useAudioPlayer(null, { updateInterval: 250 });
-  const status = useAudioPlayerStatus(player);
-  const pending = useRef<{ time: number; play: boolean } | null>({ time: saved.time, play: false });
   const list = useRef<FlatList<Para>>(null);
   const section = book.sections[sec];
-  const t = status.currentTime ?? 0;
-
-  useEffect(() => {
-    setAudioModeAsync({ playsInSilentMode: true, shouldPlayInBackground: true, interruptionMode: 'doNotMix' });
-  }, []);
-
-  useEffect(() => {
-    player.replace({ uri: audioUri(folder, section.audio) });
-    player.setActiveForLockScreen(true, { title: section.title, artist: book.title, albumTitle: book.title });
-  }, [sec]);
-
-  const goTo = (i: number, time: number, play = status.playing) => {
-    if (i === sec) {
-      player.seekTo(time);
-      if (play) player.play();
-    } else {
-      pending.current = { time, play };
-      save(i, time);
-      setSec(i);
-    }
-  };
-  const ready = status.isLoaded && Math.abs((status.duration || 0) - section.duration) < 3;
-  useEffect(() => {
-    if (!ready || !pending.current) return;
-    const p = pending.current;
-    pending.current = null;
-    player.seekTo(p.time).then(() => {
-      player.setPlaybackRate(rate, 'high');
-      if (p.play) player.play();
-    });
-  }, [ready, sec]);
-
-  useEffect(() => {
-    if (!status.didJustFinish) return;
-    done.current.add(section.id);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (sec < book.sections.length - 1) goTo(sec + 1, 0, true);
-    else save(sec, 0);
-  }, [status.didJustFinish]);
-
-  const lastSave = useRef(0);
-  useEffect(() => {
-    if (Math.abs(t - lastSave.current) > 5) {
-      lastSave.current = t;
-      save(sec, t);
-    }
-  }, [t]);
 
   const current = useMemo(() => {
     const ps = section.paras;
@@ -126,14 +68,11 @@ export default function Player({ item, start, onClose }: { item: LibraryItem; st
       list.current?.scrollToIndex({ index: current, viewPosition: 0.3, animated: true });
   }, [current, follow, showText]);
 
-  const skip = (d: number) => player.seekTo(Math.max(0, Math.min(t + d, status.duration || t + d)));
-  const toggle = () => (status.playing ? player.pause() : player.play());
   const [rateAt, setRateAt] = useState<{ x: number; y: number } | null>(null);
   const rateBtn = useRef<View>(null);
   const openRates = () => rateBtn.current?.measureInWindow((x, y) => setRateAt({ x, y }));
   const pickRate = (r: number) => {
-    setRate(r);
-    player.setPlaybackRate(r, 'high');
+    pb.setRate(r);
     setRateAt(null);
   };
 
@@ -214,14 +153,13 @@ export default function Player({ item, start, onClose }: { item: LibraryItem; st
     [notes, section]
   );
 
+  if (pb.item?.folder !== folder) return <SafeAreaView style={s.wrap} />;
+
   return (
     <SafeAreaView style={s.wrap} edges={['top', 'bottom']}>
       <View style={s.top}>
         <Pressable onPress={onClose} hitSlop={12}>
-          <View style={s.iconLink}>
-            <Ionicons name="chevron-back" size={20} color={c.gold} />
-            <Text style={s.link}>Back</Text>
-          </View>
+          <Ionicons name="chevron-down" size={26} color={c.gold} />
         </Pressable>
         <View style={s.topRight}>
           <Pressable onPress={() => setPanel('consults')} hitSlop={8}>

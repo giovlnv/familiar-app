@@ -1,5 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Tabs } from 'expo-router';
+import { BottomTabBar } from 'expo-router/build/react-navigation/bottom-tabs';
+import MiniPlayer from '../../components/MiniPlayer';
 import type { ColorValue } from 'react-native';
 import { c } from '../../theme';
 
@@ -12,6 +14,12 @@ function icon(name: keyof typeof Ionicons.glyphMap) {
 export default function TabsLayout() {
   return (
     <Tabs
+      tabBar={(props) => (
+        <>
+          <MiniPlayer />
+          <BottomTabBar {...props} />
+        </>
+      )}
       screenOptions={{
         tabBarActiveTintColor: c.gold,
         tabBarInactiveTintColor: c.dim,

@@ -11,6 +11,7 @@ Built for one person's study. Books and audio are **never** stored in this repos
 | **Library** | All imported books with length and progress; open a book to see every section with a 1–2 line summary, duration, finished mark, notes and consults |
 | **Follow-along text** | Current paragraph highlighted and auto-scrolled; tap a paragraph to jump there |
 | **Listen-only mode** | Hide the text; audio keeps playing in the background and on the lock screen |
+| **Mini player** | Minimize the player (chevron at the top) and keep listening while you browse the app; the mini bar above the tabs reopens, pauses or stops it |
 | **Two voices** | Book text and explanations use different voices, so you always know which is which |
 | **Notes** | "Note here" or long-press a paragraph; each note stores the time *and* the passage. Tap a note to jump back; export all notes as Markdown |
 | **Ask Claude** | “Ask” or long-press a paragraph → your question plus the passage, section, time and your notes open in the Claude app as a numbered consult (#C1, #C2…). Copy Claude’s reply, then **Paste answer** in the consults list. Waiting/answered filters, follow-ups, jump to passage, export as Markdown |
@@ -77,7 +78,9 @@ src/tracker.ts             books, statuses, diary logs, Open Library search
 src/components/ui.tsx      Stars, Cover, Chip, Button
 src/app/book/[id].tsx      Book page: sections, summaries, progress
 src/app/player/[id].tsx    Player screen
+src/playback.tsx           app-wide audio (keeps playing when minimized)
 src/components/Player.tsx  player, follow-along text, notes
+src/components/MiniPlayer.tsx mini bar shown while browsing
 src/components/Consults.tsx Ask Claude sheet, consult list, prompt builder
 src/format.ts              time formatting
 src/storage.ts             books, notes and progress on the device

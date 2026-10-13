@@ -1,3 +1,4 @@
+import { fetchGenres, setGenres } from '../genres';
 import { usePad } from '../playback';
 import { useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -70,8 +71,11 @@ export default function SearchView({ onPick, manual }: { onPick: (r: OLResult) =
   );
 }
 
-export const addFromResult = (r: OLResult) =>
-  addBook({ title: r.title, authors: r.authors, year: r.year, pages: r.pages, coverId: r.coverId, olKey: r.olKey });
+export const addFromResult = (r: OLResult) => {
+  const b = addBook({ title: r.title, authors: r.authors, year: r.year, pages: r.pages, coverId: r.coverId, olKey: r.olKey });
+  if (!b.genres?.length) fetchGenres(b).then(({ top }) => top.length && setGenres(b.id, top, false)).catch(() => {});
+  return b;
+};
 
 const s = StyleSheet.create({
   wrap: { flex: 1, backgroundColor: c.bg, paddingHorizontal: 16, paddingTop: 12 },

@@ -29,6 +29,7 @@ export function parseCsv(text: string): string[][] {
 }
 
 const COLS = {
+  grId: ['book id'],
   title: ["title", "book title", "name"],
   author: ["author", "authors", "author name", "writer"],
   extra: ["additional authors", "contributors"],
@@ -167,6 +168,7 @@ export function importRows(rows: string[][]): ImportResult {
       b.isbn ??= isbn;
       b.pages ??= pages;
       b.year ??= year;
+      b.grId ??= get(r, 'grId') || undefined;
       if (status && (b.status === "none" || b.status === "want"))
         b.status = status;
       res.updated++;
@@ -178,6 +180,7 @@ export function importRows(rows: string[][]): ImportResult {
         isbn,
         pages,
         year,
+        grId: get(r, "grId") || undefined,
         status: status ?? "want",
         added: added ? Date.parse(`${added}T12:00:00`) : Date.now(),
       } as TBook;

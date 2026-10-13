@@ -66,6 +66,7 @@ export default function Profile() {
   });
   const labels = all ? buckets.map((y) => `'${y.slice(2)}`) : MONTHS;
 
+  const genres = count(logs.flatMap((l) => byId.get(l.bookId)?.genres ?? [])).slice(0, 6);
   const authors = count(
     logs.flatMap((l) => byId.get(l.bookId)?.authors ?? []),
   ).slice(0, 5);
@@ -176,6 +177,25 @@ export default function Profile() {
           Some books have no page count. Use “Find details on Open Library” on
           their page.
         </Text>
+      )}
+
+      {genres.length > 0 && (
+        <>
+          <Text style={s.h2}>Genres</Text>
+          <View style={[s.card, { gap: 10 }]}>
+            {genres.map(([g, n]) => (
+              <View key={g} style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                <Text style={{ color: c.text, width: 120, fontSize: 13 }} numberOfLines={1}>
+                  {g}
+                </Text>
+                <View style={{ flex: 1, height: 8, backgroundColor: c.line, borderRadius: 4, overflow: 'hidden' }}>
+                  <View style={{ width: `${(n / genres[0][1]) * 100}%`, height: 8, backgroundColor: c.gold }} />
+                </View>
+                <Text style={[s.dim, { width: 28, textAlign: 'right' }]}>{n}</Text>
+              </View>
+            ))}
+          </View>
+        </>
       )}
 
       <Text style={s.h2}>Top authors</Text>

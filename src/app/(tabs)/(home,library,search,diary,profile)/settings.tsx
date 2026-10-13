@@ -1,5 +1,5 @@
 import { usePad } from '../../../playback';
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import {
   Alert,
   Pressable,
@@ -22,6 +22,7 @@ import {
 } from "../../../sync";
 import { c } from "../../../theme";
 import { pickAndImport } from "../../../importer";
+import { fetchAllGenres } from "../../../genres";
 
 const when = (t?: number) => (t ? new Date(t).toLocaleString() : "never");
 
@@ -53,6 +54,18 @@ export default function Settings() {
       setBusy(false);
       refresh();
     }
+  };
+
+  const [genreMsg, setGenreMsg] = useState("");
+  const genreRun = useRef({ stop: false });
+  const genresAll = async () => {
+    if (genreMsg && !genreMsg.startsWith("Done")) return void (genreRun.current.stop = true);
+    genreRun.current = { stop: false };
+    const n = await fetchAllGenres(
+      (d, t, title) => setGenreMsg(d < t ? `${d + 1}/${t} · ${title}` : `Done · ${t} books checked`),
+      genreRun.current,
+    );
+    if (!n) setGenreMsg("Done · every book already has genres");
   };
 
   const importCsv = async () => {
@@ -144,6 +157,18 @@ export default function Settings() {
           />
         </View>
       </View>
+      <Text style={s.h2}>Genres</Text>
+      <Text style={s.p}>
+        Fetch the top 5 genres for every book that has none yet (Goodreads, Amazon, Open Library). Books whose genres you edited are
+        skipped.
+      </Text>
+      <View style={s.card}>
+        {!!genreMsg && <Text style={s.meta}>{genreMsg}</Text>}
+        <View style={s.row}>
+          <Btn label={genreMsg && !genreMsg.startsWith("Done") ? "Stop" : "Fetch genres for all books"} primary onPress={genresAll} />
+        </View>
+      </View>
+
       <Text style={s.h2}>Import reading history</Text>
       <Text style={s.p}>
         Goodreads (My Books → Import and export → Export library), StoryGraph

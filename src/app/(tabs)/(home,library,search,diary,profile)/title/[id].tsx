@@ -46,6 +46,7 @@ import {
   Stars,
 } from "../../../../components/ui";
 import { c } from "../../../../theme";
+import { GenreSheet } from "../../../../components/GenreSheet";
 
 const STATUSES: Status[] = ["want", "reading", "read", "dnf"];
 
@@ -56,6 +57,7 @@ export default function Title() {
   const [logging, setLogging] = useState(false);
   const [shelving, setShelving] = useState(false);
   const [editStart, setEditStart] = useState(false);
+  const [genring, setGenring] = useState(false);
   const refresh = useCallback(() => setT(syncAudioBooks()), []);
   useFocusEffect(refresh);
 
@@ -206,6 +208,15 @@ export default function Title() {
         </Text>
         <Ionicons name="chevron-forward" size={16} color={c.dim} />
       </Pressable>
+
+      <Pressable style={s.row} onPress={() => setGenring(true)}>
+        <Ionicons name="pricetags-outline" size={18} color={c.gold} />
+        <Text style={s.rowText} numberOfLines={2}>
+          {b.genres?.length ? b.genres.join(" · ") : "Find genres"}
+        </Text>
+        <Ionicons name="chevron-forward" size={16} color={c.dim} />
+      </Pressable>
+      <GenreSheet book={b} visible={genring} onClose={() => (setGenring(false), refresh())} />
 
       <View style={s.actions}>
         <View style={{ flex: 1 }}>

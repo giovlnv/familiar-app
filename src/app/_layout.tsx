@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { AppState, Pressable, Text } from 'react-native';
 import { router, Stack } from 'expo-router';
+import * as Updates from 'expo-updates';
 import { pushToGithub } from '../sync';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -8,7 +9,20 @@ import { c } from '../theme';
 
 export default function RootLayout() {
   useEffect(() => {
-    const sub = AppState.addEventListener('change', (st) => st === 'background' && pushToGithub());
+    let pending = false;
+    const fetchUpdate = async () => {
+      if (!Updates.isEnabled) return;
+      try {
+        if ((await Updates.checkForUpdateAsync()).isAvailable) pending = !!(await Updates.fetchUpdateAsync()).isNew;
+      } catch {}
+    };
+    fetchUpdate();
+    const sub = AppState.addEventListener('change', (st) => {
+      if (st === 'active') fetchUpdate();
+      if (st === 'background') {
+        pushToGithub().finally(() => pending && Updates.reloadAsync().catch(() => {}));
+      }
+    });
     return () => sub.remove();
   }, []);
   return (

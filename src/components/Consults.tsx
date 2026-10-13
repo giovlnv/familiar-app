@@ -98,6 +98,7 @@ export function ConsultList({
   onResend,
   onFollowUp,
   onDelete,
+  onSaveNote,
   onExport,
 }: {
   visible: boolean;
@@ -109,6 +110,7 @@ export function ConsultList({
   onResend: (cst: Consult) => void;
   onFollowUp: (cst: Consult) => void;
   onDelete: (cst: Consult) => void;
+  onSaveNote: (cst: Consult, keep: boolean) => void;
   onExport: () => void;
 }) {
   const [filter, setFilter] = useState<'all' | 'asked' | 'answered'>('all');
@@ -189,6 +191,19 @@ export function ConsultList({
                       <Btn label={x.answer ? 'Replace answer' : 'Paste answer'} primary={!x.answer} onPress={() => paste(x)} />
                       {x.status === 'asked' && <Btn label="Send again" onPress={() => onResend(x)} />}
                       {x.answer && <Btn label="Follow-up" onPress={() => onFollowUp(x)} />}
+                      {x.answer && !x.noted && (
+                        <Btn
+                          label="Save as note"
+                          onPress={() =>
+                            Alert.alert(`Save #C${x.id} as a note?`, 'The question and Claude’s answer become a note on this passage.', [
+                              { text: 'Keep consult too', onPress: () => onSaveNote(x, true) },
+                              { text: 'Move to notes', onPress: () => onSaveNote(x, false) },
+                              { text: 'Cancel', style: 'cancel' },
+                            ])
+                          }
+                        />
+                      )}
+                      {x.noted && <Text style={{ color: c.dim, alignSelf: 'center' }}>Saved as note</Text>}
                       <Btn label="Go to passage" onPress={() => onJump(x)} />
                       <Btn
                         label="Delete"

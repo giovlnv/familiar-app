@@ -28,6 +28,7 @@ export type Consult = {
   answer?: string;
   parent?: number;
   status: 'asked' | 'answered';
+  noted?: boolean;
   created: number;
   answered?: number;
 };

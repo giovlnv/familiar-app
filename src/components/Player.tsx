@@ -580,6 +580,27 @@ export default function Player({
           );
         }}
         onDelete={(x) => storeConsults(consults.filter((y) => y.id !== x.id))}
+        onSaveNote={(x, keep) => {
+          const next = [
+            ...notes,
+            {
+              id: String(Date.now()),
+              section: x.section,
+              time: x.time,
+              para: x.para,
+              quote: x.quote,
+              text: `Q: ${x.question}\n\nClaude: ${x.answer}`,
+              created: Date.now(),
+            },
+          ];
+          setNotes(next);
+          saveNotes(folder, next);
+          storeConsults(
+            keep
+              ? consults.map((y) => (y.id === x.id ? { ...y, noted: true } : y))
+              : consults.filter((y) => y.id !== x.id),
+          );
+        }}
         onExport={exportConsults}
       />
     </SafeAreaView>

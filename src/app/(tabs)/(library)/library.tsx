@@ -26,6 +26,7 @@ import {
 import { lastBackup } from "../../../sync";
 import { Chip, Cover, Stars } from "../../../components/ui";
 import { c } from "../../../theme";
+import DiaryList from "../../../components/DiaryList";
 
 type Filter = "all" | Status | `shelf:${string}`;
 const FILTERS: Filter[] = ["all", "reading", "want", "read", "dnf"];
@@ -34,6 +35,7 @@ export default function Library() {
   const pad = usePad();
   const [t, setT] = useState<Tracker>({ books: [], logs: [] });
   const [filter, setFilter] = useState<Filter>("all");
+  const [view, setView] = useState<"books" | "diary">("books");
   const [stale, setStale] = useState(false);
   const { width } = useWindowDimensions();
   const cols = 3;
@@ -89,8 +91,27 @@ export default function Library() {
       { text: "Cancel", style: "cancel" },
     ]);
 
+  const views = (
+    <View style={s.views}>
+      {(["books", "diary"] as const).map((v) => (
+        <Pressable key={v} style={[s.view, view === v && s.viewOn]} onPress={() => setView(v)}>
+          <Ionicons name={v === "books" ? "grid-outline" : "calendar-outline"} size={15} color={view === v ? c.bg : c.dim} />
+          <Text style={[s.viewText, view === v && { color: c.bg }]}>{v === "books" ? "Books" : "Diary"}</Text>
+        </Pressable>
+      ))}
+    </View>
+  );
+
+  if (view === "diary")
+    return (
+      <View style={s.wrap}>
+        <DiaryList header={views} />
+      </View>
+    );
+
   return (
     <View style={s.wrap}>
+      {views}
       {stale && (
         <Pressable style={s.banner} onPress={() => router.push("/settings")}>
           <Text style={s.bannerText}>
@@ -186,6 +207,10 @@ const s = StyleSheet.create({
   },
   bannerText: { color: c.gold, textAlign: "center" },
   filters: { gap: 8, paddingVertical: 12 },
+  views: { flexDirection: "row", backgroundColor: c.panel, borderRadius: 10, padding: 3, marginTop: 10 },
+  view: { flex: 1, flexDirection: "row", gap: 6, alignItems: "center", justifyContent: "center", paddingVertical: 7, borderRadius: 8 },
+  viewOn: { backgroundColor: c.gold },
+  viewText: { color: c.dim, fontWeight: "600" },
   empty: { color: c.dim, fontSize: 16, lineHeight: 22, marginTop: 20 },
   title: { color: c.text, fontSize: 13, marginTop: 6, marginBottom: 3 },
   import: {

@@ -1,13 +1,14 @@
-import { usePad } from '../../../playback';
+import { usePad } from '../playback';
+import type { ReactElement } from 'react';
 import { useCallback, useState } from 'react';
 import { Pressable, SectionList, StyleSheet, Text, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { load, Tracker } from '../../../tracker';
-import { Cover, fmtDate, Stars } from '../../../components/ui';
-import { c } from '../../../theme';
+import { load, Tracker } from '../tracker';
+import { Cover, fmtDate, Stars } from '../components/ui';
+import { c } from '../theme';
 
-export default function Diary() {
+export default function DiaryList({ header }: { header?: ReactElement }) {
   const pad = usePad();
   const [t, setT] = useState<Tracker>({ books: [], logs: [] });
   useFocusEffect(useCallback(() => setT(load()), []));
@@ -28,6 +29,7 @@ export default function Diary() {
       sections={sections}
       keyExtractor={(l) => l.id}
       stickySectionHeadersEnabled={false}
+      ListHeaderComponent={header}
       contentContainerStyle={{ paddingBottom: 40 + pad }}
       ListEmptyComponent={
         <Text style={s.empty}>Your diary is empty. Open a book and tap “Log” when you finish it.</Text>
@@ -64,7 +66,7 @@ export default function Diary() {
 }
 
 const s = StyleSheet.create({
-  wrap: { flex: 1, backgroundColor: c.bg, paddingHorizontal: 16 },
+  wrap: { flex: 1, backgroundColor: c.bg },
   empty: { color: c.dim, fontSize: 16, lineHeight: 22, marginTop: 20 },
   month: { color: c.gold, fontWeight: '700', fontSize: 13, letterSpacing: 1, textTransform: 'uppercase', marginTop: 18, marginBottom: 6 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 8, borderBottomWidth: StyleSheet.hairlineWidth, borderColor: c.line },

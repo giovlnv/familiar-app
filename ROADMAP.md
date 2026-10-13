@@ -50,7 +50,7 @@ Status: ✅ done · 🔨 next · 📋 planned · ❓ decision needed · Last rev
 
 ## Next 📋
 
-4. **Reading journal (tarot readings)** — its own tab, designed directly in the app (no Figma step first)
+4. **Reading journal (tarot readings)** — the Journal tab (replaced Diary; the diary is now a Books/Diary toggle in Library), designed directly in the app
    - Date and time, the question
    - For me or someone else: name, date of birth and short background (all optional), reusable people
    - Area: love/relationships, family, money, job, personal, spiritual, + custom

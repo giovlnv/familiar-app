@@ -7,7 +7,7 @@ const TITLES: Record<string, string> = {
   "(home)": "Home",
   "(library)": "Library",
   "(search)": "Search",
-  "(diary)": "Diary",
+  "(journal)": "Journal",
   "(profile)": "Profile",
 };
 

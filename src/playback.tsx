@@ -1,6 +1,7 @@
 import { createContext, ReactNode, useContext, useEffect, useRef, useState } from 'react';
 import { AudioPlayer, AudioStatus, setAudioModeAsync, useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import { audioUri, LibraryItem, loadProgress, saveProgress } from './storage';
+import { addListening } from './tracker';
 
 type Playback = {
   item: LibraryItem | null;
@@ -50,6 +51,7 @@ export function PlaybackProvider({ children }: { children: ReactNode }) {
       return;
     }
     if (item) save(sec, t);
+    flushHeard();
     player.pause();
     const p = loadProgress(next.folder);
     const s = Math.min(start ?? p.section, next.book.sections.length - 1);
@@ -89,12 +91,26 @@ export function PlaybackProvider({ children }: { children: ReactNode }) {
   }, [status.didJustFinish]);
 
   const lastSave = useRef(0);
+  const prevT = useRef(0);
+  const heard = useRef(0);
+  const flushHeard = () => {
+    if (item) addListening(item.folder, heard.current);
+    heard.current = 0;
+  };
   useEffect(() => {
+    const dt = t - prevT.current;
+    prevT.current = t;
+    if (status.playing && dt > 0 && dt < 3) heard.current += dt / rate;
+    if (heard.current > 30) flushHeard();
     if (Math.abs(t - lastSave.current) > 5) {
       lastSave.current = t;
       save(sec, t);
     }
   }, [t]);
+
+  useEffect(() => {
+    if (!status.playing) flushHeard();
+  }, [status.playing]);
 
   const value: Playback = {
     item,
@@ -112,6 +128,7 @@ export function PlaybackProvider({ children }: { children: ReactNode }) {
       player.setPlaybackRate(r, 'high');
     },
     stop: () => {
+      flushHeard();
       save(sec, t);
       player.pause();
       player.setActiveForLockScreen(false);

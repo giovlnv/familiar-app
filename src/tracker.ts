@@ -25,7 +25,7 @@ export type Log = {
   created: number;
 };
 
-export type Tracker = { books: TBook[]; logs: Log[] };
+export type Tracker = { books: TBook[]; logs: Log[]; listened?: Record<string, Record<string, number>> };
 
 export const STATUS_LABEL: Record<Status, string> = {
   none: 'No status',
@@ -150,4 +150,12 @@ export async function searchOpenLibrary(q: string): Promise<OLResult[]> {
     pages: d.number_of_pages_median,
     coverId: d.cover_i,
   }));
+}
+
+export function addListening(folder: string, seconds: number) {
+  if (seconds <= 0) return;
+  update((t) => {
+    const day = ((t.listened ??= {})[today()] ??= {});
+    day[folder] = Math.round((day[folder] ?? 0) + seconds);
+  });
 }

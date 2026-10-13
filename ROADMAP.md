@@ -92,7 +92,10 @@ Decided: track every book (not only audiobooks), details and covers from Open Li
 - ✅ Library grid with filters (All / Reading / Want / Read / DNF / Audiobooks); imported audiobooks appear automatically and can be matched to Open Library
 - ✅ Profile: counts and rating histogram; Backup & settings
 - ✅ Tracker data included in GitHub sync and backup files
-- 📋 Stats (StoryGraph): pages and hours per month, books per year, authors, genres/moods, reading pace
+- ✅ Speed drop-up menu, line icons instead of emoji, minimizable player with a mini bar while browsing
+- ✅ Stats on Profile: year / all-time filter; books, pages, hours listened, average rating, rereads; books/pages/hours by month (or by year); top authors; most listened; longest read; rating histogram
+- ✅ Listening time logged per day and per audiobook (synced with the tracker)
+- 📋 Stats still to do: genres/moods (Open Library subjects), reading pace (needs a start date when a book is marked Reading)
 - 📋 Shelves & lists, top 4 favorites, year in review
 
 ## Phase 5 — Polish 📋

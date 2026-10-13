@@ -70,7 +70,11 @@ npx expo lint       # lint
 
 ```
 src/app/_layout.tsx        navigation (Expo Router stack)
-src/app/index.tsx          Library: book list and import
+src/app/(tabs)/            Home, Library, Search, Diary, Profile tabs
+src/app/title/[id].tsx     Tracked book: status, rating, log, history
+src/app/find.tsx           Match a book to Open Library
+src/tracker.ts             books, statuses, diary logs, Open Library search
+src/components/ui.tsx      Stars, Cover, Chip, Button
 src/app/book/[id].tsx      Book page: sections, summaries, progress
 src/app/player/[id].tsx    Player screen
 src/components/Player.tsx  player, follow-along text, notes

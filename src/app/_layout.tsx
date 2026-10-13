@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
-import { AppState, Pressable, Text } from 'react-native';
-import { router, Stack } from 'expo-router';
+import { AppState } from 'react-native';
+import { Stack } from 'expo-router';
 import * as Updates from 'expo-updates';
 import { pushToGithub } from '../sync';
 import { StatusBar } from 'expo-status-bar';
@@ -37,20 +37,11 @@ export default function RootLayout() {
           contentStyle: { backgroundColor: c.bg },
         }}
       >
-        <Stack.Screen
-          name="index"
-          options={{
-            title: 'Library',
-            headerLargeTitle: true,
-            headerRight: () => (
-              <Pressable onPress={() => router.push('/settings')} hitSlop={10}>
-                <Text style={{ color: c.gold, fontSize: 22 }}>⚙︎</Text>
-              </Pressable>
-            ),
-          }}
-        />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false, title: 'Back' }} />
         <Stack.Screen name="settings" options={{ title: 'Backup & settings' }} />
         <Stack.Screen name="book/[id]" options={{ title: '' }} />
+        <Stack.Screen name="title/[id]" options={{ title: '' }} />
+        <Stack.Screen name="find" options={{ title: 'Find on Open Library', presentation: 'modal' }} />
         <Stack.Screen name="player/[id]" options={{ headerShown: false }} />
       </Stack>
     </SafeAreaProvider>

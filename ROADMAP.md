@@ -79,6 +79,22 @@ Claude app: answer
 - ✅ Manual backup file to Files / iCloud Drive, restore from file, reminder banner after 7 days
 - ℹ️ Apple-account sign-in / iCloud sync needs a paid Apple Developer account, so it isn't used
 
+## Phase 6 — Reading tracker (Apple Books × StoryGraph × Letterboxd) 🔨
+
+Decided: track every book (not only audiobooks), details and covers from Open Library, bottom tabs, ratings and rereads, no written reviews (notes and Claude consults are the commentary). Order: logging → stats → shelves & lists.
+
+- ✅ Bottom tabs: Home · Library · Search · Diary · Profile
+- ✅ Search Open Library (title, author, ISBN) → add with cover, authors, year, pages; add manually if not found
+- ✅ Book page: status (Want to read / Reading / Read / Did not finish), latest rating, Log, reading history, Listen + sections/notes/consults when an audiobook is linked
+- ✅ Log: finish date, half-star rating, reread flag; long-press an entry to delete
+- ✅ Diary grouped by month (day, cover, rating, ↻ reread)
+- ✅ Home: books finished this year, Continue listening, Currently reading, Recently logged
+- ✅ Library grid with filters (All / Reading / Want / Read / DNF / Audiobooks); imported audiobooks appear automatically and can be matched to Open Library
+- ✅ Profile: counts and rating histogram; Backup & settings
+- ✅ Tracker data included in GitHub sync and backup files
+- 📋 Stats (StoryGraph): pages and hours per month, books per year, authors, genres/moods, reading pace
+- 📋 Shelves & lists, top 4 favorites, year in review
+
 ## Phase 5 — Polish 📋
 
 - 📋 Sleep timer

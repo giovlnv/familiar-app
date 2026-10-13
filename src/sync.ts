@@ -11,6 +11,7 @@ type Backup = {
   version: 1;
   created: number;
   books: Record<string, Record<string, unknown>>;
+  tracker?: unknown;
 };
 
 export type SyncState = { lastFile?: number; lastGithub?: number; lastError?: string };
@@ -47,10 +48,16 @@ export function collect(): Backup {
       if (meta.exists) entry.title = JSON.parse(meta.textSync()).title;
       if (Object.keys(entry).length) books[d.name] = entry;
     }
-  return { version: 1, created: Date.now(), books };
+  const tf = new File(Paths.document, 'tracker.json');
+  return { version: 1, created: Date.now(), books, tracker: tf.exists ? JSON.parse(tf.textSync()) : undefined };
 }
 
 export function apply(b: Backup) {
+  if (b.tracker) {
+    const tf = new File(Paths.document, 'tracker.json');
+    if (!tf.exists) tf.create();
+    tf.write(JSON.stringify(b.tracker));
+  }
   for (const [folder, entry] of Object.entries(b.books ?? {})) {
     const d = new Directory(booksDir(), folder);
     d.create({ idempotent: true, intermediates: true });

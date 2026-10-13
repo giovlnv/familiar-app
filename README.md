@@ -10,7 +10,7 @@ Built for one person's study. Books and audio are **never** stored in this repos
 |---|---|
 | **Library** | All imported books with length and progress; open a book to see every section with a 1–2 line summary, duration, finished mark, notes and consults |
 | **Follow-along text** | Current paragraph highlighted and auto-scrolled; tap a paragraph to jump there |
-| **Listen-only mode** | Hide the text; audio keeps playing in the background and on the lock screen |
+| **Listen-only mode** | Minimize the player: a floating card above the tab bar shows the passage being read, over whatever page you are on; audio keeps playing in the background and on the lock screen |
 | **Mini player** | Minimize the player (chevron at the top) and keep listening while you browse the app; the mini bar above the tabs reopens, pauses or stops it |
 | **Two voices** | Book text and explanations use different voices, so you always know which is which |
 | **Notes** | "Note here" or long-press a paragraph; each note stores the time *and* the passage. Tap a note to jump back; export all notes as Markdown |

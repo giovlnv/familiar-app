@@ -67,7 +67,6 @@ export default function Player({
   const { player, status, t, rate, goTo, skip, toggle } = pb;
   useEffect(() => pb.open(item, start), [item.folder, start]);
   const sec = pb.item?.folder === folder ? pb.sec : 0;
-  const [showText, setShowText] = useState(true);
   const [follow, setFollow] = useState(true);
   const [panel, setPanel] = useState<
     "none" | "chapters" | "notes" | "consults"
@@ -90,13 +89,13 @@ export default function Player({
   }, [t, section]);
 
   useEffect(() => {
-    if (follow && showText && panel === "none")
+    if (follow && panel === "none")
       list.current?.scrollToIndex({
         index: current,
         viewPosition: 0.3,
         animated: true,
       });
-  }, [current, follow, showText]);
+  }, [current, follow]);
 
   const [rateAt, setRateAt] = useState<{ x: number; y: number } | null>(null);
   const rateBtn = useRef<View>(null);
@@ -247,13 +246,6 @@ export default function Player({
               <Text style={s.link}>{notes.length}</Text>
             </View>
           </Pressable>
-          <Pressable onPress={() => setShowText(!showText)} hitSlop={8}>
-            <Ionicons
-              name={showText ? "eye-off-outline" : "document-text-outline"}
-              size={20}
-              color={c.gold}
-            />
-          </Pressable>
         </View>
       </View>
 
@@ -265,67 +257,54 @@ export default function Player({
         </Text>
       </Pressable>
 
-      {showText ? (
-        <View style={{ flex: 1 }}>
-          <FlatList
-            ref={list}
-            data={section.paras}
-            keyExtractor={(_, i) => String(i)}
-            onScrollBeginDrag={() => setFollow(false)}
-            onScrollToIndexFailed={(e) =>
-              setTimeout(
-                () =>
-                  list.current?.scrollToIndex({
-                    index: e.index,
-                    viewPosition: 0.3,
-                  }),
-                200,
-              )
-            }
-            contentContainerStyle={{ paddingBottom: 200 }}
-            renderItem={({ item: p, index }) => (
-              <Pressable
-                onPress={() => goTo(sec, p.start + 0.01)}
-                onLongPress={() => paraActions(index, p.start)}
-                style={[s.para, index === current && s.paraOn]}
+      <View style={{ flex: 1 }}>
+        <FlatList
+          ref={list}
+          data={section.paras}
+          keyExtractor={(_, i) => String(i)}
+          onScrollBeginDrag={() => setFollow(false)}
+          onScrollToIndexFailed={(e) =>
+            setTimeout(
+              () =>
+                list.current?.scrollToIndex({
+                  index: e.index,
+                  viewPosition: 0.3,
+                }),
+              200,
+            )
+          }
+          contentContainerStyle={{ paddingBottom: 200 }}
+          renderItem={({ item: p, index }) => (
+            <Pressable
+              onPress={() => goTo(sec, p.start + 0.01)}
+              onLongPress={() => paraActions(index, p.start)}
+              style={[s.para, index === current && s.paraOn]}
+            >
+              <Text
+                style={[s.pText, styleFor(p), index === current && s.pTextOn]}
               >
-                <Text
-                  style={[s.pText, styleFor(p), index === current && s.pTextOn]}
-                >
-                  {asked.has(index) && (
-                    <Ionicons
-                      name="sparkles-outline"
-                      size={15}
-                      color={c.claude}
-                    />
-                  )}
-                  {noted.has(index) && (
-                    <Ionicons name="create-outline" size={15} color={c.gold} />
-                  )}
-                  {(asked.has(index) || noted.has(index)) && " "}
-                  {p.text}
-                </Text>
-              </Pressable>
-            )}
-          />
-          {!follow && (
-            <Pressable style={s.follow} onPress={() => setFollow(true)}>
-              <Text style={s.followText}>Follow along</Text>
+                {asked.has(index) && (
+                  <Ionicons
+                    name="sparkles-outline"
+                    size={15}
+                    color={c.claude}
+                  />
+                )}
+                {noted.has(index) && (
+                  <Ionicons name="create-outline" size={15} color={c.gold} />
+                )}
+                {(asked.has(index) || noted.has(index)) && " "}
+                {p.text}
+              </Text>
             </Pressable>
           )}
-        </View>
-      ) : (
-        <View style={s.mini}>
-          <Text style={s.miniKind}>
-            {section.paras[current]?.kind.startsWith("explain")
-              ? "Explanation"
-              : "Reading"}
-          </Text>
-          <Text style={s.miniText} numberOfLines={6}>
-            {section.paras[current]?.text}
-          </Text>
-        </View>
-      )}
+        />
+        {!follow && (
+          <Pressable style={s.follow} onPress={() => setFollow(true)}>
+            <Text style={s.followText}>Follow along</Text>
+          </Pressable>
+        )}
+      </View>
 
       <View style={s.controls}>
         <View style={s.bar}>
@@ -713,15 +692,6 @@ const s = StyleSheet.create({
     borderRadius: 20,
   },
   followText: { color: c.bg, fontWeight: "700" },
-  mini: { flex: 1, justifyContent: "center" },
-  miniKind: {
-    color: c.gold,
-    fontWeight: "700",
-    marginBottom: 10,
-    textTransform: "uppercase",
-    letterSpacing: 1,
-  },
-  miniText: { color: c.text, fontSize: 20, lineHeight: 30 },
   controls: {
     borderTopWidth: 1,
     borderColor: c.line,

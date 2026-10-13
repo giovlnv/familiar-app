@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -6,22 +7,27 @@ import { c } from '../theme';
 
 export default function MiniPlayer() {
   const { item, sec, t, status, toggle, skip, stop } = usePlayback();
-  if (!item) return null;
-  const section = item.book.sections[sec];
-  const pct = status.duration ? (t / status.duration) * 100 : 0;
+  const section = item?.book.sections[sec];
+  const para = useMemo(() => {
+    const ps = section?.paras ?? [];
+    let i = 0;
+    while (i + 1 < ps.length && ps[i + 1].start <= t + 0.05) i++;
+    return ps[i];
+  }, [section, t]);
+  if (!item || !section) return null;
+  const explain = para?.kind.startsWith('explain');
+  const open = () => router.push({ pathname: '/player/[id]', params: { id: item.folder } });
   return (
-    <View style={s.wrap}>
+    <View style={s.card}>
       <View style={s.bar}>
-        <View style={[s.fill, { width: `${pct}%` }]} />
+        <View style={[s.fill, { width: `${status.duration ? (t / status.duration) * 100 : 0}%` }]} />
       </View>
       <View style={s.row}>
-        <Pressable style={{ flex: 1 }} onPress={() => router.push({ pathname: '/player/[id]', params: { id: item.folder } })}>
+        <Pressable style={{ flex: 1 }} onPress={open}>
           <Text style={s.title} numberOfLines={1}>
-            {section?.title}
+            {section.title}
           </Text>
-          <Text style={s.book} numberOfLines={1}>
-            {item.book.title}
-          </Text>
+          <Text style={s.kind}>{explain ? 'Explanation' : 'Reading'}</Text>
         </Pressable>
         <Pressable onPress={() => skip(-15)} hitSlop={8}>
           <Ionicons name="arrow-undo" size={22} color={c.text} />
@@ -33,15 +39,35 @@ export default function MiniPlayer() {
           <Ionicons name="close" size={22} color={c.dim} />
         </Pressable>
       </View>
+      {!!para && (
+        <Pressable onPress={open}>
+          <Text style={[s.text, explain && { color: c.explain }]} numberOfLines={3}>
+            {para.text}
+          </Text>
+        </Pressable>
+      )}
     </View>
   );
 }
 
 const s = StyleSheet.create({
-  wrap: { backgroundColor: c.panel, borderTopWidth: StyleSheet.hairlineWidth, borderColor: c.line },
+  card: {
+    marginHorizontal: 8,
+    marginBottom: 8,
+    backgroundColor: c.panel,
+    borderRadius: 14,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: c.line,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOpacity: 0.5,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+  },
   bar: { height: 2, backgroundColor: c.line },
   fill: { height: 2, backgroundColor: c.gold },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 18, paddingHorizontal: 16, paddingVertical: 10 },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 18, paddingHorizontal: 14, paddingTop: 10 },
   title: { color: c.text, fontSize: 15, fontWeight: '600' },
-  book: { color: c.dim, fontSize: 12, marginTop: 2 },
+  kind: { color: c.gold, fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1, marginTop: 2 },
+  text: { color: c.text, fontSize: 15, lineHeight: 21, paddingHorizontal: 14, paddingTop: 8, paddingBottom: 12 },
 });

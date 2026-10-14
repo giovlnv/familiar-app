@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Animated, Easing, StyleSheet } from 'react-native';
 import * as SplashScreen from 'expo-splash-screen';
 
@@ -8,8 +8,8 @@ const SIZE = 220;
 
 export function Splash() {
   const [done, setDone] = useState(false);
-  const scale = useRef(new Animated.Value(1)).current;
-  const fade = useRef(new Animated.Value(1)).current;
+  const [scale] = useState(() => new Animated.Value(1));
+  const [fade] = useState(() => new Animated.Value(1));
 
   useEffect(() => {
     SplashScreen.hideAsync()

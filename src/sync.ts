@@ -12,7 +12,10 @@ type Backup = {
   created: number;
   books: Record<string, Record<string, unknown>>;
   tracker?: unknown;
+  extra?: Record<string, unknown>;
 };
+
+const EXTRA_FILES = ['familiars.json', 'onboarding.json'];
 
 export type SyncState = { lastFile?: number; lastGithub?: number; lastError?: string };
 
@@ -49,7 +52,12 @@ export function collect(): Backup {
       if (Object.keys(entry).length) books[d.name] = entry;
     }
   const tf = new File(Paths.document, 'tracker.json');
-  return { version: 1, created: Date.now(), books, tracker: tf.exists ? JSON.parse(tf.textSync()) : undefined };
+  const extra: Record<string, unknown> = {};
+  for (const name of EXTRA_FILES) {
+    const f = new File(Paths.document, name);
+    if (f.exists) extra[name] = JSON.parse(f.textSync());
+  }
+  return { version: 1, created: Date.now(), books, tracker: tf.exists ? JSON.parse(tf.textSync()) : undefined, extra };
 }
 
 export function apply(b: Backup) {
@@ -57,6 +65,12 @@ export function apply(b: Backup) {
     const tf = new File(Paths.document, 'tracker.json');
     if (!tf.exists) tf.create();
     tf.write(JSON.stringify(b.tracker));
+  }
+  for (const [name, data] of Object.entries(b.extra ?? {})) {
+    if (!EXTRA_FILES.includes(name)) continue;
+    const f = new File(Paths.document, name);
+    if (!f.exists) f.create();
+    f.write(JSON.stringify(data));
   }
   for (const [folder, entry] of Object.entries(b.books ?? {})) {
     const d = new Directory(booksDir(), folder);

@@ -14,6 +14,8 @@ import { daysBetween, load, Tracker } from "../../../tracker";
 import { Chip, Cover } from "../../../components/ui";
 import { c } from "../../../theme";
 import ProfileHeader from "../../../components/ProfileHeader";
+import { FamiliarArt } from "../../../components/Familiar";
+import { loadFamiliars, withYou } from "../../../familiar";
 
 type Metric = "books" | "pages" | "hours";
 const MONTHS = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
@@ -120,6 +122,16 @@ export default function Profile() {
         }}
       />
       <ProfileHeader />
+      <Pressable style={s.familiar} onPress={() => router.push("/familiars")}>
+        <FamiliarArt familiar={withYou()} size={56} />
+        <View style={{ flex: 1 }}>
+          <Text style={s.famTitle}>Your familiars</Text>
+          <Text style={s.famDim}>
+            {withYou().name} is with you · {loadFamiliars().list.length} in all
+          </Text>
+        </View>
+        <Ionicons name="chevron-forward" size={16} color={c.dim} />
+      </Pressable>
       <Text style={[s.h2, { marginTop: 14 }]}>Top 4</Text>
       <View style={s.favs}>
         {[0, 1, 2, 3].map((i) =>
@@ -327,6 +339,9 @@ const count = (xs: string[]) =>
   ].sort((a, b) => b[1] - a[1]);
 
 const s = StyleSheet.create({
+  familiar: { flexDirection: "row", alignItems: "center", gap: 12, backgroundColor: c.panel, borderRadius: 14, padding: 10, marginTop: 12 },
+  famTitle: { color: c.text, fontSize: 15, fontWeight: "600" },
+  famDim: { color: c.dim, fontSize: 12, marginTop: 2 },
   wrap: { flex: 1, backgroundColor: c.bg, paddingHorizontal: 16 },
   chips: { gap: 8, paddingVertical: 12 },
   tiles: { flexDirection: "row", flexWrap: "wrap", gap: 10 },

@@ -279,6 +279,12 @@ export default function Settings() {
           <Btn label="Save link" primary onPress={() => (setClaudeLink(claudeLink), Alert.alert("Saved"))} />
         </View>
       </View>
+      <Text style={s.h2}>Setup</Text>
+      <Text style={s.p}>Walk through the first-launch setup again: paths, your familiar, Claude and backups.</Text>
+      <View style={s.row}>
+        <Btn label="Run setup again" onPress={() => router.push("/onboarding")} />
+        <Btn label="Your familiars" onPress={() => router.push("/familiars")} />
+      </View>
       <Text style={s.h2}>Voice lab</Text>
       <Text style={s.p}>Test the Kokoro voice running on this iPhone, offline.</Text>
       <View style={s.row}>

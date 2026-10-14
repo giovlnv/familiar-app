@@ -8,6 +8,8 @@ import { syncAudioBooks, Tracker } from '../../../tracker';
 import { Cover, fmtDate, Stars } from '../../../components/ui';
 import { fmtTime } from '../../../format';
 import { c } from '../../../theme';
+import { FamiliarArt } from '../../../components/Familiar';
+import { withYou } from '../../../familiar';
 
 export default function Home() {
   const pad = usePad();
@@ -36,6 +38,13 @@ export default function Home() {
 
   return (
     <ScrollView style={s.wrap} contentContainerStyle={{ paddingBottom: 40 + pad }}>
+      <Pressable style={s.familiar} onPress={() => router.push('/familiars')}>
+        <FamiliarArt familiar={withYou()} pose={listening.length ? 'reading' : 'idle'} size={92} />
+        <View style={{ flex: 1 }}>
+          <Text style={s.famName}>{withYou().name} is with you</Text>
+          <Text style={s.dim}>{listening.length ? 'Ready to pick up where you left off.' : 'Choose a book and study together.'}</Text>
+        </View>
+      </Pressable>
       <View style={s.stat}>
         <Text style={s.statNum}>{readThisYear}</Text>
         <Text style={s.statLabel}>books finished in {year}</Text>
@@ -115,6 +124,8 @@ export default function Home() {
 }
 
 const s = StyleSheet.create({
+  familiar: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: c.panel, borderRadius: 14, paddingVertical: 4, paddingHorizontal: 10, marginTop: 12 },
+  famName: { color: c.text, fontSize: 17, fontWeight: '600', fontFamily: 'Georgia' },
   wrap: { flex: 1, backgroundColor: c.bg, paddingHorizontal: 16 },
   stat: { backgroundColor: c.panel, borderRadius: 14, padding: 16, marginTop: 12, flexDirection: 'row', alignItems: 'baseline', gap: 10 },
   statNum: { color: c.gold, fontSize: 34, fontWeight: '800' },

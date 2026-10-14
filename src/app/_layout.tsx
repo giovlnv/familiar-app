@@ -1,12 +1,13 @@
 import { useEffect } from "react";
 import { Appearance, AppState, View } from "react-native";
-import { Stack } from "expo-router";
+import { router, Stack } from "expo-router";
 import * as Updates from "expo-updates";
 import { pushToGithub } from "../sync";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { PlaybackProvider } from "../playback";
 import { Splash } from "../components/Splash";
+import { getOnboarding } from "../familiar";
 import { c, mode, scheme } from "../theme";
 
 export default function RootLayout() {
@@ -20,6 +21,7 @@ export default function RootLayout() {
       } catch {}
     };
     fetchUpdate();
+    if (!getOnboarding().done) setTimeout(() => router.push("/onboarding"), 0);
     const sub = AppState.addEventListener("change", (st) => {
       if (st === "active") {
         fetchUpdate();
@@ -50,6 +52,7 @@ export default function RootLayout() {
           >
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="player/[id]" options={{ headerShown: false }} />
+            <Stack.Screen name="onboarding" options={{ headerShown: false, presentation: "fullScreenModal", gestureEnabled: false }} />
           </Stack>
           <Splash />
         </View>

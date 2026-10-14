@@ -97,7 +97,7 @@ export async function setStage(job: Job, stage: Stage, extra: Partial<Job> = {})
 
 export async function downloadJob(job: Job, onProgress: (done: number, total: number) => void) {
   const token = await getToken();
-  const files = job.files ?? [];
+  const files = (job.files ?? []).filter((f) => !f.startsWith('.'));
   if (!files.includes('book.json')) throw new Error('This job has no files yet.');
   const dir = new Directory(Paths.document, 'books', job.slug);
   dir.create({ idempotent: true, intermediates: true });

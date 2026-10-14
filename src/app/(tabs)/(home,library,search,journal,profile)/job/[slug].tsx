@@ -145,7 +145,7 @@ export default function JobScreen() {
       {job.stage === 'ready' && (
         <>
           <Text style={s.p}>
-            {job.hours} h of audio · {(job.files?.length ?? 1) - 1} files. Download over Wi-Fi; the copy on GitHub is removed afterwards (the zip in Releases stays as a backup).
+            {job.hours} h of audio · {job.files?.filter((f) => f.endsWith(".m4a")).length ?? 0} audio files. Download over Wi-Fi; the copy on GitHub is removed afterwards (the zip in Releases stays as a backup).
           </Text>
           <Button
             label={progress || 'Download & import'}

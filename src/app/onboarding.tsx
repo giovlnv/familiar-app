@@ -10,6 +10,8 @@ import { backupToFile, getState, getToken, setToken } from '../sync';
 import { getProfile, setProfile } from '../tracker';
 import { parseDate, showDate } from '../journal';
 import { c, F } from '../theme';
+import { maskDate, maskTime } from '../format';
+import { Place, PlaceField } from '../components/PlaceField';
 
 const STEPS = ['welcome', 'paths', 'species', 'shape', 'eyes', 'name', 'claude', 'about', 'backups', 'book'] as const;
 type Step = (typeof STEPS)[number];
@@ -26,7 +28,7 @@ export default function Onboarding() {
   const [link, setLink] = useState(getClaudeLink());
   const [dob, setDob] = useState(showDate(getProfile().dob));
   const [birthTime, setBirthTime] = useState(saved.birthTime ?? '');
-  const [birthPlace, setBirthPlace] = useState(saved.birthPlace ?? '');
+  const [place, setPlace] = useState<Place | undefined>(saved.birthPlace ? { label: saved.birthPlace, lat: saved.birthLat ?? 0, lon: saved.birthLon ?? 0, timezone: saved.birthTz } : undefined);
   const [language, setLanguage] = useState(saved.language ?? 'en');
   const [goals, setGoals] = useState<string[]>(saved.goals ?? []);
   useEffect(() => {
@@ -50,7 +52,7 @@ export default function Onboarding() {
     if (step === 'about') {
       const iso = parseDate(dob);
       if (dob.trim() && iso) setProfile({ dob: iso });
-      setOnboarding({ birthTime, birthPlace, language, goals });
+      setOnboarding({ birthTime, birthPlace: place?.label, birthLat: place?.lat, birthLon: place?.lon, birthTz: place?.timezone, language, goals });
     }
     if (step === 'species' && f.species !== 'cat') return go('eyes');
     setI(Math.min(i + 1, STEPS.length - 1));
@@ -165,12 +167,11 @@ export default function Onboarding() {
           <>
             <Head title="A little about you" sub="Optional. Used for astrology and numerology, never shared." />
             <Label>BIRTH DATE</Label>
-            <TextInput style={fs.input} value={dob} onChangeText={setDob} placeholder="DD/MM/YYYY" placeholderTextColor={c.dim} keyboardType="numbers-and-punctuation" />
-            <Label>BIRTH TIME AND PLACE</Label>
-            <View style={fs.row}>
-              <TextInput style={[fs.input, { flex: 1 }]} value={birthTime} onChangeText={setBirthTime} placeholder="14:30" placeholderTextColor={c.dim} keyboardType="numbers-and-punctuation" />
-              <TextInput style={[fs.input, { flex: 2 }]} value={birthPlace} onChangeText={setBirthPlace} placeholder="São Paulo" placeholderTextColor={c.dim} />
-            </View>
+            <TextInput style={fs.input} value={dob} onChangeText={(t) => setDob(maskDate(t))} placeholder="DD/MM/YYYY" placeholderTextColor={c.dim} keyboardType="number-pad" maxLength={10} />
+            <Label>BIRTH TIME</Label>
+            <TextInput style={fs.input} value={birthTime} onChangeText={(t) => setBirthTime(maskTime(t))} placeholder="HH:MM" placeholderTextColor={c.dim} keyboardType="number-pad" maxLength={5} />
+            <Label>BIRTH PLACE</Label>
+            <PlaceField value={place?.label ?? ''} onPick={setPlace} language={language} />
             <Label>LANGUAGE</Label>
             <View style={fs.row}>
               {[
@@ -204,7 +205,7 @@ export default function Onboarding() {
       case 'book':
         return (
           <View style={{ alignItems: 'center', gap: 12 }}>
-            <FamiliarArt familiar={f} pose="reading" size={240} />
+            <FamiliarArt familiar={f} pose="reading" size={240} vial />
             <Head title={`${f.name || 'Shadow'} is ready to read`} sub="Add your next book and you’ll study it together." center />
           </View>
         );

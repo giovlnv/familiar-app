@@ -7,6 +7,7 @@ import { getProfile, Profile, setProfile } from '../tracker';
 import { Button } from './ui';
 import { parseDate, showDate } from '../journal';
 import { c } from '../theme';
+import { maskDate } from '../format';
 
 async function pickPhoto() {
   const r = await ImagePicker.launchImageLibraryAsync({ mediaTypes: 'images', allowsEditing: true, quality: 0.7 });
@@ -77,10 +78,11 @@ export default function ProfileHeader() {
           <TextInput
             style={s.input}
             value={dob}
-            onChangeText={setDob}
+            onChangeText={(t) => setDob(maskDate(t))}
             placeholder="DD/MM/YYYY"
             placeholderTextColor={c.dim}
-            keyboardType="numbers-and-punctuation"
+            keyboardType="number-pad"
+            maxLength={10}
           />
           <Text style={s.hint}>Used for your personality, essence and year cards in the Journal.</Text>
           <Button

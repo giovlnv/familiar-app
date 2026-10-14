@@ -2,12 +2,46 @@ import { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { COATS, COLORS, EYES, Familiar, familiarXml, LIGHTS, MARKS, Pose, SPECIES } from '../familiar';
+import { COATS, COLORS, Element, EYES, Familiar, familiarXml, LIGHTS, MARK_COLORS, MARKS, Pose, SPECIES, STRIPES, sunSign } from '../familiar';
+import { getProfile } from '../tracker';
 import { c, F } from '../theme';
 
-export function FamiliarArt({ familiar, pose = 'idle', size }: { familiar: Familiar; pose?: Pose; size: number }) {
+const ELEMENTS: Record<Element, { color: string; up: boolean; bar: boolean; name: string }> = {
+  fire: { color: '#E0765A', up: true, bar: false, name: 'Fire' },
+  air: { color: '#93BCD8', up: true, bar: true, name: 'Air' },
+  water: { color: '#5E9BD6', up: false, bar: false, name: 'Water' },
+  earth: { color: '#7FA36B', up: false, bar: true, name: 'Earth' },
+};
+
+const vialXml = (el: Element) => {
+  const e = ELEMENTS[el];
+  const tri = e.up ? 'M20 31 L26.5 42 L13.5 42 Z' : 'M13.5 33 L26.5 33 L20 44 Z';
+  const bar = e.bar ? (e.up ? '<path d="M15.5 38.5 H24.5"/>' : '<path d="M15.5 36.5 H24.5"/>') : '';
+  return `<svg viewBox="0 0 40 60"><rect x="14" y="5" width="12" height="7" rx="2" fill="#A07A55"/><rect x="15.5" y="11" width="9" height="15" fill="#FFFFFF" fill-opacity="0.1" stroke="#ECE6F5" stroke-opacity="0.7" stroke-width="1.2"/><circle cx="20" cy="38" r="14" fill="#FFFFFF" fill-opacity="0.1"/><path d="M8.7 34 Q14.5 31.5 20 34 T31.3 34 A12 12 0 1 1 8.7 34 Z" fill="${e.color}" fill-opacity="0.92"/><circle cx="20" cy="38" r="14" fill="none" stroke="#ECE6F5" stroke-opacity="0.7" stroke-width="1.2"/><path d="M12 31 Q13.5 27.5 17 26" fill="none" stroke="#FFFFFF" stroke-opacity="0.6" stroke-width="1.6" stroke-linecap="round"/><g fill="none" stroke="#FFFFFF" stroke-opacity="0.9" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"><path d="${tri}"/>${bar}</g></svg>`;
+};
+
+export const myElement = () => sunSign(getProfile().dob);
+
+export function Vial({ element, size }: { element: Element; size: number }) {
+  return (
+    <View accessible accessibilityLabel={`${ELEMENTS[element].name} vial`}>
+      <SvgXml xml={vialXml(element)} width={size} height={size * 1.5} />
+    </View>
+  );
+}
+
+export function FamiliarArt({ familiar, pose = 'idle', size, vial }: { familiar: Familiar; pose?: Pose; size: number; vial?: boolean }) {
   const xml = useMemo(() => familiarXml(familiar, pose), [familiar, pose]);
-  return <SvgXml xml={xml} width={size} height={size} />;
+  const el = vial ? myElement()?.element : undefined;
+  if (!el) return <SvgXml xml={xml} width={size} height={size} />;
+  return (
+    <View style={{ width: size, height: size }}>
+      <SvgXml xml={xml} width={size} height={size} />
+      <View style={{ position: 'absolute', right: size * 0.02, bottom: size * 0.04 }}>
+        <Vial element={el} size={size * 0.2} />
+      </View>
+    </View>
+  );
 }
 
 type StepProps = { f: Familiar; set: (patch: Partial<Familiar>) => void };
@@ -27,7 +61,7 @@ function Card({ on, onPress, children, style }: { on?: boolean; onPress: () => v
 export function Preview({ f, pose = 'idle', size = 210 }: { f: Familiar; pose?: Pose; size?: number }) {
   return (
     <View style={s.preview}>
-      <FamiliarArt familiar={f} pose={pose} size={size} />
+      <FamiliarArt familiar={f} pose={pose} size={size} vial />
     </View>
   );
 }
@@ -92,6 +126,21 @@ export function ShapeCoatStep({ f, set }: StepProps) {
       )}
       <Label>{cat && f.coat === 'colourpoint' ? 'POINTS COLOUR' : 'COLOUR'}</Label>
       <Swatches list={COLORS[f.species]} value={f.color} onPick={(hex) => set({ color: hex })} />
+      {cat && f.coat === 'tabby' && (
+        <>
+          <Label>STRIPES</Label>
+          <View style={s.swatches}>
+            {STRIPES.map((x) => (
+              <Pressable key={x.name} onPress={() => set({ stripe: x.hex || undefined })} style={{ alignItems: 'center', gap: 4 }} accessibilityLabel={`${x.name} stripes`}>
+                <View style={[s.swatch, { backgroundColor: x.hex || f.color }, (f.stripe ?? '') === x.hex && s.swatchOn]}>
+                  {!x.hex && <Text style={s.auto}>A</Text>}
+                </View>
+                <Text style={s.small}>{x.name}</Text>
+              </Pressable>
+            ))}
+          </View>
+        </>
+      )}
       {cat && f.coat === 'colourpoint' && (
         <>
           <Label>BODY COLOUR</Label>
@@ -134,11 +183,24 @@ export function EyesMarkStep({ f, set }: StepProps) {
       <View style={s.row}>
         {MARKS.map((m) => (
           <Card key={m.id} on={f.mark === m.id} style={{ flex: 1, paddingVertical: 10 }} onPress={() => set({ mark: m.id })}>
-            <Text style={{ color: '#E8C767', fontSize: 20 }}>{m.id === 'crescent' ? '☾' : m.id === 'star' ? '✦' : '—'}</Text>
+            <Text style={{ color: f.markColor ?? '#E8C767', fontSize: 20 }}>{m.id === 'crescent' ? '☾' : m.id === 'star' ? '✦' : '—'}</Text>
             <Text style={s.small}>{m.name}</Text>
           </Card>
         ))}
       </View>
+      {f.mark !== 'none' && (
+        <>
+          <Label>MARK COLOUR</Label>
+          <View style={s.swatches}>
+            {MARK_COLORS.map((m) => (
+              <Pressable key={m.hex} onPress={() => set({ markColor: m.hex })} style={{ alignItems: 'center', gap: 4 }} accessibilityLabel={m.name}>
+                <View style={[s.swatch, { backgroundColor: m.hex }, (f.markColor ?? MARK_COLORS[0].hex) === m.hex && s.swatchOn]} />
+                <Text style={s.small}>{m.name}</Text>
+              </Pressable>
+            ))}
+          </View>
+        </>
+      )}
     </View>
   );
 }
@@ -149,7 +211,7 @@ export function NameStep({ f, set }: StepProps) {
   return (
     <View style={{ gap: 14 }}>
       <View style={{ alignItems: 'center' }}>
-        <FamiliarArt familiar={f} size={190} />
+        <FamiliarArt familiar={f} size={190} vial />
       </View>
       <Label>NAME</Label>
       <TextInput
@@ -193,6 +255,7 @@ export const s = StyleSheet.create({
   swatches: { flexDirection: 'row', gap: 14, flexWrap: 'wrap' },
   swatch: { width: 34, height: 34, borderRadius: 17, borderWidth: 1, borderColor: c.line },
   swatchOn: { borderWidth: 3, borderColor: c.gold },
+  auto: { color: c.text, fontSize: 13, fontWeight: '700', textAlign: 'center', lineHeight: 30 },
   row: { flexDirection: 'row', gap: 8 },
   input: { backgroundColor: c.panel, color: c.text, borderRadius: 12, padding: 14, fontSize: 17 },
   pill: { backgroundColor: c.raised, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6 },

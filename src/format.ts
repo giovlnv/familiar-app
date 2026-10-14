@@ -10,3 +10,13 @@ export const fmtHours = (t: number) => {
   const m = Math.round((t % 3600) / 60);
   return h ? `${h} h ${m} min` : `${m} min`;
 };
+
+export const maskDate = (text: string) => {
+  const d = text.replace(/\D/g, '').slice(0, 8);
+  return [d.slice(0, 2), d.slice(2, 4), d.slice(4)].filter(Boolean).join('/');
+};
+
+export const maskTime = (text: string) => {
+  const d = text.replace(/\D/g, '').slice(0, 4);
+  return d.length > 2 ? `${d.slice(0, 2)}:${d.slice(2)}` : d;
+};

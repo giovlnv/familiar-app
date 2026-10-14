@@ -18,6 +18,8 @@ export type Familiar = {
   light?: string;
   eyes: string;
   mark: Mark;
+  markColor?: string;
+  stripe?: string;
   paths: string[];
   created: number;
 };
@@ -45,6 +47,8 @@ export const COLORS: Record<Species, { hex: string; name: string }[]> = {
     { hex: '#1E2A3F', name: 'Marine' },
     { hex: '#22302A', name: 'Forest' },
     { hex: '#2B2B30', name: 'Charcoal' },
+    { hex: '#5C4233', name: 'Brown' },
+    { hex: '#E9E3DA', name: 'White' },
   ],
   bat: [
     { hex: '#1E1B24', name: 'Black' },
@@ -69,6 +73,22 @@ export const EYES = [
   { hex: '#8FD18C', name: 'Green' },
   { hex: '#8FB8DE', name: 'Blue' },
   { hex: '#E39A4C', name: 'Amber' },
+];
+
+export const MARK_COLORS = [
+  { hex: '#E8C767', name: 'Gold' },
+  { hex: '#D9D6E2', name: 'Silver' },
+  { hex: '#D49A9E', name: 'Rose' },
+  { hex: '#8FB8DE', name: 'Moon blue' },
+  { hex: '#F3ECDF', name: 'Pearl' },
+];
+
+export const STRIPES = [
+  { hex: '', name: 'Auto' },
+  { hex: '#2A2430', name: 'Dark' },
+  { hex: '#6E6A75', name: 'Grey' },
+  { hex: '#C98B5B', name: 'Ginger' },
+  { hex: '#DED5C9', name: 'Cream' },
 ];
 
 export const MARKS: { id: Mark; name: string }[] = [
@@ -126,8 +146,8 @@ export function familiarXml(f: Familiar, pose: Pose = 'idle') {
     body: f.coat === 'colourpoint' ? light : f.color,
     iris: f.eyes,
     light,
-    stripe: dark ? '#FFFFFF' : '#000000',
-    stripeOp: dark ? '0.14' : '0.3',
+    stripe: f.stripe || (dark ? '#FFFFFF' : '#000000'),
+    stripeOp: f.stripe ? '0.8' : dark ? '0.14' : '0.3',
     bellyFill: f.coat === 'solid' ? f.color : '#DED5C9',
     oSocks: on('socks'),
     oTabby: on('tabby'),
@@ -139,6 +159,8 @@ export function familiarXml(f: Familiar, pose: Pose = 'idle') {
   let xml = (ART[artKey(f, pose)] ?? ART['cat-round-idle-solid']).replace(/\{\{(\w+)\}\}/g, (_, k) => vals[k] ?? '');
   if (f.mark === 'star') xml = xml.replace(CRESCENT, STAR);
   if (f.mark === 'none') xml = xml.replace(/<g id="mark"[^>]*>.*?<\/g>/, '');
+  else if (f.markColor) xml = xml.replace('<g id="mark" fill="#E8C767"', `<g id="mark" fill="${f.markColor}"`);
+  if (lum(f.color) > 0.5) xml = xml.replace(/#F3E8B9/g, '#6E6478');
   return xml;
 }
 
@@ -214,7 +236,17 @@ export const describe = (f: Familiar) => {
 };
 
 const onboardFile = () => new File(Paths.document, 'onboarding.json');
-export type Onboarding = { done?: number; paths?: string[]; language?: string; goals?: string[]; birthTime?: string; birthPlace?: string };
+export type Onboarding = {
+  done?: number;
+  paths?: string[];
+  language?: string;
+  goals?: string[];
+  birthTime?: string;
+  birthPlace?: string;
+  birthLat?: number;
+  birthLon?: number;
+  birthTz?: string;
+};
 export function getOnboarding(): Onboarding {
   try {
     const f = onboardFile();
@@ -227,4 +259,19 @@ export function setOnboarding(patch: Onboarding) {
   const f = onboardFile();
   if (!f.exists) f.create();
   f.write(JSON.stringify({ ...getOnboarding(), ...patch }));
+}
+
+export type Element = 'fire' | 'earth' | 'air' | 'water';
+const SIGNS: [string, Element, number, number][] = [
+  ['Capricorn', 'earth', 1, 19], ['Aquarius', 'air', 2, 18], ['Pisces', 'water', 3, 20], ['Aries', 'fire', 4, 19],
+  ['Taurus', 'earth', 5, 20], ['Gemini', 'air', 6, 20], ['Cancer', 'water', 7, 22], ['Leo', 'fire', 8, 22],
+  ['Virgo', 'earth', 9, 22], ['Libra', 'air', 10, 22], ['Scorpio', 'water', 11, 21], ['Sagittarius', 'fire', 12, 21],
+];
+export function sunSign(iso?: string): { sign: string; element: Element } | undefined {
+  const m = iso?.match(/^\d{4}-(\d{2})-(\d{2})$/);
+  if (!m) return;
+  const month = +m[1], day = +m[2];
+  const i = SIGNS.findIndex(([, , mm, last]) => mm === month && day <= last);
+  const [sign, element] = SIGNS[i >= 0 ? i : month % 12];
+  return { sign, element };
 }

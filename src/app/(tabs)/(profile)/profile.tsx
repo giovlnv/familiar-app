@@ -123,7 +123,7 @@ export default function Profile() {
       />
       <ProfileHeader />
       <Pressable style={s.familiar} onPress={() => router.push("/familiars")}>
-        <FamiliarArt familiar={withYou()} size={56} />
+        <FamiliarArt familiar={withYou()} size={56} vial />
         <View style={{ flex: 1 }}>
           <Text style={s.famTitle}>Your familiars</Text>
           <Text style={s.famDim}>

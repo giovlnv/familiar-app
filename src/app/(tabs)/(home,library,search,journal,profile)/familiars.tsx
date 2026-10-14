@@ -21,7 +21,7 @@ export default function Familiars() {
           <View key={f.id} style={[s.card, on && s.cardOn]}>
             <Pressable style={s.main} onPress={() => (setWithYou(f.id), setSt(loadFamiliars()))} accessibilityLabel={`Walk with ${f.name}`}>
               <View style={s.art}>
-                <FamiliarArt familiar={f} size={64} />
+                <FamiliarArt familiar={f} size={64} vial />
               </View>
               <View style={{ flex: 1, gap: 4 }}>
                 <View style={s.titleRow}>

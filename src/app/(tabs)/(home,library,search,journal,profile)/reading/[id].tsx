@@ -26,6 +26,7 @@ import { shareToClaude } from '../../../../components/Consults';
 import { Button, Chip, DateStepper, fmtDate } from '../../../../components/ui';
 import { usePad } from '../../../../playback';
 import { c, F } from '../../../../theme';
+import { maskDate, maskTime } from '../../../../format';
 
 const short = (id: string) => cardName(id).split(' · ').pop()!;
 
@@ -157,10 +158,13 @@ export default function ReadingScreen() {
             Alert.prompt(
               'Time',
               'HH:MM',
-              (v) => /^\d{1,2}:\d{2}$/.test(v?.trim() ?? '') && set({ at: `${date}T${v!.trim().padStart(5, '0')}` }),
+              (v) => {
+                const t = maskTime(v ?? '');
+                if (/^\d{2}:\d{2}$/.test(t)) set({ at: `${date}T${t}` });
+              },
               'plain-text',
               time,
-              'numbers-and-punctuation',
+              'number-pad',
             )
           }
         >
@@ -321,10 +325,11 @@ function PersonSheet({
         <TextInput
           style={s.input}
           value={dob}
-          onChangeText={setDob}
+          onChangeText={(t) => setDob(maskDate(t))}
           placeholder="Birth date DD/MM/YYYY (optional)"
           placeholderTextColor={c.dim}
-          keyboardType="numbers-and-punctuation"
+          keyboardType="number-pad"
+          maxLength={10}
         />
         <TextInput
           style={[s.input, { minHeight: 70 }]}

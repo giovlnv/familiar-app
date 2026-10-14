@@ -40,7 +40,7 @@ export default function Home() {
   return (
     <ScrollView style={s.wrap} contentContainerStyle={{ paddingBottom: 40 + pad }}>
       <Pressable style={s.familiar} onPress={() => router.push('/familiars')}>
-        <FamiliarArt familiar={guide} pose={listening.length ? 'reading' : 'idle'} size={92} />
+        <FamiliarArt familiar={guide} pose={listening.length ? 'reading' : 'idle'} size={92} vial />
         <View style={{ flex: 1 }}>
           <Text style={s.famName}>{guide.name} is with you</Text>
           <Text style={s.dim}>{listening.length ? 'Ready to pick up where you left off.' : 'Choose a book and study together.'}</Text>

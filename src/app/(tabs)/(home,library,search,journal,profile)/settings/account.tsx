@@ -20,7 +20,7 @@ export default function Account() {
   return (
     <Page>
       <Text style={ss.h2}>GitHub</Text>
-      <Text style={ss.p}>The key lets the app back up to your private familiar-library repo and send books to the audiobook pipeline.</Text>
+      <Text style={ss.p}>The key lets the app back up to your private ios_202610.familiar_library repo and send books to the audiobook pipeline.</Text>
       <View style={ss.card}>
         <Text style={ss.meta}>Status: {hasToken ? 'connected' : 'not connected'}</Text>
         <TextInput

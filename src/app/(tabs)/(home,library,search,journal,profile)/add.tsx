@@ -64,7 +64,7 @@ export default function AddBook() {
       </View>
       <Button label={busy ? 'Uploading…' : 'Upload & start'} icon="cloud-upload-outline" primary onPress={busy ? () => {} : upload} />
       <Text style={s.small}>
-        Goes to your private familiar-library repo only. The book is split into sections; you check the split, then Claude writes the
+        Goes to your private ios_202610.familiar_library repo only. The book is split into sections; you check the split, then Claude writes the
         explanations in the TAROT chat and the voices are generated on GitHub.
       </Text>
     </ScrollView>

@@ -1,7 +1,7 @@
 import { Directory, File, Paths } from 'expo-file-system';
 import { getToken } from './sync';
 
-const API = 'https://api.github.com/repos/giovlnv/familiar-library';
+const API = 'https://api.github.com/repos/giovlnv/ios_202610.familiar_library';
 
 export type Stage = 'splitting' | 'review' | 'fix' | 'explanations' | 'voices' | 'ready' | 'imported' | 'error';
 export type Job = {

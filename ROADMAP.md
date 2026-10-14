@@ -17,7 +17,7 @@ Status: ✅ done · 🔨 next · 📋 planned · Last revised: 14 Oct 2026 (app 
 
 ### Adding books
 - ✅ Upload EPUB/PDF from the iPhone → split → you confirm → Claude writes explanations → Kokoro voices on GitHub → download in the app
-- ✅ Private `familiar-library` repo with the pipeline (6 parallel jobs)
+- ✅ Private `ios_202610.familiar_library` repo with the pipeline (6 parallel jobs)
 
 ### Tracker & journal
 - ✅ Statuses, half-star ratings, relistens, diary, shelves, Top 4 (collapsible), ranked lists, genres, stats, Year in review

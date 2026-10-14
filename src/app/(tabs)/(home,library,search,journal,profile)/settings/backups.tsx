@@ -31,7 +31,7 @@ export default function Backups() {
   return (
     <Page>
       <Text style={ss.h2}>Automatic · GitHub</Text>
-      <Text style={ss.p}>Notes, Claude consults, progress and your familiars are saved to your private familiar-library repo whenever you leave the app.</Text>
+      <Text style={ss.p}>Notes, Claude consults, progress and your familiars are saved to your private ios_202610.familiar_library repo whenever you leave the app.</Text>
       <View style={ss.card}>
         <Text style={ss.meta}>Last sync: {when(state.lastGithub)}</Text>
         {state.lastError && <Text style={[ss.meta, { color: c.claude }]}>Last error: {state.lastError}</Text>}

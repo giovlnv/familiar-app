@@ -3,7 +3,7 @@ import * as DocumentPicker from 'expo-document-picker';
 import * as SecureStore from 'expo-secure-store';
 import * as Sharing from 'expo-sharing';
 
-const REPO = 'giovlnv/familiar-library';
+const REPO = 'giovlnv/ios_202610.familiar_library';
 const PATH = 'userdata/backup.json';
 const DATA_FILES = ['notes.json', 'consults.json', 'progress.json'];
 

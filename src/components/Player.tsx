@@ -314,7 +314,7 @@ export default function Player({
         >
           {card ? (
             <View style={{ alignItems: "center", gap: 10, alignSelf: "stretch" }}>
-              <Pressable onPress={cardActions} style={{ alignItems: "center", gap: 8 }}>
+              <Pressable onPress={toggleText} onLongPress={cardActions} accessibilityHint="Tap for the text, hold for card options" style={{ alignItems: "center", gap: 8 }}>
                 <CardImage
                   id={card.card}
                   reversed={card.reversed}

@@ -21,7 +21,7 @@ Status: ✅ done · 🔨 next · 📋 planned · ❓ decision needed · Last rev
 - ✅ "Send to Claude" copies the message and opens your saved Claude chat (link in Settings)
 
 ### Adding books
-- ✅ Private `tarot-library` repo with the pipeline (Kokoro TTS, 6 parallel GitHub jobs, release zip)
+- ✅ Private `familiar-library` repo with the pipeline (Kokoro TTS, 6 parallel GitHub jobs, release zip)
 - ✅ Add a book from the iPhone: EPUB/PDF upload (two-column PDFs supported), per-book instructions, language
 - ✅ Books in progress: split → **you confirm the sections** (or send a fix note) → Claude writes explanations in the TAROT chat → voices on GitHub → download & import in the app (audio branch deleted afterwards; zip kept in Releases)
 - ✅ Manual import of `book.json` + audio files still available

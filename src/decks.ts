@@ -43,7 +43,7 @@ const root = () => {
   return d;
 };
 const defaultFile = () => new File(root(), 'default.txt');
-const RWS_URL = 'https://github.com/giovlnv/tarot-reader/releases/download/deck-rws';
+const RWS_URL = 'https://github.com/giovlnv/familiar-app/releases/download/deck-rws';
 
 let cache: { decks: Deck[]; def: string } | null = null;
 const listeners = new Set<() => void>();

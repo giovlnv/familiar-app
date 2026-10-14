@@ -134,7 +134,7 @@ export default function Settings() {
       <Text style={s.h2}>Automatic backup · GitHub</Text>
       <Text style={s.p}>
         Notes, Claude consults and progress are saved to your private
-        tarot-library repo whenever you leave the app.
+        familiar-library repo whenever you leave the app.
       </Text>
       <View style={s.card}>
         <Text style={s.meta}>

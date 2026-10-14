@@ -27,7 +27,7 @@ export function buildPrompt(book: Book, consult: Consult, notes: Note[], parent?
   const section = book.sections.find((s) => s.id === consult.section);
   const related = notes.filter((n) => n.section === consult.section && n.para === consult.para).map((n) => `- ${n.text}`);
   return [
-    `[Tarot Reader · Consult #C${consult.id}]`,
+    `[Familiar · Consult #C${consult.id}]`,
     `Book: ${book.title}`,
     `Section: ${section?.title ?? consult.section} (at ${fmtTime(consult.time)})`,
     '',

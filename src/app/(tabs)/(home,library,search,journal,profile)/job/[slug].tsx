@@ -43,8 +43,8 @@ export default function JobScreen() {
 
   if (!job) return <View style={s.wrap} />;
   const step = STEPS.indexOf(job.stage as (typeof STEPS)[number]);
-  const askClaude = `Tarot Reader job "${job.slug}" (${job.title}) is ready for explanations. Please write them following the audiobook explanation prompt${job.instructions ? ` and these instructions: ${job.instructions}` : ''}, then run Generate audiobook.`;
-  const fixMsg = `Tarot Reader job "${job.slug}" (${job.title}): the section split needs fixing. ${job.note ?? ''}`;
+  const askClaude = `Familiar job "${job.slug}" (${job.title}) is ready for explanations. Please write them following the audiobook explanation prompt${job.instructions ? ` and these instructions: ${job.instructions}` : ''}, then run Generate audiobook.`;
+  const fixMsg = `Familiar job "${job.slug}" (${job.title}): the section split needs fixing. ${job.note ?? ''}`;
 
   return (
     <ScrollView

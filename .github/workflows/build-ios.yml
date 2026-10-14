@@ -29,11 +29,11 @@ jobs:
             CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" | tail -40
           mkdir -p Payload
           cp -R build/app.xcarchive/Products/Applications/*.app Payload/
-          zip -qr TarotReader.ipa Payload
+          zip -qr Familiar.ipa Payload
       - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release delete latest --yes --cleanup-tag || true
-          gh release create latest TarotReader.ipa --title "Tarot Reader (build ${{ github.run_number }})" \
-            --notes "Download TarotReader.ipa on your iPhone and open it with SideStore."
+          gh release create latest Familiar.ipa --title "Familiar (build ${{ github.run_number }})" \
+            --notes "Download Familiar.ipa on your iPhone and open it with Sideloadly."

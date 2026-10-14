@@ -1,4 +1,4 @@
-# Tarot Reader
+# Familiar
 
 A personal iPhone app for studying books by listening. Each book is read word for word by an AI voice, and every section ends with a short spoken explanation (Jungian archetypes, tarot meanings, pop-culture examples). The text follows along on screen, and you can take notes tied to the exact moment and passage.
 
@@ -37,11 +37,11 @@ book.json + 001.m4a … NNN.m4a   ──► imported into the app (Files)
 
 ## Installing on iPhone (no App Store, no Mac)
 
-Every push to `main` runs [`.github/workflows/build-ios.yml`](.github/workflows/build-ios.yml) on GitHub's macOS runners. It builds an **unsigned** `TarotReader.ipa` and publishes it under **Releases → latest**.
+Every push to `main` runs [`.github/workflows/build-ios.yml`](.github/workflows/build-ios.yml) on GitHub's macOS runners. It builds an **unsigned** `Familiar.ipa` and publishes it under **Releases → latest**.
 
 Installed with **[Sideloadly](https://sideloadly.io)** on Windows (SideStore/iloader sign-in failed with Apple error -80045).
 
-1. Download `TarotReader.ipa` from Releases on the PC.
+1. Download `Familiar.ipa` from Releases on the PC.
 2. Sideloadly → drag in the IPA → Apple ID → **Start** (iPhone on USB the first time).
 3. Sideloadly re-signs every few days (PC on, same Wi-Fi). Books and notes are kept across re-installs.
 

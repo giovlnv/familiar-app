@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "Tarot Reader",
+    "name": "Familiar",
     "slug": "tarot-reader",
-    "version": "1.3.0",
+    "version": "1.4.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -73,7 +73,32 @@
           }
         }
       ],
-      "expo-font"
+      "expo-font",
+      [
+        "expo-alternate-app-icons",
+        [
+          {
+            "name": "Plum",
+            "ios": "./assets/icons/plum.png"
+          },
+          {
+            "name": "Water",
+            "ios": "./assets/icons/water.png"
+          },
+          {
+            "name": "Fire",
+            "ios": "./assets/icons/fire.png"
+          },
+          {
+            "name": "Earth",
+            "ios": "./assets/icons/earth.png"
+          },
+          {
+            "name": "Air",
+            "ios": "./assets/icons/air.png"
+          }
+        ]
+      ]
     ],
     "scheme": "tarotreader",
     "experiments": {

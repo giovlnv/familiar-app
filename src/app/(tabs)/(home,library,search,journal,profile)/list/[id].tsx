@@ -131,7 +131,7 @@ export default function ListScreen() {
               </View>
             </View>
           ))}
-          <Text style={s.brand}>Tarot Reader</Text>
+          <Text style={s.brand}>Familiar</Text>
         </View>
       </View>
 

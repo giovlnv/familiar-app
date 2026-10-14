@@ -3,7 +3,7 @@ import * as DocumentPicker from 'expo-document-picker';
 import * as SecureStore from 'expo-secure-store';
 import * as Sharing from 'expo-sharing';
 
-const REPO = 'giovlnv/tarot-library';
+const REPO = 'giovlnv/familiar-library';
 const PATH = 'userdata/backup.json';
 const DATA_FILES = ['notes.json', 'consults.json', 'progress.json'];
 
@@ -87,7 +87,7 @@ export function apply(b: Backup) {
 
 export async function backupToFile() {
   const stamp = new Date().toISOString().slice(0, 10);
-  const f = new File(Paths.cache, `Tarot Reader backup ${stamp}.json`);
+  const f = new File(Paths.cache, `Familiar backup ${stamp}.json`);
   if (f.exists) f.delete();
   f.create();
   f.write(JSON.stringify(collect(), null, 1));
@@ -131,7 +131,7 @@ export async function pushToGithub(): Promise<boolean> {
       api(token, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: 'Tarot Reader backup', content: tmp.base64Sync(), sha }),
+        body: JSON.stringify({ message: 'Familiar backup', content: tmp.base64Sync(), sha }),
       })
     );
     if (!res.ok) throw new Error(`GitHub ${res.status}`);

@@ -130,7 +130,7 @@ export function readingPrompt(r: Reading, j: JournalData) {
   const sp = spreadOf(j, r.spreadId);
   const person = j.people.find((p) => p.id === r.personId);
   const lines = [
-    `[Tarot Reader · Reading ${r.at.replace('T', ' ')}]`,
+    `[Familiar · Reading ${r.at.replace('T', ' ')}]`,
     `Question: ${r.question || '(none)'}`,
     `For: ${person ? [person.name, person.dob && `born ${person.dob}`, person.background].filter(Boolean).join(' · ') : 'me'}`,
     r.area ? `Area: ${r.area}` : '',

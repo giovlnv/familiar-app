@@ -63,7 +63,7 @@ Variant flag (personal build keeps Claude and unlocks everything) → public onb
 - Accessories (collars, hats), more poses, per-system props, paid familiars (owl, toad, snake)
 - Search in books and notes, bookmarks, highlight colours
 - Home-screen widget / Siri "continue my book"
-- Portuguese books and UI
+- Portuguese, French and Arabic books, UI and voices (Arabic right-to-left)
 - Shareable cards (Year in review, lists, daily card)
 
 ## Constraints

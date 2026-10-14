@@ -126,8 +126,8 @@ export function ConsultList({
   };
 
   return (
-    <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
-      <SafeAreaView style={s.wrap}>
+    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
+      <SafeAreaView style={s.wrap} edges={['bottom']}>
         <View style={s.top}>
           <Text style={s.h2}>
             <Ionicons name="sparkles-outline" size={20} color={c.claude} /> Claude consults

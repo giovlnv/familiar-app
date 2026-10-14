@@ -26,14 +26,14 @@ const RENAMED: Record<string, string> = { marine: 'water', maroon: 'fire', fores
 export type Mode = 'dark' | 'light' | 'system';
 
 const file = (name: string) => new File(Paths.document, name);
-const read = (name: string) => {
+export const read = (name: string) => {
   try {
     return file(name).exists ? file(name).textSync().trim() : '';
   } catch {
     return '';
   }
 };
-const write = (name: string, v: string) => {
+export const write = (name: string, v: string) => {
   const f = file(name);
   if (!f.exists) f.create();
   f.write(v);

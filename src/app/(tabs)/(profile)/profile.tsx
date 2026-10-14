@@ -11,7 +11,7 @@ import { router, Stack, useFocusEffect } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { daysBetween, load, Tracker } from "../../../tracker";
 import { Chip, Cover } from "../../../components/ui";
-import { c, F, themed } from "../../../theme";
+import { c, F, read, themed, write } from "../../../theme";
 import ProfileHeader from "../../../components/ProfileHeader";
 import { ThemeSheet } from "../../../components/ThemeSheet";
 import { FamiliarArt } from "../../../components/Familiar";
@@ -26,6 +26,7 @@ export default function Profile() {
   const [year, setYear] = useState(String(new Date().getFullYear()));
   const [metric, setMetric] = useState<Metric>("books");
   const [theming, setTheming] = useState(false);
+  const [top4, setTop4] = useState(() => read("top4.txt") !== "0");
   const { width } = useWindowDimensions();
   useFocusEffect(useCallback(() => setT(load()), []));
 
@@ -139,27 +140,34 @@ export default function Profile() {
         </View>
         <Ionicons name="chevron-forward" size={16} color={c.dim} />
       </Pressable>
-      <Text style={[s.h2, { marginTop: 14 }]}>Top 4</Text>
-      <View style={s.favs}>
-        {[0, 1, 2, 3].map((i) =>
-          favs[i] ? (
-            <Pressable key={i} onPress={() => open(favs[i]!.id)}>
-              <Cover book={favs[i]!} width={favW} />
-            </Pressable>
-          ) : (
-            <View
-              key={i}
-              style={[s.favEmpty, { width: favW, height: favW * 1.5 }]}
-            >
-              <Ionicons name="add" size={22} color={c.line} />
-            </View>
-          ),
+      <Pressable style={s.foldHead} onPress={() => (write('top4.txt', top4 ? '0' : '1'), setTop4(!top4))} accessibilityState={{ expanded: top4 }}>
+        <Text style={[s.h2, { marginTop: 0, marginBottom: 0 }]}>Top 4</Text>
+        <Ionicons name={top4 ? 'chevron-up' : 'chevron-down'} size={18} color={c.dim} />
+      </Pressable>
+      {top4 && (
+        <>
+        <View style={s.favs}>
+          {[0, 1, 2, 3].map((i) =>
+            favs[i] ? (
+              <Pressable key={i} onPress={() => open(favs[i]!.id)}>
+                <Cover book={favs[i]!} width={favW} />
+              </Pressable>
+            ) : (
+              <View
+                key={i}
+                style={[s.favEmpty, { width: favW, height: favW * 1.5 }]}
+              >
+                <Ionicons name="add" size={22} color={c.line} />
+              </View>
+            ),
+          )}
+        </View>
+        {favs.length < 4 && (
+          <Text style={s.note}>
+            Add favorites from the menu on a book’s page (top right).
+          </Text>
         )}
-      </View>
-      {favs.length < 4 && (
-        <Text style={s.note}>
-          Add favorites from the menu on a book’s page (top right).
-        </Text>
+        </>
       )}
 
       <ScrollView
@@ -416,6 +424,7 @@ const s = themed(() => ({
   },
   linkText: { color: c.text, flex: 1, fontSize: 16 },
   favs: { flexDirection: "row", gap: 10 },
+  foldHead: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 14, marginBottom: 6 },
   favEmpty: {
     borderRadius: 6,
     borderWidth: 1,

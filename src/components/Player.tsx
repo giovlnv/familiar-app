@@ -471,9 +471,10 @@ export default function Player({
       <Modal
         visible={panel === "chapters"}
         animationType="slide"
+        presentationStyle="pageSheet"
         onRequestClose={() => setPanel("none")}
       >
-        <SafeAreaView style={s.wrap}>
+        <SafeAreaView style={s.wrap} edges={["bottom"]}>
           <Header title="Sections" onClose={() => setPanel("none")} />
           <FlatList
             data={book.sections}
@@ -498,9 +499,10 @@ export default function Player({
       <Modal
         visible={panel === "notes"}
         animationType="slide"
+        presentationStyle="pageSheet"
         onRequestClose={() => setPanel("none")}
       >
-        <SafeAreaView style={s.wrap}>
+        <SafeAreaView style={s.wrap} edges={["bottom"]}>
           <Header
             title="Notes"
             onClose={() => setPanel("none")}

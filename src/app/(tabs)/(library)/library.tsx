@@ -113,7 +113,7 @@ export default function Library() {
     <View style={s.wrap}>
       {views}
       {stale && (
-        <Pressable style={s.banner} onPress={() => router.push("/settings")}>
+        <Pressable style={s.banner} onPress={() => router.push("/settings/backups")}>
           <Text style={s.bannerText}>
             {lastBackup() ? "Last backup over 7 days ago" : "No backup yet"} ·
             tap to back up

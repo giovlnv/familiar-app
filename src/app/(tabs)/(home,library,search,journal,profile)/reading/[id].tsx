@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Alert, Modal, Pressable, ScrollView, Text, TextInput, useWindowDimensions, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Modal, Pressable, ScrollView, Text, TextInput, useWindowDimensions, View } from 'react-native';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import * as Clipboard from 'expo-clipboard';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -318,6 +318,7 @@ function PersonSheet({
   const [bg, setBg] = useState('');
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose} onShow={() => (setName(''), setDob(''), setBg(''))}>
+      <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
       <Pressable style={s.dimBg} onPress={onClose} />
       <View style={s.sheet}>
         <Text style={s.h2}>Reading for someone</Text>
@@ -345,6 +346,7 @@ function PersonSheet({
           onPress={() => name.trim() && onSave({ name: name.trim(), dob: parseDate(dob), background: bg.trim() || undefined })}
         />
       </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }

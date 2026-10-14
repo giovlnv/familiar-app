@@ -1,94 +1,114 @@
+<div align="center">
+
+<img src="assets/icon.png" width="96" alt="Familiar app icon: a black cat silhouette in front of a golden moon" />
+
 # Familiar
 
-A personal iPhone app for studying books by listening. Each book is read word for word by an AI voice, and every section ends with a short spoken explanation (Jungian archetypes, tarot meanings, pop-culture examples). The text follows along on screen, and you can take notes tied to the exact moment and passage.
+*your familiar knows the way.*
 
-Built for one person's study. Books and audio are **never** stored in this repository.
+A study companion for tarot, Lenormand, astrology and numerology on iPhone: books become two-voice audiobooks, your notes and readings live next to them, and a small witch's familiar walks the path with you.
 
-## Features
+<img src="assets/hero.jpg" width="300" alt="Shadow, a black cat, walking a moonlit path lined with lanterns for each study path" />
+
+![Expo SDK 57](https://img.shields.io/badge/Expo-SDK%2057-1B1F23?logo=expo)
+![React Native](https://img.shields.io/badge/React%20Native-TypeScript-3178C6?logo=typescript&logoColor=white)
+![iOS 17+](https://img.shields.io/badge/iOS-17%2B-0D1626?logo=apple)
+![Status](https://img.shields.io/badge/status-personal%20build-D9B45B)
+
+</div>
+
+---
+
+## The idea
+
+Studying esoteric systems means reading dense books, connecting symbols, and practising readings. Familiar puts that into one app:
+
+1. **Listen** to a book read word for word, with a short spoken explanation after every section (archetypes, card meanings, everyday examples) in a second voice.
+2. **Think out loud**: tie notes to the exact passage, or ask Claude about it and keep the answer as a numbered consult.
+3. **Practise**: log tarot readings in the Journal with the spread, the cards and your interpretation.
+4. **Keep track**: statuses, ratings, stats and a year in review for everything you listen to.
+
+The mascot is the point of view: *becoming familiar* is learning. Your familiar (Shadow, the black cat, by default) reads along, sleeps at night, and can be petted.
+
+## Highlights
 
 | | |
 |---|---|
-| **Library** | All imported books with length and progress; open a book to see every section with a 1–2 line summary, duration, finished mark, notes and consults |
-| **Follow-along text** | Current paragraph highlighted and auto-scrolled; tap a paragraph to jump there |
-| **Listen-only mode** | Minimize the player: a floating card above the tab bar shows the passage being read, over whatever page you are on; audio keeps playing in the background and on the lock screen |
-| **Mini player** | Minimize the player (chevron at the top) and keep listening while you browse the app; the mini bar above the tabs reopens, pauses or stops it |
-| **Two voices** | Book text and explanations use different voices, so you always know which is which |
-| **Notes** | "Note here" or long-press a paragraph; each note stores the time *and* the passage. Tap a note to jump back; export all notes as Markdown |
-| **Ask Claude** | “Ask” or long-press a paragraph → your question plus the passage, section, time and your notes open in the Claude app as a numbered consult (#C1, #C2…). Copy Claude’s reply, then **Paste answer** in the consults list. Waiting/answered filters, follow-ups, jump to passage, export as Markdown |
-| **Playback** | Speed menu 0.5x–2.0x plus custom, ±15/30 s skips, previous/next section, progress saved automatically |
+| 🎧 **Two-voice audiobooks** | Book text in one voice, explanations in another; follow-along text, tap to seek, background and lock-screen playback, speed up to 2.0×, sleep timer down to "end of this explanation" |
+| 📝 **Notes & consults** | Notes store the time *and* the passage. "Ask Claude" sends the passage, section and your notes as a numbered consult (#C1, #C2…); paste the answer back, follow up, export as Markdown |
+| 🃏 **Reading journal** | Question, area, person, spread and cards (upright/reversed) per position, your interpretation and open questions; personality, essence and year cards from your birth date; Rider-Waite-Smith 1909 deck or your own |
+| 📚 **Tracker** | Statuses, half-star ratings, relistens, diary, shelves, Top 4, ranked lists, genres, stats and a year in review |
+| 🐈‍⬛ **Familiars** | Cat (6 coats, 2 builds, stripe and mark colours), bat, crow, spider; poses for idle, reading, sleeping and walking; blinking, tail swish, petting reactions with haptics; link a familiar to a study path |
+| 🌗 **Themes** | Plum and gold plus four element themes (Water, Fire, Earth, Air), dark and light, switched live; six app icons |
+| ☁️ **Your data** | Everything stays on the phone, with automatic GitHub backup and manual backup files |
 
-| **Reading tracker** | Every book, not only audiobooks: statuses, half-star ratings, rereads, start/finish dates, diary, custom shelves, top 4 favorites, stats and a yearly review. Import your Goodreads or StoryGraph history in Settings |
+<div align="center">
+<img src="assets/icons/classic.png" width="64" alt="Classic icon" />&nbsp;
+<img src="assets/icons/plum.png" width="64" alt="Plum icon" />&nbsp;
+<img src="assets/icons/water.png" width="64" alt="Water icon" />&nbsp;
+<img src="assets/icons/fire.png" width="64" alt="Fire icon" />&nbsp;
+<img src="assets/icons/earth.png" width="64" alt="Earth icon" />&nbsp;
+<img src="assets/icons/air.png" width="64" alt="Air icon" />
+<br /><sub>Classic · Plum · Water · Fire · Earth · Air</sub>
+</div>
 
-Planned features are in [ROADMAP.md](ROADMAP.md).
+## How a book becomes an audiobook
 
-## How it fits together
-
+```mermaid
+flowchart LR
+    A[EPUB / PDF<br/>uploaded from the app] --> B[Split into sections<br/>GitHub Actions]
+    B --> C{You check<br/>the split}
+    C -->|fix note| B
+    C -->|confirm| D[Claude writes an<br/>explanation per section]
+    D --> E[Kokoro TTS<br/>6 parallel jobs]
+    E --> F[book.json + .m4a]
+    F --> G[Downloaded into<br/>the app]
 ```
-Book (EPUB/PDF)
-   │  book2audio pipeline (Python, outside this repo)
-   │   1. split into sections
-   │   2. write an explanation per section (Claude)
-   │   3. synthesize speech (Kokoro, offline, free)
-   ▼
-book.json + 001.m4a … NNN.m4a   ──► imported into the app (Files)
-```
 
-`book.json` holds every section's title, audio file and paragraphs with start/end times, which is what makes the text follow along.
+The pipeline lives in a separate **private** repository, because the books are copyrighted. `book.json` holds every section's paragraphs with start and end times, which is what makes the text follow along.
 
-## Installing on iPhone (no App Store, no Mac)
+## Built with
 
-Every push to `main` runs [`.github/workflows/build-ios.yml`](.github/workflows/build-ios.yml) on GitHub's macOS runners. It builds an **unsigned** `Familiar.ipa` and publishes it under **Releases → latest**.
+- **App**: Expo SDK 57 · React Native · TypeScript · Expo Router · expo-audio · react-native-svg (the familiars are SVG templates recoloured at runtime) · Playfair Display
+- **Pipeline**: Python · Kokoro text-to-speech · GitHub Actions
+- **Design**: Figma (design system, screens, brand) and a Claude design canvas for the mascot drawings
+- **Data**: local files on the device · GitHub API for backups and jobs · Open Library · Open-Meteo geocoding
 
-Installed with **[Sideloadly](https://sideloadly.io)** on Windows (SideStore/iloader sign-in failed with Apple error -80045).
+## Installing (no App Store, no Mac)
 
-1. Download `Familiar.ipa` from Releases on the PC.
-2. Sideloadly → drag in the IPA → Apple ID → **Start** (iPhone on USB the first time).
-3. Sideloadly re-signs every few days (PC on, same Wi-Fi). Books and notes are kept across re-installs.
+Every push to `main` runs [`build-ios.yml`](.github/workflows/build-ios.yml) on GitHub's macOS runners and publishes an **unsigned** `Familiar.ipa` under **Releases → latest**. It is installed with [Sideloadly](https://sideloadly.io) from Windows.
 
-**Over-the-air updates:** every push to `main` also publishes the JavaScript bundle with EAS Update (channel `production`, runtime `1.0.0`). The app downloads it in the background and applies it the next time it goes to the background — no reinstall. Only native changes (new native modules, app.json native config) need a new `.ipa`; bump `version` in app.json when that happens.
-
-> EAS Build isn't used: installing on a real iPhone through EAS requires a paid Apple Developer account. The GitHub workflow plus Sideloadly keeps everything free.
-
-## Adding a book
-
-1. Get the book's `book.json` and `.m4a` files onto the iPhone (Files / iCloud Drive).
-2. In the app: **Import book**, then select `book.json` **and** all the audio files together.
-3. Long-press a book in the Library to delete it.
+Every push also publishes an over-the-air update ([`ota.yml`](.github/workflows/ota.yml), EAS Update, runtime = app version). Only native changes need a new `.ipa`; bump `version` in `app.json` when that happens.
 
 ## Development
 
 ```bash
 npm install
-npx expo start      # live preview in Expo Go (scan the QR code)
+npx expo start      # dev server
 npx tsc --noEmit    # typecheck
 npx expo lint       # lint
 ```
 
-- Expo SDK 57, TypeScript. Check the versioned docs before touching Expo APIs (see [AGENTS.md](AGENTS.md)).
-- Add packages with `npx expo install`, never `npm install <pkg>`.
-- `ios/` and `android/` are generated: configure native behavior in `app.json`.
-- Background audio comes from the `expo-audio` config plugin. It works in installed builds; Expo Go may stop audio when the app is in the background.
-
-### Project layout
+- Add packages with `npx expo install`. `ios/` and `android/` are generated: configure native behaviour in `app.json` and config plugins.
+- Check the versioned Expo docs before touching Expo APIs (see [AGENTS.md](AGENTS.md)).
+- `src/familiar-art.ts` is generated from the mascot drawings; don't edit it by hand.
 
 ```
-src/app/_layout.tsx        root stack (tabs + full-screen player)
-src/app/(tabs)/(home,library,search,diary,profile)/  shared screens; each tab keeps its own history (tap a tab twice to go back to its start)
-src/app/(tabs)/            Home, Library, Search, Diary, Profile tabs
-src/app/title/[id].tsx     Tracked book: status, rating, log, history
-src/app/find.tsx           Match a book to Open Library
-src/tracker.ts             books, statuses, diary logs, shelves, favorites, Open Library search
-src/importer.ts            Goodreads / StoryGraph / generic CSV import
-src/app/review/[year].tsx  Year in review
-src/components/ui.tsx      Stars, Cover, Chip, Button
-src/app/book/[id].tsx      Book page: sections, summaries, progress
-src/app/player/[id].tsx    Player screen
-src/playback.tsx           app-wide audio (keeps playing when minimized)
-src/components/Player.tsx  player, follow-along text, notes
-src/components/MiniPlayer.tsx mini bar shown while browsing
-src/components/Consults.tsx Ask Claude sheet, consult list, prompt builder
-src/format.ts              time formatting
-src/storage.ts             books, notes and progress on the device
-src/types.ts               book.json format
-src/theme.ts               colors
+src/app/                    screens (Expo Router)
+  (tabs)/                   Home · Library · Search · Journal · Profile
+  (tabs)/(home,…,profile)/  shared screens: settings/, familiars, den/[id], title/[id], add, jobs…
+  onboarding.tsx            first-launch setup
+  player/[id].tsx           player
+src/components/             Player, Familiar, Cards, Consults, ThemeSheet, PlaceField…
+src/familiar.ts             familiars: options, storage, SVG templating, closed eyes, tail swish
+src/playback.tsx            app-wide audio, sleep timer
+src/tracker.ts · journal.ts tracker and reading journal
+src/theme.ts                palettes and live theming
+src/sync.ts · jobs.ts       GitHub backups and book jobs
 ```
+
+## Status
+
+Personal build, used daily. A public App Store version (no Claude, on-device voices, bring your own books) is planned. See [ROADMAP.md](ROADMAP.md).
+
+<div align="center"><sub>Made by <a href="https://github.com/giovlnv">@giovlnv</a> with Claude.</sub></div>

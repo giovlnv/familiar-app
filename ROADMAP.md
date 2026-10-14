@@ -1,81 +1,73 @@
 # Roadmap
 
-Personal-use app. New books arrive occasionally, so automation can be slow (hours) as long as it needs no effort.
+Personal-use app first; a public App Store version later. New books arrive occasionally, so automation can be slow (hours) as long as it needs no effort.
 
-Status: ✅ done · 🔨 next · 📋 planned · ❓ decision needed · Last revised: 13 Oct 2026
+Status: ✅ done · 🔨 next · 📋 planned · Last revised: 14 Oct 2026 (app 1.4.0)
 
 ---
 
 ## Built
 
 ### Listening & notes
-- ✅ Word-for-word reading (US voice) + spoken explanation per section (UK voice), follow-along text, tap to seek
-- ✅ Background playback, lock-screen controls, saved progress, section list with 1–2 line summaries
-- ✅ Profile: photo, name and username at the top; settings behind the cog (top right) — app 1.1.0, needs the new .ipa
-- ✅ Decks (Settings → Decks): Rider-Waite-Smith 1909 (public domain, Wikimedia Commons, hosted in this repo's `deck-rws` release), custom decks from images/.zip in Files or a zip link (cards matched by file name), one default deck used everywhere; card picker with upright/reversed ready for the journal
-- ✅ Seven color palettes, each with dark and light versions; Dark / Light / Phone setting switch in Settings → Colors (app reloads to apply; Phone setting needs the next .ipa); black-and-gold card + headphones icon (new .ipa)
-- ✅ Speed drop-up menu: 1.0x, 1.3x, 1.5x, 2.0x + custom 0.1–2.0 (iOS limit is 2.0x); skip back/forward 15 s
-- ✅ Minimize the player: floating card above the tab bar with the passage being read, on every page; pages leave room for it
-- ✅ Notes tied to time + passage; export as Markdown
-- ✅ Ask Claude: numbered consults (#C1…), paste answers, follow-ups, export; save an answer as a note (keep or move)
-- ✅ "Send to Claude" copies the message and opens your saved Claude chat (link in Settings)
+- ✅ Word-for-word reading + spoken explanation per section in a second voice, follow-along text, tap to seek
+- ✅ Background playback, lock-screen controls, saved progress, section list with summaries
+- ✅ Speed menu (1.0/1.3/1.5/2.0× + custom), 15 s skips, mini player with the passage being read
+- ✅ Sleep timer: 5–60 min, 1 hour, end of this section, end of the explanation; fades out
+- ✅ Notes tied to time + passage; Ask Claude consults (#C1…) with answers, follow-ups, export
 
 ### Adding books
-- ✅ Private `familiar-library` repo with the pipeline (Kokoro TTS, 6 parallel GitHub jobs, release zip)
-- ✅ Add a book from the iPhone: EPUB/PDF upload (two-column PDFs supported), per-book instructions, language
-- ✅ Books in progress: split → **you confirm the sections** (or send a fix note) → Claude writes explanations in the TAROT chat → voices on GitHub → download & import in the app (audio branch deleted afterwards; zip kept in Releases)
-- ✅ Manual import of `book.json` + audio files still available
+- ✅ Upload EPUB/PDF from the iPhone → split → you confirm → Claude writes explanations → Kokoro voices on GitHub → download in the app
+- ✅ Private `familiar-library` repo with the pipeline (6 parallel jobs)
 
-### Audiobook tracker (Apple Books × StoryGraph × Letterboxd)
-- ✅ Bottom tabs; each tab keeps its own history (tap the active tab again to go back to its start); tab bar on every screen
-- ✅ Audiobooks only (13 Oct 2026): manual adds, Goodreads/StoryGraph/CSV import and their data removed
-- ✅ Open Library search: apply details/cover to an audiobook, or start an upload with the title filled in
-- ✅ Statuses, half-star ratings, rereads/relistens, start/finish dates, pace, diary
-- ✅ Stats (year / all time): books, pages, hours listened, avg rating, avg days to finish, by-month chart, top authors, genres, most listened, longest read, ratings
-- ✅ Shelves, Top 4 favorites, Year in review, ranked lists with notes (share as image after the next reinstall, text until then)
-- ✅ Genres: top 5 from Goodreads + Amazon + Open Library, editable, bulk fetch
+### Tracker & journal
+- ✅ Statuses, half-star ratings, relistens, diary, shelves, Top 4 (collapsible), ranked lists, genres, stats, Year in review
+- ✅ Reading journal: question, area, person, spread, cards per position, interpretation, open questions, Ask Claude; personality/essence/year cards
+- ✅ Decks: Rider-Waite-Smith 1909 + custom decks
+- ✅ Books tagged to study paths (tarot, Lenormand, astrology, numerology, custom)
+
+### Familiar
+- ✅ Onboarding (paths, familiar creator, about you, backups, first book)
+- ✅ Familiars: cat (6 coats × round/slim, colours, stripe colour, eyes, marks crescent/star/sun/eye/none + 7 mark colours), bat, crow, spider; unlimited, one "with you", linked to paths
+- ✅ Poses: idle, reading, sleeping, walking; element vial from the birth date
+- ✅ Familiar page: petting (purr, chirp, caw, spider drop) with haptics, sleep 23:00–07:00, Tuck in / Wake up
+- ✅ Idle animations: blinking, tail swish (off with Reduce Motion)
+
+### Look & feel
+- ✅ Name **Familiar**, icon A + five alternate icons (Plum, Water, Fire, Earth, Air), splash with zoom
+- ✅ Themes: Plum and gold, Water, Fire, Earth, Air — dark and light, switched live
+- ✅ Playfair Display headings; no full-screen modals (nothing under the status bar)
+- ✅ Settings menus: Edit profile, Appearance, Account, Backups, Configuration, Development
 
 ### Infrastructure
-- ✅ GitHub Actions builds the `.ipa` (installed with Sideloadly); silent over-the-air updates for everything that isn't native
-- ✅ Backup: automatic GitHub sync on leaving the app + manual file with a 7-day reminder
-- ✅ Figma design file (design system, current screens, roadmap, wireframes)
+- ✅ GitHub Actions builds the `.ipa` (Sideloadly); over-the-air updates for everything that isn't native
+- ✅ Backups: automatic GitHub sync + manual file with a 7-day reminder
+- ✅ Figma design file; mascot source drawings on a Claude design canvas
 
 ---
 
-## Now 🔨
+## Next 🔨
 
-1. ✅ **Figma comments** (13 Oct): read through the API (`FIGMA_TOKEN`); the workflow also saves node context + screenshots, so it no longer uses the Figma MCP call limit
-2. 🔨 **Verify on the phone**: reinstall (image sharing), download the "Pipeline test" book, try genres fetch and lists
-3. 🔨 **First real book through the upload flow** (fix whatever the real split shows)
+1. First real book through the upload flow
+2. Expressions for familiars (free): angry, silly, happy
+3. Familiar in the mini player and empty states
+4. Journal stats and search
+5. Full Lenormand / astrology / numerology content
 
-## Next 📋
+## Public version 📋
 
-4. ✅ **Reading journal** — Journal tab (replaced Diary; the diary is a Books/Diary toggle in Library): timeline with stats on top (personality, essence, year card from the birth date in Profile; most drawn; this month), calendar toggle, area filter; reading screen with everything below. Next: stats/search
-   - Date and time, the question
-   - For me or someone else: name, date of birth and short background (all optional), reusable people
-   - Area: love/relationships, family, money, job, personal, spiritual, + custom
-   - Layout/spread (one card, three cards, Celtic Cross…, + custom layouts with named positions)
-   - Cards per position (upright/reversed), linked to the card's section in the audiobooks
-   - My interpretation, bullet list of key points, open questions
-   - Ask Claude about the open questions (same consult flow) and save the answers into the reading
-   - Later: stats (most drawn cards, areas, people), search
-5. **Moods** picked when logging a book; mood stats
-6. **Sleep timer**: 5–60 min, end of section, **end of the explanation**
+Variant flag (personal build keeps Claude and unlocks everything) → public onboarding → on-device Kokoro + iOS voices → bring your own book or audiobook → backup export → free/paid tiers (Familiar+, accessories, own-key cloud voices) → privacy → TestFlight → App Store. Then accounts + sync, then Android.
 
 ## Later 📋
 
 - Notification when a book finishes generating (needs a reinstall)
-- Search across a book's text and notes
-- Bookmarks without text; highlight colors for notes
-- Home-screen widget / Siri shortcut "continue my book"
-- Splash screen
-- CarPlay: a dedicated CarPlay app needs an Apple entitlement a sideloaded app can’t get; audio already plays through CarPlay’s Now Playing
-- Portuguese books (Brazilian voice)
-- Moods/genres cleanup tools; shareable Year in review image
+- Accessories (collars, hats), more poses, per-system props, paid familiars (owl, toad, snake)
+- Search in books and notes, bookmarks, highlight colours
+- Home-screen widget / Siri "continue my book"
+- Portuguese books and UI
+- Shareable cards (Year in review, lists, daily card)
 
 ## Constraints
 
-- Copyrighted books and audio stay in the **private** repo; this repo is public only so iOS builds are free
-- 2,000 free Actions minutes/month (private repo) ≈ 6–10 books/month
-- Native changes need a new `.ipa` + Sideloadly reinstall; everything else arrives over the air
-- Figma Starter plan: 3 pages, limited connector calls per month
+- Copyrighted books and audio stay in the **private** repo; this repo is public so iOS builds are free
+- 2,000 free Actions minutes/month on the private repo ≈ 6–10 books/month
+- Native changes need a new `.ipa` + reinstall; everything else arrives over the air

@@ -21,6 +21,8 @@ const GOALS = ['Learn the cards', 'Read for others', 'Know myself', 'Daily pract
 export default function Onboarding() {
   const insets = useSafeAreaInsets();
   const { width, height } = useWindowDimensions();
+  const band = height * 0.7;
+  const heroH = Math.max((width * 600) / 393, band);
   const saved = getOnboarding();
   const [i, setI] = useState(0);
   const [f, setF] = useState<Familiar>(withYou);
@@ -70,12 +72,12 @@ export default function Onboarding() {
   if (step === 'welcome')
     return (
       <ScrollView style={st.wrap} contentContainerStyle={{ flexGrow: 1, paddingBottom: insets.bottom + 20 }} bounces={false}>
-        <View style={{ height: height * 0.3, overflow: 'hidden' }}>
-          <Image source={require('../../assets/hero.jpg')} style={[st.hero, { height: (width * 600) / 393 }]} />
+        <View style={{ height: band, overflow: 'hidden' }}>
+          <Image source={require('../../assets/hero.jpg')} style={[st.hero, { height: heroH, width: (heroH * 393) / 600, left: (width - (heroH * 393) / 600) / 2 }]} />
           <Svg style={StyleSheet.absoluteFill} preserveAspectRatio="none" viewBox="0 0 1 1">
             <Defs>
               <LinearGradient id="fade" x1="0" y1="0" x2="0" y2="1">
-                <Stop offset="0.6" stopColor={c.bg} stopOpacity={0} />
+                <Stop offset="0.7" stopColor={c.bg} stopOpacity={0} />
                 <Stop offset="1" stopColor={c.bg} stopOpacity={1} />
               </LinearGradient>
             </Defs>
@@ -321,8 +323,8 @@ function Status({ icon, title, text }: { icon: keyof typeof Ionicons.glyphMap; t
 
 const st = themed(() => ({
   wrap: { flex: 1, backgroundColor: c.bg },
-  hero: { position: 'absolute', bottom: 0, width: '100%' },
-  brand: { alignItems: 'center', gap: 6, marginTop: 14 },
+  hero: { position: 'absolute', bottom: 0 },
+  brand: { alignItems: 'center', gap: 6, marginTop: -28 },
   word: { color: c.gold, fontSize: 46, fontWeight: '500' },
   tagline: { color: c.text, fontStyle: 'italic', fontSize: 17 },
   pad: { paddingHorizontal: 22 },

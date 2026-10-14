@@ -25,6 +25,7 @@ import { fetchAllGenres } from "../../../genres";
 import { getClaudeLink, setClaudeLink } from "../../../components/Consults";
 import { defaultDeck, deleteDeck, downloadRws, importDeckFromFiles, importDeckFromUrl, listDecks, setDefaultDeck } from "../../../decks";
 import { CardImage, CardPicker, useDecks } from "../../../components/Cards";
+import { IconPicker } from "../../../components/ThemeSheet";
 
 const when = (t?: number) => (t ? new Date(t).toLocaleString() : "never");
 
@@ -130,6 +131,9 @@ export default function Settings() {
           </Pressable>
         ))}
       </View>
+
+      <Text style={s.h2}>App icon</Text>
+      <IconPicker heading={false} />
 
       <Text style={s.h2}>Automatic backup · GitHub</Text>
       <Text style={s.p}>

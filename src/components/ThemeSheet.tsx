@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Image, Modal, Pressable, ScrollView, Text, View } from 'react-native';
-import { getAppIconName, setAlternateAppIcon, supportsAlternateIcons } from 'expo-alternate-app-icons';
+import { Alert, Image, Modal, Platform, Pressable, ScrollView, Text, View } from 'react-native';
+import { getAppIconName, setAlternateAppIcon } from 'expo-alternate-app-icons';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { c, F, Mode, mode, PALETTES, paletteId, scheme, setMode, setPalette, themed } from '../theme';
 
@@ -19,13 +19,25 @@ const ICONS: [string | null, string, number][] = [
   ['Air', 'Air', require('../../assets/icons/air.png')],
 ];
 
-function IconPicker() {
-  const [icon, setIcon] = useState(() => getAppIconName());
-  if (!supportsAlternateIcons) return null;
-  const pick = (name: string | null) => setAlternateAppIcon(name as never).then(() => setIcon(name as never), () => {});
+const currentIcon = () => {
+  try {
+    return getAppIconName();
+  } catch {
+    return null;
+  }
+};
+
+export function IconPicker({ heading = true }: { heading?: boolean }) {
+  const [icon, setIcon] = useState(currentIcon);
+  if (Platform.OS !== 'ios') return null;
+  const pick = (name: string | null) =>
+    setAlternateAppIcon(name as never).then(
+      () => setIcon(name as never),
+      (e: Error) => Alert.alert('Couldn’t change the icon', e?.message ?? String(e)),
+    );
   return (
     <>
-      <Text style={s.sub}>App icon</Text>
+      {heading && <Text style={s.sub}>App icon</Text>}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.icons}>
         {ICONS.map(([name, label, img]) => {
           const on = icon === name;

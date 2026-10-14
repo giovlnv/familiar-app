@@ -9,7 +9,6 @@ import {
   Pressable,
   ScrollView,
   Share,
-  StyleSheet,
   Text,
   TextInput,
   View,
@@ -20,7 +19,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Book, Consult, Note } from '../types';
 import { fmtTime } from '../format';
-import { c, F } from '../theme';
+import { c, F, themed } from '../theme';
 
 export type AskDraft = { section: string; para: number; time: number; quote: string; parent?: Consult };
 
@@ -272,7 +271,7 @@ const Btn = ({ label, onPress, primary }: { label: string; onPress: () => void; 
   </Pressable>
 );
 
-const s = StyleSheet.create({
+const s = themed(() => ({
   wrap: { flex: 1, backgroundColor: c.bg, paddingHorizontal: 16 },
   top: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 10 },
   topRight: { flexDirection: 'row', gap: 18 },
@@ -311,4 +310,4 @@ const s = StyleSheet.create({
     textAlignVertical: 'top',
   },
   row: { flexDirection: 'row', justifyContent: 'flex-end', gap: 10 },
-});
+}));

@@ -1,11 +1,11 @@
 import { useCallback, useState } from 'react';
-import { Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, FlatList, Pressable, Text, View } from 'react-native';
 import { router, Stack, useFocusEffect } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { addList, load, Tracker } from '../../../tracker';
 import { Cover } from '../../../components/ui';
 import { usePad } from '../../../playback';
-import { c } from '../../../theme';
+import { c, themed } from '../../../theme';
 
 export const newList = (then: (id: string) => void) =>
   Alert.prompt('New list', 'e.g. Best tarot books', (name) => name?.trim() && then(addList(name).id));
@@ -58,10 +58,10 @@ export default function Lists() {
   );
 }
 
-const s = StyleSheet.create({
+const s = themed(() => ({
   wrap: { flex: 1, backgroundColor: c.bg },
   card: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: c.panel, borderRadius: 12, padding: 12 },
   covers: { flexDirection: 'row', minWidth: 44 },
   title: { color: c.text, fontSize: 16, fontWeight: '600' },
   dim: { color: c.dim, fontSize: 13 },
-});
+}));

@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import { Pressable, ScrollView, SectionList, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Pressable, ScrollView, SectionList, Text, useWindowDimensions, View } from 'react-native';
 import { router, Stack, useFocusEffect } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { birthCards, JournalData, loadJournal, mostDrawn, newReading, Reading } from '../../../journal';
@@ -10,7 +10,7 @@ import ReadingRow from '../../../components/ReadingRow';
 import CardSheet from '../../../components/CardSheet';
 import { Chip, fmtDate } from '../../../components/ui';
 import { usePad } from '../../../playback';
-import { c } from '../../../theme';
+import { c, themed } from '../../../theme';
 
 const WEEK = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 const day = (r: Reading) => r.at.slice(0, 10);
@@ -234,7 +234,7 @@ function Calendar({
   );
 }
 
-const s = StyleSheet.create({
+const s = themed(() => ({
   wrap: { flex: 1, backgroundColor: c.bg, paddingHorizontal: 16 },
   h3: { color: c.text, fontSize: 17, fontWeight: '700', marginTop: 16, marginBottom: 8 },
   birthRow: { flexDirection: 'row', gap: 10 },
@@ -262,4 +262,4 @@ const s = StyleSheet.create({
   week: { color: c.dim, fontSize: 12, textAlign: 'center' },
   num: { color: c.text, fontSize: 14 },
   dot: { width: 5, height: 5, borderRadius: 3, marginTop: 2 },
-});
+}));

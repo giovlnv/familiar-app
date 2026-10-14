@@ -5,7 +5,6 @@ import {
   FlatList,
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   useWindowDimensions,
   View,
@@ -26,7 +25,7 @@ import {
 import { lastBackup } from "../../../sync";
 import { Chip, Cover, Stars } from "../../../components/ui";
 import { PATHS } from "../../../familiar";
-import { c } from "../../../theme";
+import { c, themed } from "../../../theme";
 import DiaryList from "../../../components/DiaryList";
 
 type Filter = "all" | Status | `shelf:${string}` | `path:${string}`;
@@ -206,7 +205,7 @@ export default function Library() {
 const match = (b: TBook, f: Filter) =>
   f === "all" || b.status === f || (f.startsWith("path:") && !!b.paths?.includes(f.slice(5)));
 
-const s = StyleSheet.create({
+const s = themed(() => ({
   wrap: { flex: 1, backgroundColor: c.bg, paddingHorizontal: 16 },
   banner: {
     backgroundColor: c.raised,
@@ -234,4 +233,4 @@ const s = StyleSheet.create({
     borderColor: c.line,
   },
   importText: { color: c.gold, fontWeight: "600" },
-});
+}));

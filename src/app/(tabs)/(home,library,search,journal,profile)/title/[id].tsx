@@ -46,7 +46,7 @@ import {
   fmtDate,
   Stars,
 } from "../../../../components/ui";
-import { c, F } from "../../../../theme";
+import { c, F, themed } from "../../../../theme";
 import { GenreSheet } from "../../../../components/GenreSheet";
 import { newList } from "../lists";
 import { FamiliarArt } from "../../../../components/Familiar";
@@ -534,7 +534,7 @@ function LogSheet({
   );
 }
 
-const s = StyleSheet.create({
+const s = themed(() => ({
   pathChip: { borderWidth: 1, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 },
   pathText: { fontSize: 12, fontWeight: '600' },
   wrap: { flex: 1, backgroundColor: c.bg, paddingHorizontal: 16 },
@@ -599,4 +599,4 @@ const s = StyleSheet.create({
     gap: 12,
     paddingVertical: 10,
   },
-});
+}));

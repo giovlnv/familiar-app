@@ -1,4 +1,4 @@
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Modal, Pressable, ScrollView, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -6,7 +6,7 @@ import { CardImage } from './Cards';
 import { cardName } from '../decks';
 import { cardSections } from '../journal';
 import { getBook } from '../storage';
-import { c } from '../theme';
+import { c, themed } from '../theme';
 
 const excerpt = (paras: { kind: string; text: string }[], kind: string, max: number) =>
   paras.filter((p) => p.kind === kind).slice(0, max).map((p) => p.text);
@@ -76,7 +76,7 @@ export default function CardSheet({ id, role, onClose }: { id: string | null; ro
   );
 }
 
-const s = StyleSheet.create({
+const s = themed(() => ({
   wrap: { flex: 1, backgroundColor: c.bg, paddingHorizontal: 16 },
   top: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 14 },
   link: { color: c.gold, fontSize: 16, fontWeight: '600' },
@@ -92,4 +92,4 @@ const s = StyleSheet.create({
   text: { color: c.text, fontSize: 15, lineHeight: 22 },
   listen: { flexDirection: 'row', gap: 8, alignItems: 'center', justifyContent: 'center', backgroundColor: c.gold, borderRadius: 10, padding: 11, marginTop: 10 },
   listenText: { color: c.bg, fontWeight: '700' },
-});
+}));

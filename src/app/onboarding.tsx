@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Alert, Image, KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Image, KeyboardAvoidingView, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -9,7 +9,7 @@ import { getClaudeLink, setClaudeLink } from '../components/Consults';
 import { backupToFile, getState, getToken, setToken } from '../sync';
 import { getProfile, setProfile } from '../tracker';
 import { parseDate, showDate } from '../journal';
-import { c, F } from '../theme';
+import { c, F, themed } from '../theme';
 import { maskDate, maskTime } from '../format';
 import { Place, PlaceField } from '../components/PlaceField';
 
@@ -308,7 +308,7 @@ function Status({ icon, title, text }: { icon: keyof typeof Ionicons.glyphMap; t
   );
 }
 
-const st = StyleSheet.create({
+const st = themed(() => ({
   wrap: { flex: 1, backgroundColor: c.bg },
   heroBox: { alignSelf: 'center', height: '44%', aspectRatio: 393 / 600, borderRadius: 24, overflow: 'hidden', marginTop: 8 },
   hero: { width: '100%', height: '100%' },
@@ -334,4 +334,4 @@ const st = StyleSheet.create({
   pill: { backgroundColor: c.raised, borderRadius: 999, paddingHorizontal: 14, paddingVertical: 8 },
   pillOn: { backgroundColor: c.gold },
   pillText: { color: c.text, fontSize: 14 },
-});
+}));

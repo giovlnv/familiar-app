@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { coverUrl, TBook } from "../tracker";
-import { c } from "../theme";
+import { c, themed } from "../theme";
 
 export function Stars({
   value,
@@ -152,7 +152,7 @@ export const fmtDate = (
   },
 ) => new Date(`${d}T12:00:00`).toLocaleDateString(undefined, opts);
 
-const s = StyleSheet.create({
+const s = themed(() => ({
   placeholder: {
     flex: 1,
     padding: 6,
@@ -199,7 +199,7 @@ const s = StyleSheet.create({
     paddingHorizontal: 4,
   },
   stepDate: { color: c.text, fontSize: 17, fontWeight: "600" },
-});
+}));
 
 export function DateStepper({
   value,

@@ -1,4 +1,4 @@
-import { Appearance } from 'react-native';
+import { Appearance, StyleSheet } from 'react-native';
 import { File, Paths } from 'expo-file-system';
 
 export type Palette = {
@@ -40,14 +40,61 @@ const write = (name: string, v: string) => {
 };
 
 const savedPalette = read('palette.txt');
-export const paletteId = RENAMED[savedPalette] ?? (PALETTES.some((p) => p.id === savedPalette) ? savedPalette : PALETTES[0].id);
-export const mode = (read('mode.txt') || 'dark') as Mode;
-export const scheme: 'dark' | 'light' = mode === 'system' ? (Appearance.getColorScheme() === 'light' ? 'light' : 'dark') : mode;
+export let paletteId = RENAMED[savedPalette] ?? (PALETTES.some((p) => p.id === savedPalette) ? savedPalette : PALETTES[0].id);
+export let mode = (read('mode.txt') || 'dark') as Mode;
+const resolve = (m: Mode): 'dark' | 'light' => (m === 'system' ? (Appearance.getColorScheme() === 'light' ? 'light' : 'dark') : m);
+export let scheme: 'dark' | 'light' = resolve(mode);
 
-const chosen = PALETTES.find((p) => p.id === paletteId) ?? PALETTES[0];
-export const c: Palette = { ...(scheme === 'light' ? chosen.light : chosen.c) };
+const paletteFor = (id: string, sch: 'dark' | 'light') => {
+  const p = PALETTES.find((x) => x.id === id) ?? PALETTES[0];
+  return sch === 'light' ? p.light : p.c;
+};
+export const c: Palette = { ...paletteFor(paletteId, scheme) };
 
-export const setPalette = (id: string) => write('palette.txt', id);
-export const setMode = (m: Mode) => write('mode.txt', m);
+let version = 0;
+const listeners = new Set<() => void>();
+export const onThemeChange = (fn: () => void) => {
+  listeners.add(fn);
+  return () => {
+    listeners.delete(fn);
+  };
+};
+
+/** Apply a palette and/or mode live: colours update in place and every themed style sheet rebuilds on next read. */
+export function applyTheme(next: { palette?: string; mode?: Mode } = {}) {
+  if (next.palette) {
+    paletteId = next.palette;
+    write('palette.txt', next.palette);
+  }
+  if (next.mode) {
+    mode = next.mode;
+    write('mode.txt', next.mode);
+  }
+  const sch = resolve(mode);
+  const pal = paletteFor(paletteId, sch);
+  if (sch === scheme && Object.keys(pal).every((k) => c[k as keyof Palette] === pal[k as keyof Palette])) return;
+  scheme = sch;
+  Object.assign(c, pal);
+  version++;
+  listeners.forEach((fn) => fn());
+}
+
+/** Like StyleSheet.create, but rebuilt from the current theme colours after applyTheme. */
+export function themed<T extends StyleSheet.NamedStyles<T> | StyleSheet.NamedStyles<any>>(make: () => T & StyleSheet.NamedStyles<any>): T {
+  let built = -1;
+  let cache = {} as T;
+  return new Proxy({} as T, {
+    get(_, key) {
+      if (built !== version) {
+        cache = make();
+        built = version;
+      }
+      return cache[key as keyof T];
+    },
+  });
+}
+
+export const setPalette = (id: string) => applyTheme({ palette: id });
+export const setMode = (m: Mode) => applyTheme({ mode: m });
 
 export const F = { heading: 'PlayfairDisplay_500Medium', headingItalic: 'PlayfairDisplay_500Medium_Italic' };

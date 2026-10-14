@@ -1,12 +1,12 @@
 import { usePad } from '../../../../playback';
 import { useCallback, useMemo, useState } from 'react';
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, Text, View } from 'react-native';
 import { router, Stack, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { getBook, loadConsults, loadNotes, loadProgress } from '../../../../storage';
 import { fmtHours, fmtTime } from '../../../../format';
 import { Consult, Note, Progress } from '../../../../types';
-import { c, F } from '../../../../theme';
+import { c, F, themed } from '../../../../theme';
 
 export default function BookPage() {
   const pad = usePad();
@@ -88,7 +88,7 @@ export default function BookPage() {
   );
 }
 
-const s = StyleSheet.create({
+const s = themed(() => ({
   wrap: { flex: 1, backgroundColor: c.bg, paddingHorizontal: 16 },
   empty: { color: c.dim, padding: 16 },
   head: { paddingBottom: 8 },
@@ -106,4 +106,4 @@ const s = StyleSheet.create({
   secDone: { color: c.dim },
   marks: { color: c.dim, fontSize: 13, fontVariant: ['tabular-nums'] },
   summary: { color: c.dim, fontSize: 14, lineHeight: 19, marginTop: 4, marginLeft: 34 },
-});
+}));

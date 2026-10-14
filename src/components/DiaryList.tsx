@@ -6,7 +6,7 @@ import { router, useFocusEffect } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { load, Tracker } from '../tracker';
 import { Cover, fmtDate, Stars } from '../components/ui';
-import { c } from '../theme';
+import { c, themed } from '../theme';
 
 export default function DiaryList({ header }: { header?: ReactElement }) {
   const pad = usePad();
@@ -65,7 +65,7 @@ export default function DiaryList({ header }: { header?: ReactElement }) {
   );
 }
 
-const s = StyleSheet.create({
+const s = themed(() => ({
   wrap: { flex: 1, backgroundColor: c.bg },
   empty: { color: c.dim, fontSize: 16, lineHeight: 22, marginTop: 20 },
   month: { color: c.gold, fontWeight: '700', fontSize: 13, letterSpacing: 1, textTransform: 'uppercase', marginTop: 18, marginBottom: 6 },
@@ -73,4 +73,4 @@ const s = StyleSheet.create({
   day: { color: c.text, fontSize: 20, fontWeight: '700', width: 28, textAlign: 'center' },
   title: { color: c.text, fontSize: 15, fontWeight: '600' },
   author: { color: c.dim, fontSize: 13, marginTop: 2 },
-});
+}));

@@ -7,7 +7,7 @@ import { getBook as getAudio, installSampleOnce, loadProgress } from '../../../s
 import { syncAudioBooks, Tracker } from '../../../tracker';
 import { Cover, fmtDate, Stars } from '../../../components/ui';
 import { fmtTime } from '../../../format';
-import { c, F } from '../../../theme';
+import { c, F, themed } from '../../../theme';
 import { FamiliarArt } from '../../../components/Familiar';
 import { familiarFor } from '../../../familiar';
 
@@ -124,7 +124,7 @@ export default function Home() {
   );
 }
 
-const s = StyleSheet.create({
+const s = themed(() => ({
   familiar: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: c.panel, borderRadius: 14, paddingVertical: 4, paddingHorizontal: 10, marginTop: 12 },
   famName: { color: c.text, fontSize: 18, fontFamily: F.heading },
   wrap: { flex: 1, backgroundColor: c.bg, paddingHorizontal: 16 },
@@ -139,4 +139,4 @@ const s = StyleSheet.create({
   bar: { height: 3, backgroundColor: c.line, borderRadius: 2, marginTop: 8, overflow: 'hidden' },
   barFill: { height: 3, backgroundColor: c.gold },
   log: { flexDirection: 'row', gap: 12, alignItems: 'center', paddingVertical: 8, borderBottomWidth: StyleSheet.hairlineWidth, borderColor: c.line },
-});
+}));

@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { usePlayback } from '../playback';
-import { c } from '../theme';
+import { c, themed } from '../theme';
 
 export default function MiniPlayer() {
   const { item, sec, t, status, toggle, skip, stop, setMiniH } = usePlayback();
@@ -50,7 +50,7 @@ export default function MiniPlayer() {
   );
 }
 
-const s = StyleSheet.create({
+const s = themed(() => ({
   card: {
     marginHorizontal: 8,
     marginBottom: 8,
@@ -70,4 +70,4 @@ const s = StyleSheet.create({
   title: { color: c.text, fontSize: 15, fontWeight: '600' },
   kind: { color: c.gold, fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1, marginTop: 2 },
   text: { color: c.text, fontSize: 15, lineHeight: 21, paddingHorizontal: 14, paddingTop: 8, paddingBottom: 12 },
-});
+}));

@@ -6,7 +6,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { load, patchList, removeList, TBook, Tracker } from '../../../../tracker';
 import { Button, Cover } from '../../../../components/ui';
 import { usePad } from '../../../../playback';
-import { c, F } from '../../../../theme';
+import { c, F, themed } from '../../../../theme';
 
 export default function ListScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -167,7 +167,7 @@ export default function ListScreen() {
   );
 }
 
-const s = StyleSheet.create({
+const s = themed(() => ({
   wrap: { flex: 1, backgroundColor: c.bg },
   dim: { color: c.dim, fontSize: 13, marginBottom: 8 },
   h2: { color: c.text, fontSize: 19, fontFamily: F.heading },
@@ -183,4 +183,4 @@ const s = StyleSheet.create({
   shareRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   shareRank: { color: c.gold, fontSize: 22, fontWeight: '800', width: 28, textAlign: 'center' },
   brand: { color: c.dim, fontSize: 12, textAlign: 'right', marginTop: 6 },
-});
+}));

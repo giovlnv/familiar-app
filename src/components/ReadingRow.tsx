@@ -1,8 +1,8 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { router } from 'expo-router';
 import { CardImage } from './Cards';
 import { JournalData, Reading, spreadOf } from '../journal';
-import { c } from '../theme';
+import { c, themed } from '../theme';
 
 export default function ReadingRow({ r, j }: { r: Reading; j: JournalData }) {
   const sp = spreadOf(j, r.spreadId);
@@ -35,7 +35,7 @@ export default function ReadingRow({ r, j }: { r: Reading; j: JournalData }) {
   );
 }
 
-const s = StyleSheet.create({
+const s = themed(() => ({
   card: { backgroundColor: c.panel, borderRadius: 12, padding: 12, marginBottom: 10, gap: 8 },
   top: { flexDirection: 'row', gap: 8 },
   q: { color: c.text, fontSize: 15, fontWeight: '600', flex: 1 },
@@ -44,4 +44,4 @@ const s = StyleSheet.create({
   tags: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   tag: { color: c.dim, fontSize: 12, borderWidth: 1, borderColor: c.line, borderRadius: 10, paddingHorizontal: 8, paddingVertical: 2, overflow: 'hidden' },
   dim: { color: c.dim, fontSize: 12 },
-});
+}));

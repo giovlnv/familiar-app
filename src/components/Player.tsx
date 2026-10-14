@@ -32,7 +32,7 @@ import {
   ConsultList,
   shareToClaude,
 } from "./Consults";
-import { c, F } from "../theme";
+import { c, F, themed } from "../theme";
 import { usePlayback } from "../playback";
 import { FamiliarArt } from "./Familiar";
 import { familiarFor } from "../familiar";
@@ -672,7 +672,7 @@ const Header = ({
   </View>
 );
 
-const s = StyleSheet.create({
+const s = themed(() => ({
   wrap: { flex: 1, backgroundColor: c.bg, paddingHorizontal: 16 },
   top: {
     flexDirection: "row",
@@ -814,4 +814,4 @@ const s = StyleSheet.create({
     padding: 12,
     textAlignVertical: "top",
   },
-});
+}));

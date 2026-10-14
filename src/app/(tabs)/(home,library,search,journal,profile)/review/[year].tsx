@@ -3,7 +3,6 @@ import { useMemo } from "react";
 import {
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   useWindowDimensions,
   View,
@@ -11,7 +10,7 @@ import {
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { daysBetween, load, TBook } from "../../../../tracker";
 import { Cover, Stars } from "../../../../components/ui";
-import { c, F } from "../../../../theme";
+import { c, F, themed } from "../../../../theme";
 
 const MONTHS = [
   "January",
@@ -168,7 +167,7 @@ const Line = ({ k, v }: { k: string; v: string }) => (
   </View>
 );
 
-const s = StyleSheet.create({
+const s = themed(() => ({
   wrap: { flex: 1, backgroundColor: c.bg, paddingHorizontal: 16 },
   facts: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginTop: 12 },
   fact: {
@@ -203,4 +202,4 @@ const s = StyleSheet.create({
   line: { gap: 2 },
   lineV: { color: c.text, fontSize: 15 },
   grid: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-});
+}));

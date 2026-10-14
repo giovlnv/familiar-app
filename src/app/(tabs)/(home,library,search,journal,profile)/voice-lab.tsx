@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import * as Clipboard from "expo-clipboard";
 import { File, Paths } from "expo-file-system";
 import { AudioPlayer, createAudioPlayer } from "expo-audio";
 import { KokoroTtsModel, models, useTextToSpeech } from "react-native-executorch";
-import { c } from "../../../theme";
+import { c, themed } from "../../../theme";
 import { usePad, usePlayback } from "../../../playback";
 
 type Lang = "EN" | "PT";
@@ -224,7 +224,7 @@ const Btn = ({
   </Pressable>
 );
 
-const s = StyleSheet.create({
+const s = themed(() => ({
   wrap: { flex: 1, backgroundColor: c.bg, padding: 16 },
   p: { color: c.dim, lineHeight: 20, marginBottom: 12 },
   card: { backgroundColor: c.panel, borderRadius: 12, padding: 14, gap: 10, marginTop: 4, marginBottom: 12 },
@@ -240,4 +240,4 @@ const s = StyleSheet.create({
   btn: { backgroundColor: c.raised, paddingVertical: 11, paddingHorizontal: 14, borderRadius: 10 },
   btnPrimary: { backgroundColor: c.gold },
   btnText: { color: c.text, fontWeight: "600" },
-});
+}));

@@ -1,10 +1,10 @@
 import { useMemo } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { COATS, COLORS, Element, EYES, Familiar, familiarXml, LIGHTS, MARK_COLORS, MARKS, Pose, SPECIES, STRIPES, sunSign } from '../familiar';
 import { getProfile } from '../tracker';
-import { c, F } from '../theme';
+import { c, F, themed } from '../theme';
 
 const ELEMENTS: Record<Element, { color: string; up: boolean; bar: boolean; name: string }> = {
   fire: { color: '#E0765A', up: true, bar: false, name: 'Fire' },
@@ -235,7 +235,7 @@ export function NameStep({ f, set }: StepProps) {
   );
 }
 
-export const s = StyleSheet.create({
+export const s = themed(() => ({
   label: { color: c.dim, fontSize: 11, fontWeight: '700', letterSpacing: 1 },
   card: { backgroundColor: c.panel, borderRadius: 14, padding: 12, alignItems: 'center', gap: 4, borderWidth: 2, borderColor: 'transparent' },
   cardOn: { borderColor: c.gold },
@@ -261,4 +261,4 @@ export const s = StyleSheet.create({
   pill: { backgroundColor: c.raised, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6 },
   pillText: { color: c.text, fontSize: 13 },
   quote: { color: c.dim, fontFamily: F.headingItalic, fontSize: 15, marginTop: 6 },
-});
+}));

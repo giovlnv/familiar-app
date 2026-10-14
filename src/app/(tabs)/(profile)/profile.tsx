@@ -3,7 +3,6 @@ import { useCallback, useState } from "react";
 import {
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   useWindowDimensions,
   View,
@@ -12,8 +11,9 @@ import { router, Stack, useFocusEffect } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { daysBetween, load, Tracker } from "../../../tracker";
 import { Chip, Cover } from "../../../components/ui";
-import { c, F } from "../../../theme";
+import { c, F, themed } from "../../../theme";
 import ProfileHeader from "../../../components/ProfileHeader";
+import { ThemeSheet } from "../../../components/ThemeSheet";
 import { FamiliarArt } from "../../../components/Familiar";
 import { loadFamiliars, withYou } from "../../../familiar";
 
@@ -25,6 +25,7 @@ export default function Profile() {
   const [t, setT] = useState<Tracker>({ books: [], logs: [] });
   const [year, setYear] = useState(String(new Date().getFullYear()));
   const [metric, setMetric] = useState<Metric>("books");
+  const [theming, setTheming] = useState(false);
   const { width } = useWindowDimensions();
   useFocusEffect(useCallback(() => setT(load()), []));
 
@@ -114,6 +115,11 @@ export default function Profile() {
     <ScrollView style={s.wrap} contentContainerStyle={{ paddingBottom: 40 + pad }}>
       <Stack.Screen
         options={{
+          headerLeft: () => (
+            <Pressable hitSlop={10} onPress={() => setTheming(true)} accessibilityLabel="Theme">
+              <Ionicons name="color-palette-outline" size={24} color={c.gold} />
+            </Pressable>
+          ),
           headerRight: () => (
             <Pressable hitSlop={10} onPress={() => router.push("/settings")} accessibilityLabel="Settings">
               <Ionicons name="settings-outline" size={24} color={c.gold} />
@@ -121,6 +127,7 @@ export default function Profile() {
           ),
         }}
       />
+      <ThemeSheet visible={theming} onClose={() => setTheming(false)} />
       <ProfileHeader />
       <Pressable style={s.familiar} onPress={() => router.push("/familiars")}>
         <FamiliarArt familiar={withYou()} size={56} vial />
@@ -338,7 +345,7 @@ const count = (xs: string[]) =>
     ),
   ].sort((a, b) => b[1] - a[1]);
 
-const s = StyleSheet.create({
+const s = themed(() => ({
   familiar: { flexDirection: "row", alignItems: "center", gap: 12, backgroundColor: c.panel, borderRadius: 14, padding: 10, marginTop: 12 },
   famTitle: { color: c.text, fontSize: 15, fontWeight: "600" },
   famDim: { color: c.dim, fontSize: 12, marginTop: 2 },
@@ -417,4 +424,4 @@ const s = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-});
+}));

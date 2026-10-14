@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useReducer, useState } from 'react';
-import { FlatList, Image, Modal, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
+import { FlatList, Image, Modal, Pressable, ScrollView, Switch, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CARDS, cardName, cardUri, onDecksChange } from '../decks';
 import { Chip } from './ui';
-import { c, F } from '../theme';
+import { c, F, themed } from '../theme';
 
 export function useDecks() {
   const [, bump] = useReducer((n: number) => n + 1, 0);
@@ -95,7 +95,7 @@ export function CardPicker({
   );
 }
 
-const s = StyleSheet.create({
+const s = themed(() => ({
   wrap: { flex: 1, backgroundColor: c.bg, paddingHorizontal: 16 },
   top: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 14 },
   h2: { color: c.text, fontSize: 20, fontFamily: F.heading },
@@ -107,4 +107,4 @@ const s = StyleSheet.create({
   name: { color: c.dim, fontSize: 12, marginTop: 4 },
   blank: { backgroundColor: c.raised, borderWidth: 1, borderColor: c.gold, alignItems: 'center', justifyContent: 'center', padding: 4 },
   blankText: { color: c.gold, textAlign: 'center' },
-});
+}));

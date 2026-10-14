@@ -4,7 +4,6 @@ import {
   Alert,
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   TextInput,
   View,
@@ -20,9 +19,8 @@ import {
   setToken,
   SyncState,
 } from "../../../sync";
-import * as Updates from "expo-updates";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { c, Mode, mode, PALETTES, paletteId, scheme, setMode, setPalette, F } from "../../../theme";
+import { c, Mode, mode, PALETTES, paletteId, scheme, setMode, setPalette, F, themed } from "../../../theme";
 import { fetchAllGenres } from "../../../genres";
 import { getClaudeLink, setClaudeLink } from "../../../components/Consults";
 import { defaultDeck, deleteDeck, downloadRws, importDeckFromFiles, importDeckFromUrl, listDecks, setDefaultDeck } from "../../../decks";
@@ -105,7 +103,6 @@ export default function Settings() {
             onPress={() => {
               if (m === mode) return;
               setMode(m as Mode);
-              Updates.reloadAsync().catch(() => Alert.alert("Saved", "Close and reopen the app to see the change."));
             }}
           >
             <Ionicons name={icon} size={15} color={mode === m ? c.bg : c.dim} />
@@ -121,7 +118,6 @@ export default function Settings() {
             onPress={() => {
               if (p.id === paletteId) return;
               setPalette(p.id);
-              Updates.reloadAsync().catch(() => Alert.alert("Saved", "Close and reopen the app to see the new colors."));
             }}
           >
             <View style={[s.swatch, { backgroundColor: p.c.bg, borderColor: p.c.line }]}>
@@ -331,7 +327,7 @@ const Btn = ({
   </Pressable>
 );
 
-const s = StyleSheet.create({
+const s = themed(() => ({
   wrap: { flex: 1, backgroundColor: c.bg, padding: 16 },
   h2: {
     color: c.text,
@@ -372,4 +368,4 @@ const s = StyleSheet.create({
   btnPrimary: { backgroundColor: c.gold },
   btnText: { color: c.text },
   btnTextPrimary: { color: c.bg, fontWeight: "700" },
-});
+}));

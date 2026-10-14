@@ -1,10 +1,10 @@
 import { useCallback, useState } from 'react';
-import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, RefreshControl, Text, View } from 'react-native';
 import { router, Stack, useFocusEffect } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Job, listJobs, STAGE_LABEL } from '../../../jobs';
 import { usePad } from '../../../playback';
-import { c } from '../../../theme';
+import { c, themed } from '../../../theme';
 
 const ICON: Record<string, keyof typeof Ionicons.glyphMap> = {
   splitting: 'timer-outline',
@@ -72,10 +72,10 @@ export default function Jobs() {
   );
 }
 
-const s = StyleSheet.create({
+const s = themed(() => ({
   wrap: { flex: 1, backgroundColor: c.bg },
   card: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: c.panel, borderRadius: 12, padding: 14 },
   title: { color: c.text, fontSize: 15, fontWeight: '600' },
   dim: { color: c.dim, fontSize: 13 },
   err: { color: c.claude, marginBottom: 10 },
-});
+}));

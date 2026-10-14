@@ -1,11 +1,11 @@
 import { useCallback, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { describe, loadFamiliars, PATHS } from '../../../familiar';
 import { FamiliarArt } from '../../../components/Familiar';
 import { usePad } from '../../../playback';
-import { c } from '../../../theme';
+import { c, themed } from '../../../theme';
 
 export default function Familiars() {
   const pad = usePad();
@@ -64,7 +64,7 @@ export default function Familiars() {
   );
 }
 
-const s = StyleSheet.create({
+const s = themed(() => ({
   wrap: { flex: 1, backgroundColor: c.bg },
   p: { color: c.dim, fontSize: 14, lineHeight: 20, marginBottom: 4 },
   card: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: c.panel, borderRadius: 14, padding: 12, borderWidth: 2, borderColor: 'transparent' },
@@ -80,4 +80,4 @@ const s = StyleSheet.create({
   tag: { borderRadius: 999, paddingHorizontal: 8, paddingVertical: 2 },
   tagText: { fontSize: 11, fontWeight: '600' },
   add: { flexDirection: 'row', alignItems: 'center', gap: 12, borderRadius: 14, padding: 16, borderWidth: 1, borderColor: c.line, borderStyle: 'dashed' },
-});
+}));

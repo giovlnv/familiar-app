@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Alert, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, useWindowDimensions, View } from 'react-native';
+import { Alert, Modal, Pressable, ScrollView, Text, TextInput, useWindowDimensions, View } from 'react-native';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import * as Clipboard from 'expo-clipboard';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -25,7 +25,7 @@ import { CardImage, CardPicker } from '../../../../components/Cards';
 import { shareToClaude } from '../../../../components/Consults';
 import { Button, Chip, DateStepper, fmtDate } from '../../../../components/ui';
 import { usePad } from '../../../../playback';
-import { c, F } from '../../../../theme';
+import { c, F, themed } from '../../../../theme';
 import { maskDate, maskTime } from '../../../../format';
 
 const short = (id: string) => cardName(id).split(' · ').pop()!;
@@ -349,7 +349,7 @@ function PersonSheet({
   );
 }
 
-const s = StyleSheet.create({
+const s = themed(() => ({
   wrap: { flex: 1, backgroundColor: c.bg, paddingHorizontal: 16 },
   question: { color: c.text, fontSize: 20, fontWeight: '700', paddingVertical: 12 },
   dateRow: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: c.panel, borderRadius: 12, padding: 10 },
@@ -371,4 +371,4 @@ const s = StyleSheet.create({
   dimBg: { flex: 1, backgroundColor: '#000a' },
   sheet: { backgroundColor: c.panel, padding: 16, paddingBottom: 36, borderTopLeftRadius: 18, borderTopRightRadius: 18, gap: 10 },
   h2: { color: c.text, fontSize: 19, fontFamily: F.heading },
-});
+}));

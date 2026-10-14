@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { EYES, Familiar, loadFamiliars, newFamiliar, PATHS, removeFamiliar, saveFamiliar } from '../../../../familiar';
 import { EyesMarkStep, Label, NameStep, ShapeCoatStep, SpeciesStep } from '../../../../components/Familiar';
 import { usePad } from '../../../../playback';
-import { c } from '../../../../theme';
+import { c, themed } from '../../../../theme';
 
 const TABS = ['Species', 'Shape', 'Eyes', 'Name', 'Paths'] as const;
 
@@ -103,7 +103,7 @@ function BasicEyes({ f, set }: { f: Familiar; set: (p: Partial<Familiar>) => voi
   );
 }
 
-const s = StyleSheet.create({
+const s = themed(() => ({
   wrap: { flex: 1, backgroundColor: c.bg },
   save: { color: c.gold, fontSize: 17, fontWeight: '600' },
   tab: { backgroundColor: c.panel, borderRadius: 999, paddingHorizontal: 14, paddingVertical: 8 },
@@ -115,4 +115,4 @@ const s = StyleSheet.create({
   title: { color: c.text, fontSize: 15, fontWeight: '600' },
   dim: { color: c.dim, fontSize: 12 },
   swatch: { width: 34, height: 34, borderRadius: 17, borderWidth: 1, borderColor: c.line },
-});
+}));

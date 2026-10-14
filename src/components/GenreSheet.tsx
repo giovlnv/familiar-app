@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { ActivityIndicator, Alert, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Modal, Pressable, Text, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { fetchGenres, setGenres } from '../genres';
 import { TBook } from '../tracker';
 import { Button } from './ui';
-import { c, F } from '../theme';
+import { c, F, themed } from '../theme';
 
 export function GenreSheet({ book, visible, onClose }: { book: TBook; visible: boolean; onClose: () => void }) {
   const [mine, setMine] = useState<string[]>(book.genres ?? []);
@@ -90,7 +90,7 @@ export function GenreSheet({ book, visible, onClose }: { book: TBook; visible: b
   );
 }
 
-const s = StyleSheet.create({
+const s = themed(() => ({
   dimBg: { flex: 1, backgroundColor: '#000a' },
   sheet: { backgroundColor: c.panel, padding: 16, paddingBottom: 36, borderTopLeftRadius: 18, borderTopRightRadius: 18, gap: 12 },
   h2: { color: c.text, fontSize: 19, fontFamily: F.heading },
@@ -101,4 +101,4 @@ const s = StyleSheet.create({
   chipText: { color: c.text, fontSize: 13 },
   on: { backgroundColor: c.gold },
   onText: { color: c.bg, fontSize: 13, fontWeight: '700' },
-});
+}));

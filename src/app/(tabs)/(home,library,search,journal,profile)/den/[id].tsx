@@ -1,11 +1,11 @@
 import { useCallback, useRef, useState } from 'react';
-import { Animated, Easing, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Animated, Easing, Pressable, ScrollView, Text, View } from 'react-native';
 import { router, Stack, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { describe, Familiar, loadFamiliars, setWithYou, withYou } from '../../../../familiar';
 import { FamiliarArt, myElement } from '../../../../components/Familiar';
 import { usePad } from '../../../../playback';
-import { c, F } from '../../../../theme';
+import { c, F, themed } from '../../../../theme';
 
 const ART = 280;
 const SOUNDS: Record<Familiar['species'], string[]> = {
@@ -122,7 +122,7 @@ export default function Den() {
   );
 }
 
-const s = StyleSheet.create({
+const s = themed(() => ({
   wrap: { flex: 1, backgroundColor: c.bg },
   edit: { color: c.gold, fontSize: 17, fontWeight: '600' },
   stage: { backgroundColor: c.panel, borderRadius: 24, alignItems: 'center', justifyContent: 'center', paddingVertical: 24, overflow: 'hidden', minHeight: ART + 60 },
@@ -136,4 +136,4 @@ const s = StyleSheet.create({
   btn: { flex: 1, flexDirection: 'row', gap: 8, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: c.line, borderRadius: 14, paddingVertical: 13 },
   btnOn: { backgroundColor: c.gold, borderColor: c.gold },
   btnText: { color: c.text, fontSize: 15, fontWeight: '600' },
-});
+}));

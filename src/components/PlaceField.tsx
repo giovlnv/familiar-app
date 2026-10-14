@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { c } from '../theme';
+import { c, themed } from '../theme';
 
 export type Place = { label: string; lat: number; lon: number; timezone?: string };
 type Hit = { id: number; name: string; admin1?: string; country?: string; latitude: number; longitude: number; timezone?: string };
@@ -71,11 +71,11 @@ export function PlaceField({ value, onPick, language = 'en' }: { value: string; 
   );
 }
 
-const s = StyleSheet.create({
+const s = themed(() => ({
   box: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: c.panel, borderRadius: 12, paddingHorizontal: 12 },
   input: { flex: 1, color: c.text, fontSize: 17, paddingVertical: 14 },
   list: { backgroundColor: c.panel, borderRadius: 12, overflow: 'hidden' },
   hit: { paddingHorizontal: 14, paddingVertical: 10, borderBottomWidth: StyleSheet.hairlineWidth, borderColor: c.line },
   hitName: { color: c.text, fontSize: 15, fontWeight: '600' },
   hitDim: { color: c.dim, fontSize: 12, marginTop: 2 },
-});
+}));

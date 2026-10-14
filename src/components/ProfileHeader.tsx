@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { Image, Modal, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Image, Modal, Pressable, Text, TextInput, View } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { File, Paths } from 'expo-file-system';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { getProfile, Profile, setProfile } from '../tracker';
 import { Button } from './ui';
 import { parseDate, showDate } from '../journal';
-import { c } from '../theme';
+import { c, themed } from '../theme';
 import { maskDate } from '../format';
 
 async function pickPhoto() {
@@ -96,7 +96,7 @@ export default function ProfileHeader() {
   );
 }
 
-const s = StyleSheet.create({
+const s = themed(() => ({
   head: { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: c.panel, borderRadius: 14, padding: 14, marginTop: 12 },
   empty: { backgroundColor: c.raised, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: c.line },
   initial: { color: c.gold, fontWeight: '700' },
@@ -108,4 +108,4 @@ const s = StyleSheet.create({
   label: { color: c.dim, fontSize: 13, textTransform: 'uppercase', letterSpacing: 1, marginTop: 6 },
   hint: { color: c.dim, fontSize: 12 },
   input: { backgroundColor: c.bg, color: c.text, borderRadius: 10, padding: 12, fontSize: 15 },
-});
+}));

@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { Alert, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { router, Stack, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import * as Clipboard from 'expo-clipboard';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -8,7 +8,7 @@ import { syncAudioBooks } from '../../../../tracker';
 import { shareToClaude } from '../../../../components/Consults';
 import { Button } from '../../../../components/ui';
 import { usePad } from '../../../../playback';
-import { c, F } from '../../../../theme';
+import { c, F, themed } from '../../../../theme';
 
 const STEPS = ['review', 'explanations', 'voices', 'ready', 'imported'] as const;
 
@@ -181,7 +181,7 @@ export default function JobScreen() {
   );
 }
 
-const s = StyleSheet.create({
+const s = themed(() => ({
   wrap: { flex: 1, backgroundColor: c.bg },
   h1: { color: c.text, fontSize: 22, fontFamily: F.heading },
   dim: { color: c.dim, fontSize: 13 },
@@ -196,4 +196,4 @@ const s = StyleSheet.create({
   secTitle: { color: c.text, fontSize: 14, flex: 1 },
   quote: { backgroundColor: c.panel, borderRadius: 10, padding: 12, borderLeftWidth: 3, borderLeftColor: c.claude },
   quoteText: { color: c.text, fontSize: 14, lineHeight: 20 },
-});
+}));

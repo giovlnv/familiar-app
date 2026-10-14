@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as DocumentPicker from 'expo-document-picker';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { uploadBook } from '../../../jobs';
 import { Button, Chip } from '../../../components/ui';
 import { usePad } from '../../../playback';
-import { c } from '../../../theme';
+import { c, themed } from '../../../theme';
 
 export default function AddBook() {
   const pad = usePad();
@@ -71,7 +71,7 @@ export default function AddBook() {
   );
 }
 
-const s = StyleSheet.create({
+const s = themed(() => ({
   wrap: { flex: 1, backgroundColor: c.bg, padding: 16 },
   drop: { alignItems: 'center', gap: 8, paddingVertical: 28, borderRadius: 14, borderWidth: 1, borderStyle: 'dashed', borderColor: c.line },
   dropTitle: { color: c.text, fontSize: 15, fontWeight: '600', textAlign: 'center', paddingHorizontal: 12 },
@@ -80,4 +80,4 @@ const s = StyleSheet.create({
   input: { backgroundColor: c.panel, color: c.text, borderRadius: 10, padding: 12, fontSize: 15 },
   row: { flexDirection: 'row', gap: 8 },
   small: { color: c.dim, fontSize: 12, lineHeight: 17 },
-});
+}));

@@ -32,7 +32,11 @@ import {
   ConsultList,
   shareToClaude,
 } from "./Consults";
-import { c, F, themed } from "../theme";
+import { c, F, read, themed, write } from "../theme";
+import { CardImage, CardPicker } from "./Cards";
+import CardSheet from "./CardSheet";
+import { cardName } from "../decks";
+import { Link, loadLinks, sectionCard, setLink } from "../sectionCards";
 import { SleepKind, usePlayback } from "../playback";
 import { FamiliarArt } from "./Familiar";
 import { familiarFor } from "../familiar";
@@ -73,6 +77,16 @@ export default function Player({
   useEffect(() => pb.open(item, start), [item.folder, start]);
   const sec = pb.item?.folder === folder ? pb.sec : 0;
   const [follow, setFollow] = useState(true);
+  const [showText, setShowText] = useState(() => read("player-text.txt") !== "0");
+  const toggleText = () => {
+    write("player-text.txt", showText ? "0" : "1");
+    setShowText(!showText);
+    setFollow(true);
+  };
+  const [links, setLinks] = useState(() => loadLinks(folder));
+  const [picking, setPicking] = useState(false);
+  const [cardInfo, setCardInfo] = useState<string | null>(null);
+  const [stage, setStage] = useState({ w: 0, h: 0 });
   const [panel, setPanel] = useState<
     "none" | "chapters" | "notes" | "consults"
   >("none");
@@ -85,6 +99,18 @@ export default function Player({
   const { height: winH } = useWindowDimensions();
   const list = useRef<FlatList<Para>>(null);
   const section = book.sections[sec];
+  const card = sectionCard(links, section);
+  const link = (l: Link | undefined) => setLinks(setLink(folder, section.id, l));
+  const cardActions = () =>
+    card
+      ? Alert.alert(cardName(card.card), card.auto ? "Found in the section title" : undefined, [
+          { text: "About this card", onPress: () => setCardInfo(card.card) },
+          { text: "Change card", onPress: () => setPicking(true) },
+          { text: card.reversed ? "Show upright" : "Show reversed", onPress: () => link({ card: card.card, reversed: !card.reversed }) },
+          { text: "Remove from this section", style: "destructive", onPress: () => link({ card: null }) },
+          { text: "Cancel", style: "cancel" },
+        ])
+      : setPicking(true);
 
   const current = useMemo(() => {
     const ps = section.paras;
@@ -94,13 +120,13 @@ export default function Player({
   }, [t, section]);
 
   useEffect(() => {
-    if (follow && panel === "none")
+    if (follow && showText && panel === "none")
       list.current?.scrollToIndex({
         index: current,
         viewPosition: 0.3,
         animated: true,
       });
-  }, [current, follow]);
+  }, [current, follow, showText]);
 
   const [rateAt, setRateAt] = useState<{ x: number; y: number } | null>(null);
   const rateBtn = useRef<View>(null);
@@ -237,6 +263,16 @@ export default function Player({
           <Ionicons name="chevron-down" size={26} color={c.gold} />
         </Pressable>
         <View style={s.topRight}>
+          <Pressable
+            onPress={toggleText}
+            hitSlop={8}
+            accessibilityLabel="Follow-along text"
+            accessibilityState={{ selected: showText }}
+          >
+            <View style={[s.textBtn, showText && s.textBtnOn]}>
+              <Ionicons name="text" size={16} color={showText ? c.bg : c.dim} />
+            </View>
+          </Pressable>
           <Pressable onPress={() => setPanel("consults")} hitSlop={8}>
             <View style={s.iconLink}>
               <Ionicons name="sparkles-outline" size={17} color={c.claude} />
@@ -263,8 +299,41 @@ export default function Player({
             <Ionicons name="chevron-down" size={16} color={c.dim} />
           </Text>
         </View>
+        {showText && card && (
+          <Pressable onPress={toggleText} accessibilityLabel={`Show ${cardName(card.card)}`}>
+            <CardImage id={card.card} reversed={card.reversed} width={30} />
+          </Pressable>
+        )}
       </Pressable>
 
+      {!showText ? (
+        <View
+          style={s.stage}
+          onLayout={(e) => setStage({ w: e.nativeEvent.layout.width, h: e.nativeEvent.layout.height })}
+        >
+          {card ? (
+            <Pressable onPress={cardActions} style={{ alignItems: "center", gap: 12 }}>
+              <CardImage
+                id={card.card}
+                reversed={card.reversed}
+                width={Math.max(80, Math.min(stage.w - 48, (stage.h - 60) / 1.72))}
+              />
+              <Text style={s.cardName}>
+                {cardName(card.card)}
+                {card.reversed ? " · reversed" : ""}
+              </Text>
+            </Pressable>
+          ) : (
+            <View style={{ alignItems: "center", gap: 14 }}>
+              <FamiliarArt familiar={familiar} pose={status.playing ? "reading" : "idle"} size={160} />
+              <Pressable style={s.linkBtn} onPress={() => setPicking(true)}>
+                <Ionicons name="add-circle-outline" size={18} color={c.gold} />
+                <Text style={s.link}>Link a card to this section</Text>
+              </Pressable>
+            </View>
+          )}
+        </View>
+      ) : (
       <View style={{ flex: 1 }}>
         <FlatList
           ref={list}
@@ -313,6 +382,7 @@ export default function Player({
           </Pressable>
         )}
       </View>
+      )}
 
       <View style={s.controls}>
         <View style={s.bar}>
@@ -486,9 +556,13 @@ export default function Player({
                 style={[s.row2, index === sec && s.paraOn]}
                 onPress={() => (goTo(index, 0), setPanel("none"))}
               >
-                <Text style={s.pText} numberOfLines={1}>
+                <Text style={[s.pText, { flex: 1 }]} numberOfLines={1}>
                   {x.title}
                 </Text>
+                {(() => {
+                  const k = sectionCard(links, x);
+                  return k ? <CardImage id={k.card} reversed={k.reversed} width={22} /> : null;
+                })()}
                 <Text style={s.time}>{fmt(x.duration)}</Text>
               </Pressable>
             )}
@@ -590,6 +664,13 @@ export default function Player({
           </View>
         </KeyboardAvoidingView>
       </Modal>
+      <CardPicker
+        visible={picking}
+        title="Card for this section"
+        onClose={() => setPicking(false)}
+        onPick={(id, reversed) => link({ card: id, reversed })}
+      />
+      <CardSheet id={cardInfo} here={folder} onClose={() => setCardInfo(null)} />
       <AskSheet draft={ask} onCancel={() => setAsk(null)} onSend={sendAsk} />
       <ConsultList
         visible={panel === "consults"}
@@ -717,6 +798,11 @@ const Header = ({
 );
 
 const s = themed(() => ({
+  stage: { flex: 1, alignItems: "center", justifyContent: "center" },
+  cardName: { color: c.text, fontSize: 18, fontFamily: F.heading, textAlign: "center" },
+  linkBtn: { flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: c.panel, paddingVertical: 10, paddingHorizontal: 16, borderRadius: 20 },
+  textBtn: { width: 28, height: 24, borderRadius: 6, alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: c.dim },
+  textBtnOn: { backgroundColor: c.gold, borderColor: c.gold },
   sleepSheet: { backgroundColor: c.panel, borderTopLeftRadius: 22, borderTopRightRadius: 22, padding: 18, paddingBottom: 40, gap: 2 },
   sleepRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingVertical: 12 },
   sleepNote: { color: c.dim, fontSize: 12, marginTop: 8 },
@@ -791,6 +877,7 @@ const s = themed(() => ({
   },
   row2: {
     height: 52,
+    gap: 10,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",

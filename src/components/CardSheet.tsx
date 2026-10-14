@@ -11,7 +11,7 @@ import { c, themed } from '../theme';
 const excerpt = (paras: { kind: string; text: string }[], kind: string, max: number) =>
   paras.filter((p) => p.kind === kind).slice(0, max).map((p) => p.text);
 
-export default function CardSheet({ id, role, onClose }: { id: string | null; role?: string; onClose: () => void }) {
+export default function CardSheet({ id, role, here, onClose }: { id: string | null; role?: string; here?: string; onClose: () => void }) {
   const found = id ? cardSections(id) : [];
   return (
     <Modal visible={!!id} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
@@ -56,6 +56,7 @@ export default function CardSheet({ id, role, onClose }: { id: string | null; ro
                       {t}
                     </Text>
                   ))}
+                  {f.folder !== here && (
                   <Pressable
                     style={s.listen}
                     onPress={() => {
@@ -66,6 +67,7 @@ export default function CardSheet({ id, role, onClose }: { id: string | null; ro
                     <Ionicons name="headset" size={16} color={c.bg} />
                     <Text style={s.listenText}>Listen to this section</Text>
                   </Pressable>
+                  )}
                 </View>
               );
             })}

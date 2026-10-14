@@ -1,5 +1,6 @@
 import { cardName } from './decks';
 import { listBooks } from './storage';
+import { loadLinks, sectionCard } from './sectionCards';
 import { load, save, Tracker, uid } from './tracker';
 
 export type Person = { id: string; name: string; dob?: string; background?: string };
@@ -103,24 +104,11 @@ export function mostDrawn(readings: Reading[], limit = 3) {
   return [...n.entries()].sort((a, b) => b[1] - a[1]).slice(0, limit);
 }
 
-const SUIT_WORDS: Record<string, string> = { wands: 'wands|rods|staves', cups: 'cups|chalices', swords: 'swords', pents: 'pentacles|coins|disks' };
-const RANK_WORDS = ['ace', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'page', 'knight', 'queen', 'king'];
-
-function cardPattern(id: string) {
-  if (id.startsWith('m')) {
-    const name = cardName(id).split(' · ')[1].replace(/^The /, '').toLowerCase().replace('judgement', 'judge?ment');
-    return new RegExp(`\\b${name}\\b`, 'i');
-  }
-  const suit = SUIT_WORDS[id.replace(/\d+$/, '')];
-  const r = Number(id.slice(-2));
-  return new RegExp(`\\b(${RANK_WORDS[r - 1]}${r <= 10 ? `|${r}` : ''})\\s+of\\s+(${suit})\\b`, 'i');
-}
-
 export function cardSections(id: string) {
-  const re = cardPattern(id);
   const out: { folder: string; book: string; index: number; title: string }[] = [];
   for (const b of listBooks()) {
-    const i = b.book.sections.findIndex((s) => re.test(s.title));
+    const links = loadLinks(b.folder);
+    const i = b.book.sections.findIndex((s) => sectionCard(links, s)?.card === id);
     if (i >= 0) out.push({ folder: b.folder, book: b.book.title, index: i, title: b.book.sections[i].title });
   }
   return out;

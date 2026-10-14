@@ -3,6 +3,9 @@ import { AudioPlayer, AudioStatus, setAudioModeAsync, useAudioPlayer, useAudioPl
 import { audioUri, LibraryItem, loadProgress, saveProgress } from './storage';
 import { addListening } from './tracker';
 
+export type SleepKind = 'off' | 'section' | 'explain' | number;
+type Sleep = { kind: 'min'; until: number } | { kind: 'section' } | { kind: 'explain'; sec: number; end: number } | null;
+
 type Playback = {
   item: LibraryItem | null;
   sec: number;
@@ -18,6 +21,13 @@ type Playback = {
   stop: () => void;
   miniH: number;
   setMiniH: (h: number) => void;
+  sleep: Sleep;
+  sleepLeft: number | null;
+  setSleep: (k: SleepKind) => void;
+};
+
+const setVolume = (p: AudioPlayer, v: number) => {
+  p.volume = v;
 };
 
 const Ctx = createContext<Playback | null>(null);
@@ -34,6 +44,8 @@ export function PlaybackProvider({ children }: { children: ReactNode }) {
   const [sec, setSec] = useState(0);
   const [rate, setRateState] = useState(1);
   const [miniH, setMiniH] = useState(0);
+  const [sleep, setSleepState] = useState<Sleep>(null);
+  const [now, setNow] = useState(() => Date.now());
   const done = useRef(new Set<string>());
   const pending = useRef<{ time: number; play: boolean } | null>(null);
   const t = status.currentTime ?? 0;
@@ -90,12 +102,67 @@ export function PlaybackProvider({ children }: { children: ReactNode }) {
     });
   }, [ready, sec, item]);
 
+  const fallAsleep = () => {
+    player.pause();
+    setVolume(player, 1);
+    queueMicrotask(() => setSleepState(null));
+  };
+
   useEffect(() => {
     if (!status.didJustFinish || !item || !section) return;
     done.current.add(section.id);
-    if (sec < item.book.sections.length - 1) goTo(sec + 1, 0, true);
+    const stopHere = sleep && sleep.kind !== 'min';
+    if (stopHere) queueMicrotask(() => setSleepState(null));
+    if (sec < item.book.sections.length - 1) goTo(sec + 1, 0, !stopHere);
     else save(sec, 0);
   }, [status.didJustFinish]);
+
+  useEffect(() => {
+    if (sleep?.kind !== 'min') return;
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, [sleep]);
+
+  useEffect(() => {
+    if (!sleep || !status.playing) return;
+    if (sleep.kind === 'min') {
+      const left = (sleep.until - now) / 1000;
+      if (left <= 0) fallAsleep();
+      else setVolume(player, left < 10 ? Math.max(0.05, left / 10) : 1);
+    }
+    if (sleep.kind === 'explain' && (sleep.sec !== sec || t >= sleep.end)) fallAsleep();
+  }, [now, t, sleep]);
+
+  /** End of the explanation the listener is in, or the next one in this section; undefined if none is left. */
+  const explanationEnd = () => {
+    const paras = section?.paras ?? [];
+    const isExp = (k: string) => k === 'explain' || k === 'explainhead';
+    let i = paras.findIndex((p) => isExp(p.kind) && p.end > t);
+    if (i < 0) return undefined;
+    while (i + 1 < paras.length && isExp(paras[i + 1].kind)) i++;
+    return paras[i].end;
+  };
+
+  const setSleep = (k: SleepKind) => {
+    setVolume(player, 1);
+    if (k === 'off') return setSleepState(null);
+    if (k === 'section') return setSleepState({ kind: 'section' });
+    if (k === 'explain') {
+      const end = explanationEnd();
+      return setSleepState(end === undefined ? { kind: 'section' } : { kind: 'explain', sec, end });
+    }
+    setNow(Date.now());
+    setSleepState({ kind: 'min', until: Date.now() + k * 60000 });
+  };
+
+  const sleepLeft =
+    sleep?.kind === 'min'
+      ? Math.max(0, Math.round((sleep.until - now) / 1000))
+      : sleep?.kind === 'explain'
+        ? Math.max(0, Math.round((sleep.end - t) / rate))
+        : sleep?.kind === 'section'
+          ? Math.max(0, Math.round(((status.duration || 0) - t) / rate))
+          : null;
 
   const lastSave = useRef(0);
   const prevT = useRef(0);
@@ -136,7 +203,12 @@ export function PlaybackProvider({ children }: { children: ReactNode }) {
     },
     miniH,
     setMiniH,
+    sleep,
+    sleepLeft,
+    setSleep,
     stop: () => {
+      setSleepState(null);
+      setVolume(player, 1);
       flushHeard();
       save(sec, t);
       player.pause();

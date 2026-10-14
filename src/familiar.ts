@@ -5,7 +5,7 @@ import { paletteId } from './theme';
 export type Species = 'cat' | 'bat' | 'crow' | 'spider';
 export type Build = 'round' | 'slim';
 export type Coat = 'solid' | 'socks' | 'tabby' | 'tuxedo' | 'calico' | 'colourpoint';
-export type Mark = 'crescent' | 'star' | 'none';
+export type Mark = 'crescent' | 'star' | 'sun' | 'eye' | 'none';
 export type Pose = 'idle' | 'reading' | 'sleeping' | 'walking';
 
 export type Familiar = {
@@ -96,6 +96,8 @@ export const STRIPES = [
 export const MARKS: { id: Mark; name: string }[] = [
   { id: 'crescent', name: 'Crescent' },
   { id: 'star', name: 'Star' },
+  { id: 'sun', name: 'Sun' },
+  { id: 'eye', name: 'Eye' },
   { id: 'none', name: 'None' },
 ];
 
@@ -129,6 +131,10 @@ const PROPS: Record<string, { accent: string; cover: string; cup: string }> = {
 };
 
 const STAR = 'M256 136 Q258.5 147.5 270 150 Q258.5 152.5 256 164 Q253.5 152.5 242 150 Q253.5 147.5 256 136 Z';
+const SUN =
+  'M262 150 A6 6 0 1 1 250 150 A6 6 0 1 1 262 150 Z M264.4 151.7 L269.6 150 L264.4 148.3 Z M260.74 157.14 L265.62 159.62 L263.14 154.74 Z M254.3 158.4 L256 163.6 L257.7 158.4 Z M248.86 154.74 L246.38 159.62 L251.26 157.14 Z M247.6 148.3 L242.4 150 L247.6 151.7 Z M251.26 142.86 L246.38 140.38 L248.86 145.26 Z M257.7 141.6 L256 136.4 L254.3 141.6 Z M263.14 145.26 L265.62 140.38 L260.74 142.86 Z';
+const EYE =
+  'M242 150 Q256 136.5 270 150 Q256 163.5 242 150 Z M245.6 150 Q256 140.5 266.4 150 Q256 159.5 245.6 150 Z M260.2 150 A4.2 4.2 0 1 1 251.8 150 A4.2 4.2 0 1 1 260.2 150 Z';
 
 const lum = (hex: string) => {
   const h = hex.replace('#', '');
@@ -140,7 +146,7 @@ export function artKey(f: Familiar, pose: Pose) {
   return pose === 'idle' ? `cat-${f.build}-idle-${f.coat}` : `cat-${f.build}-${pose}`;
 }
 
-export function familiarXml(f: Familiar, pose: Pose = 'idle', closed = false) {
+export function familiarXml(f: Familiar, pose: Pose = 'idle', closed = false, tail = 0) {
   const p = PROPS[paletteId] ?? PROPS.plum;
   const dark = lum(f.color) < 0.13;
   const light = f.light ?? LIGHTS[0];
@@ -162,11 +168,20 @@ export function familiarXml(f: Familiar, pose: Pose = 'idle', closed = false) {
   };
   let xml = (ART[artKey(f, pose)] ?? ART['cat-round-idle-solid']).replace(/\{\{(\w+)\}\}/g, (_, k) => vals[k] ?? '');
   if (f.mark === 'star') xml = xml.replace(CRESCENT, STAR);
+  if (f.mark === 'sun') xml = xml.replace(CRESCENT, SUN);
+  if (f.mark === 'eye') xml = xml.replace(`d="${CRESCENT}"`, `d="${EYE}" fill-rule="evenodd"`);
   if (f.mark === 'none') xml = xml.replace(/<g id="mark"[^>]*>.*?<\/g>/, '');
   else if (f.markColor) xml = xml.replace('<g id="mark" fill="#E8C767"', `<g id="mark" fill="${f.markColor}"`);
   if (lum(f.color) > 0.5) xml = xml.replace(/#F3E8B9/g, '#6E6478');
+  if (tail) xml = swish(xml, pose, tail);
   return closed ? closeEyes(xml) : xml;
 }
+
+/** Tail around its root: the wrap-around tail (coat-front) in idle/reading, the raised tail in walking. */
+const swish = (xml: string, pose: Pose, a: number) =>
+  pose === 'walking'
+    ? xml.replace(/<path d="(M150 318 C110|M104 210)/g, `<path transform="rotate(${-a * 2} 150 318)" d="$1`)
+    : xml.replace('<g id="coat-front"', `<g id="coat-front" transform="rotate(${a} 352 440)"`);
 
 const section = (xml: string, id: string, fn: (part: string) => string) => {
   const start = xml.indexOf(`<g id="${id}"`);

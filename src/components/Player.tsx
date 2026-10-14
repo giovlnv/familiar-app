@@ -33,7 +33,7 @@ import {
   shareToClaude,
 } from "./Consults";
 import { c, F, themed } from "../theme";
-import { usePlayback } from "../playback";
+import { SleepKind, usePlayback } from "../playback";
 import { FamiliarArt } from "./Familiar";
 import { familiarFor } from "../familiar";
 import { load as loadTracker } from "../tracker";
@@ -68,7 +68,8 @@ export default function Player({
   const { book, folder } = item;
   const familiar = useMemo(() => familiarFor(loadTracker().books.find((b) => b.audio === folder)?.paths), [folder]);
   const pb = usePlayback();
-  const { player, status, t, rate, goTo, skip, toggle } = pb;
+  const { player, status, t, rate, goTo, skip, toggle, sleep, sleepLeft, setSleep } = pb;
+  const [sleepOpen, setSleepOpen] = useState(false);
   useEffect(() => pb.open(item, start), [item.folder, start]);
   const sec = pb.item?.folder === folder ? pb.sec : 0;
   const [follow, setFollow] = useState(true);
@@ -363,6 +364,12 @@ export default function Player({
             />
           </View>
           <Btn
+            icon={sleep ? "moon" : "moon-outline"}
+            label={sleepLeft !== null ? fmtLeft(sleepLeft) : undefined}
+            color={sleep ? c.gold : c.text}
+            onPress={() => setSleepOpen(true)}
+          />
+          <Btn
             icon="create-outline"
             label="Note here"
             onPress={() => newNote(current, t)}
@@ -376,6 +383,39 @@ export default function Player({
           />
         </View>
       </View>
+
+      <Modal visible={sleepOpen} transparent animationType="slide" onRequestClose={() => setSleepOpen(false)}>
+        <Pressable style={{ flex: 1, backgroundColor: "#0008" }} onPress={() => setSleepOpen(false)} accessibilityLabel="Close" />
+        <View style={s.sleepSheet}>
+          <Text style={s.h2}>Sleep timer</Text>
+          {(
+            [
+              ["off", "Off"],
+              [5, "5 minutes"],
+              [15, "15 minutes"],
+              [30, "30 minutes"],
+              [45, "45 minutes"],
+              [60, "1 hour"],
+              ["section", "End of this section"],
+              ["explain", "End of the explanation"],
+            ] as [SleepKind, string][]
+          ).map(([k, label]) => {
+            const on =
+              (k === "off" && !sleep) ||
+              (k === "section" && sleep?.kind === "section") ||
+              (k === "explain" && sleep?.kind === "explain");
+            return (
+              <Pressable key={String(k)} style={s.sleepRow} onPress={() => (setSleep(k), setSleepOpen(false))}>
+                <Text style={[s.menuText, on && { color: c.gold, fontWeight: "700" }]}>{label}</Text>
+                {on && <Ionicons name="checkmark" size={18} color={c.gold} />}
+              </Pressable>
+            );
+          })}
+          <Text style={s.sleepNote}>
+            {sleep?.kind === "min" ? `Fades out over the last 10 seconds · ${fmtLeft(sleepLeft ?? 0)} left` : "Timed options fade out over the last 10 seconds."}
+          </Text>
+        </View>
+      </Modal>
 
       <Modal
         visible={!!rateAt}
@@ -626,6 +666,8 @@ const styleFor = (p: Para) =>
           : null;
 
 type IconName = keyof typeof Ionicons.glyphMap;
+const fmtLeft = (secs: number) => (secs >= 60 ? `${Math.ceil(secs / 60)}m` : `${secs}s`);
+
 const Btn = ({
   icon,
   label,
@@ -673,6 +715,9 @@ const Header = ({
 );
 
 const s = themed(() => ({
+  sleepSheet: { backgroundColor: c.panel, borderTopLeftRadius: 22, borderTopRightRadius: 22, padding: 18, paddingBottom: 40, gap: 2 },
+  sleepRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingVertical: 12 },
+  sleepNote: { color: c.dim, fontSize: 12, marginTop: 8 },
   wrap: { flex: 1, backgroundColor: c.bg, paddingHorizontal: 16 },
   top: {
     flexDirection: "row",

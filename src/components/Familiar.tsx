@@ -1,8 +1,8 @@
-import { useMemo } from 'react';
-import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { useEffect, useMemo, useState } from 'react';
+import { AccessibilityInfo, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { COATS, COLORS, Element, EYES, Familiar, familiarXml, LIGHTS, MARK_COLORS, MARKS, Pose, SPECIES, STRIPES, sunSign } from '../familiar';
+import { COATS, COLORS, Element, EYES, Familiar, familiarXml, Mark, LIGHTS, MARK_COLORS, MARKS, Pose, SPECIES, STRIPES, sunSign } from '../familiar';
 import { getProfile } from '../tracker';
 import { c, F, themed } from '../theme';
 
@@ -30,8 +30,58 @@ export function Vial({ element, size }: { element: Element; size: number }) {
   );
 }
 
-export function FamiliarArt({ familiar, pose = 'idle', size, vial, closed }: { familiar: Familiar; pose?: Pose; size: number; vial?: boolean; closed?: boolean }) {
-  const xml = useMemo(() => familiarXml(familiar, pose, closed), [familiar, pose, closed]);
+const SWISH = [1.5, 3, 4, 3, 1.5, 0, -1, 0];
+
+/** Blinks every few seconds; cats also swish their tail. Off with Reduce Motion. */
+function useAlive(on: boolean, cat: boolean) {
+  const [blink, setBlink] = useState(false);
+  const [tail, setTail] = useState(0);
+  useEffect(() => {
+    if (!on) return;
+    let live = true;
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    const later = (fn: () => void, ms: number) => timers.push(setTimeout(() => live && fn(), ms));
+    const blinkLoop = () =>
+      later(() => {
+        setBlink(true);
+        later(() => setBlink(false), 140);
+        blinkLoop();
+      }, 2800 + Math.random() * 3500);
+    const tailLoop = () =>
+      later(() => {
+        SWISH.forEach((a, i) => later(() => setTail(a), i * 70));
+        tailLoop();
+      }, 4500 + Math.random() * 5000);
+    AccessibilityInfo.isReduceMotionEnabled().then((reduce) => {
+      if (reduce || !live) return;
+      blinkLoop();
+      if (cat) tailLoop();
+    });
+    return () => {
+      live = false;
+      timers.forEach(clearTimeout);
+    };
+  }, [on, cat]);
+  return on ? { blink, tail } : { blink: false, tail: 0 };
+}
+
+export function FamiliarArt({
+  familiar,
+  pose = 'idle',
+  size,
+  vial,
+  closed,
+  alive,
+}: {
+  familiar: Familiar;
+  pose?: Pose;
+  size: number;
+  vial?: boolean;
+  closed?: boolean;
+  alive?: boolean;
+}) {
+  const { blink, tail } = useAlive(!!alive && pose !== 'sleeping', familiar.species === 'cat');
+  const xml = useMemo(() => familiarXml(familiar, pose, closed || blink, tail), [familiar, pose, closed, blink, tail]);
   const el = vial ? myElement()?.element : undefined;
   if (!el) return <SvgXml xml={xml} width={size} height={size} />;
   return (
@@ -166,6 +216,8 @@ function Swatches({ list, value, onPick }: { list: { hex: string; name: string }
   );
 }
 
+const GLYPH: Record<Mark, string> = { crescent: '☾', star: '✦', sun: '☀︎', eye: '◉', none: '—' };
+
 export function EyesMarkStep({ f, set }: StepProps) {
   return (
     <View style={{ gap: 14 }}>
@@ -183,7 +235,7 @@ export function EyesMarkStep({ f, set }: StepProps) {
       <View style={s.row}>
         {MARKS.map((m) => (
           <Card key={m.id} on={f.mark === m.id} style={{ flex: 1, paddingVertical: 10 }} onPress={() => set({ mark: m.id })}>
-            <Text style={{ color: f.markColor ?? '#E8C767', fontSize: 20 }}>{m.id === 'crescent' ? '☾' : m.id === 'star' ? '✦' : '—'}</Text>
+            <Text style={{ color: f.markColor ?? '#E8C767', fontSize: 20 }}>{GLYPH[m.id]}</Text>
             <Text style={s.small}>{m.name}</Text>
           </Card>
         ))}

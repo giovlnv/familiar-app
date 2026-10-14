@@ -90,7 +90,7 @@ export default function Den() {
       <Pressable onPress={pet} style={s.stage} accessibilityLabel={asleep ? `${f.name} is asleep` : `Pet ${f.name}`} accessibilityRole="button">
         {spider && !asleep && <Animated.View style={[s.thread, { height: Animated.add(drop, 30 + ART * 0.46) }]} />}
         <Animated.View style={{ transform: [{ translateY: spider ? drop : 0 }] }}>
-          <FamiliarArt familiar={f} pose={asleep ? 'sleeping' : 'idle'} size={ART} closed={closed} vial />
+          <FamiliarArt familiar={f} pose={asleep ? 'sleeping' : 'idle'} size={ART} closed={closed} vial alive />
         </Animated.View>
         {bubbles.map((b) => (
           <Animated.Text key={b.id} style={[s.bubble, { left: b.x, opacity: b.o, transform: [{ translateY: b.y }] }]}>

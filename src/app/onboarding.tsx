@@ -205,7 +205,7 @@ export default function Onboarding() {
       case 'book':
         return (
           <View style={{ alignItems: 'center', gap: 12 }}>
-            <FamiliarArt familiar={f} pose="reading" size={240} vial />
+            <FamiliarArt familiar={f} pose="reading" size={240} vial alive />
             <Head title={`${f.name || 'Shadow'} is ready to read`} sub="Add your next book and you’ll study it together." center />
           </View>
         );

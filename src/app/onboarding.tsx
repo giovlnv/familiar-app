@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Alert, Image, KeyboardAvoidingView, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { Alert, Image, KeyboardAvoidingView, Pressable, ScrollView, StyleSheet, Text, TextInput, useWindowDimensions, View } from 'react-native';
+import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -19,6 +20,7 @@ const GOALS = ['Learn the cards', 'Read for others', 'Know myself', 'Daily pract
 
 export default function Onboarding() {
   const insets = useSafeAreaInsets();
+  const { width, height } = useWindowDimensions();
   const saved = getOnboarding();
   const [i, setI] = useState(0);
   const [f, setF] = useState<Familiar>(withYou);
@@ -67,20 +69,29 @@ export default function Onboarding() {
 
   if (step === 'welcome')
     return (
-      <View style={[st.wrap, { paddingTop: insets.top + 12, paddingBottom: insets.bottom + 20 }]}>
-        <View style={st.heroBox}>
-          <Image source={require('../../assets/hero.jpg')} style={st.hero} />
+      <ScrollView style={st.wrap} contentContainerStyle={{ flexGrow: 1, paddingBottom: insets.bottom + 20 }} bounces={false}>
+        <View style={{ height: height * 0.3, overflow: 'hidden' }}>
+          <Image source={require('../../assets/hero.jpg')} style={[st.hero, { height: (width * 600) / 393 }]} />
+          <Svg style={StyleSheet.absoluteFill} preserveAspectRatio="none" viewBox="0 0 1 1">
+            <Defs>
+              <LinearGradient id="fade" x1="0" y1="0" x2="0" y2="1">
+                <Stop offset="0.6" stopColor={c.bg} stopOpacity={0} />
+                <Stop offset="1" stopColor={c.bg} stopOpacity={1} />
+              </LinearGradient>
+            </Defs>
+            <Rect width="1" height="1" fill="url(#fade)" />
+          </Svg>
         </View>
         <View style={st.brand}>
           <Text style={st.word}>Familiar</Text>
           <Text style={st.tagline}>your familiar knows the way.</Text>
         </View>
-        <View style={{ flex: 1 }} />
+        <View style={{ flex: 1, minHeight: 24 }} />
         <View style={st.pad}>
           <Primary label="Begin" onPress={next} />
           <Link label="I’m already set up — skip" onPress={() => finish('/')} />
         </View>
-      </View>
+      </ScrollView>
     );
 
   const familiarStep = ['species', 'shape', 'eyes', 'name'].includes(step);
@@ -310,8 +321,7 @@ function Status({ icon, title, text }: { icon: keyof typeof Ionicons.glyphMap; t
 
 const st = themed(() => ({
   wrap: { flex: 1, backgroundColor: c.bg },
-  heroBox: { alignSelf: 'center', height: '44%', aspectRatio: 393 / 600, borderRadius: 24, overflow: 'hidden', marginTop: 8 },
-  hero: { width: '100%', height: '100%' },
+  hero: { position: 'absolute', bottom: 0, width: '100%' },
   brand: { alignItems: 'center', gap: 6, marginTop: 14 },
   word: { color: c.gold, fontSize: 46, fontWeight: '500' },
   tagline: { color: c.text, fontStyle: 'italic', fontSize: 17 },

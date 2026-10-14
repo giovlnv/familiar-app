@@ -2,6 +2,7 @@ import { useCallback, useRef, useState } from 'react';
 import { Animated, Easing, Pressable, ScrollView, Text, View } from 'react-native';
 import { router, Stack, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import * as Haptics from 'expo-haptics';
 import { describe, Familiar, loadFamiliars, setWithYou, withYou } from '../../../../familiar';
 import { FamiliarArt, myElement } from '../../../../components/Familiar';
 import { usePad } from '../../../../playback';
@@ -14,6 +15,17 @@ const SOUNDS: Record<Familiar['species'], string[]> = {
   crow: ['caw!', 'caw!'],
   spider: [],
 };
+const BUZZ: Record<Familiar['species'], number[]> = {
+  cat: [0, 90, 180, 270, 360, 450, 540],
+  bat: [0, 160],
+  crow: [0, 260],
+  spider: [0, 320, 740, 980],
+};
+const buzz = (sp: Familiar['species'], asleep: boolean) =>
+  (asleep ? [0] : BUZZ[sp]).forEach((t) =>
+    setTimeout(() => Haptics.impactAsync(sp === 'cat' || asleep ? Haptics.ImpactFeedbackStyle.Soft : Haptics.ImpactFeedbackStyle.Light), t),
+  );
+
 type Bubble = { id: number; text: string; x: number; y: Animated.Value; o: Animated.Value };
 
 const nightNow = () => {
@@ -60,6 +72,7 @@ export default function Den() {
   };
 
   const pet = () => {
+    buzz(f.species, asleep);
     if (asleep) return float(['z', 'z', 'Z']);
     setClosed(true);
     if (timer.current) clearTimeout(timer.current);

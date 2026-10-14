@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
   FlatList,
+  ScrollView,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -312,17 +313,20 @@ export default function Player({
           onLayout={(e) => setStage({ w: e.nativeEvent.layout.width, h: e.nativeEvent.layout.height })}
         >
           {card ? (
-            <Pressable onPress={cardActions} style={{ alignItems: "center", gap: 12 }}>
-              <CardImage
-                id={card.card}
-                reversed={card.reversed}
-                width={Math.max(80, Math.min(stage.w - 48, (stage.h - 60) / 1.72))}
-              />
-              <Text style={s.cardName}>
-                {cardName(card.card)}
-                {card.reversed ? " · reversed" : ""}
-              </Text>
-            </Pressable>
+            <View style={{ alignItems: "center", gap: 10, alignSelf: "stretch" }}>
+              <Pressable onPress={cardActions} style={{ alignItems: "center", gap: 8 }}>
+                <CardImage
+                  id={card.card}
+                  reversed={card.reversed}
+                  width={Math.max(70, Math.min(stage.w - 48, (stage.h - 50 - PASSAGE_H - 10) / 1.72))}
+                />
+                <Text style={s.cardName}>
+                  {cardName(card.card)}
+                  {card.reversed ? " · reversed" : ""}
+                </Text>
+              </Pressable>
+              <Passage para={section.paras[current]} t={t} />
+            </View>
           ) : (
             <View style={{ alignItems: "center", gap: 14 }}>
               <FamiliarArt familiar={familiar} pose={status.playing ? "reading" : "idle"} size={160} />
@@ -748,6 +752,34 @@ const styleFor = (p: Para) =>
           ? s.kExplain
           : null;
 
+const LINE = 24;
+const PASSAGE_H = LINE * 6 + 20;
+
+function Passage({ para, t }: { para?: Para; t: number }) {
+  const ref = useRef<ScrollView>(null);
+  const [contentH, setContentH] = useState(0);
+  const last = useRef(0);
+  const frac = para && para.end > para.start ? Math.min(1, Math.max(0, (t - para.start) / (para.end - para.start))) : 0;
+  const room = Math.max(0, contentH - (PASSAGE_H - 20));
+  const target = Math.floor((room * frac) / LINE) * LINE;
+  useEffect(() => {
+    if (target === last.current) return;
+    last.current = target;
+    ref.current?.scrollTo({ y: target, animated: true });
+  }, [target]);
+  useEffect(() => {
+    last.current = 0;
+    ref.current?.scrollTo({ y: 0, animated: false });
+  }, [para]);
+  return (
+    <View style={s.passage}>
+      <ScrollView ref={ref} scrollEnabled={false} showsVerticalScrollIndicator={false} onContentSizeChange={(_, h) => setContentH(h)}>
+        <Text style={[s.passageText, para && styleFor(para), { lineHeight: LINE, fontSize: 17 }]}>{para?.text}</Text>
+      </ScrollView>
+    </View>
+  );
+}
+
 type IconName = keyof typeof Ionicons.glyphMap;
 const fmtLeft = (secs: number) => (secs >= 60 ? `${Math.ceil(secs / 60)}m` : `${secs}s`);
 
@@ -799,6 +831,8 @@ const Header = ({
 
 const s = themed(() => ({
   stage: { flex: 1, alignItems: "center", justifyContent: "center" },
+  passage: { height: PASSAGE_H, alignSelf: "stretch", backgroundColor: c.panel, borderRadius: 12, paddingVertical: 10, paddingHorizontal: 14, overflow: "hidden" },
+  passageText: { color: c.text },
   cardName: { color: c.text, fontSize: 18, fontFamily: F.heading, textAlign: "center" },
   linkBtn: { flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: c.panel, paddingVertical: 10, paddingHorizontal: 16, borderRadius: 20 },
   textBtn: { width: 28, height: 24, borderRadius: 6, alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: c.dim },

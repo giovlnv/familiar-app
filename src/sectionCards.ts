@@ -49,3 +49,27 @@ export function sectionCard(links: Record<string, Link>, s: Section): SectionCar
   const card = cardInTitle(s.title);
   return card ? { card, reversed: false, auto: true } : null;
 }
+
+export type Sources = { paths: string[]; books: string[] };
+
+const sourcesFile = () => new File(Paths.document, 'card-sources.json');
+
+export function loadSources(): Sources {
+  try {
+    const f = sourcesFile();
+    return f.exists ? { paths: [], books: [], ...JSON.parse(f.textSync()) } : { paths: [], books: [] };
+  } catch {
+    return { paths: [], books: [] };
+  }
+}
+
+export function saveSources(s: Sources) {
+  const f = sourcesFile();
+  if (!f.exists) f.create();
+  f.write(JSON.stringify(s));
+}
+
+export const allSources = (s: Sources) => !s.paths.length && !s.books.length;
+
+export const usesBook = (s: Sources, folder: string, paths: string[] = []) =>
+  allSources(s) || s.books.includes(folder) || paths.some((p) => s.paths.includes(p));

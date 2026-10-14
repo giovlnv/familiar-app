@@ -15,7 +15,7 @@ type Backup = {
   extra?: Record<string, unknown>;
 };
 
-const EXTRA_FILES = ['familiars.json', 'onboarding.json'];
+const EXTRA_FILES = ['familiars.json', 'onboarding.json', 'card-sources.json'];
 
 export type SyncState = { lastFile?: number; lastGithub?: number; lastError?: string };
 

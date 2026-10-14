@@ -22,6 +22,7 @@ import {
 } from '../../../../journal';
 import { cardName } from '../../../../decks';
 import { CardImage, CardPicker } from '../../../../components/Cards';
+import CardSheet from '../../../../components/CardSheet';
 import { shareToClaude } from '../../../../components/Consults';
 import { Button, Chip, DateStepper, fmtDate } from '../../../../components/ui';
 import { usePad } from '../../../../playback';
@@ -37,6 +38,7 @@ export default function ReadingScreen() {
   const [j, setJ] = useState(loadJournal);
   const [r, setR] = useState<Reading | undefined>(() => loadJournal().readings.find((x) => x.id === id));
   const [slot, setSlot] = useState<number | null>(null);
+  const [about, setAbout] = useState<{ id: string; role: string } | null>(null);
   const [personSheet, setPersonSheet] = useState(false);
 
   useEffect(
@@ -69,6 +71,7 @@ export default function ReadingScreen() {
     if (!p?.card) return setSlot(i);
     const links = cardSections(p.card);
     Alert.alert(`${sp.positions[i]} · ${short(p.card)}${p.reversed ? ' (reversed)' : ''}`, undefined, [
+      { text: 'About this card', onPress: () => setAbout({ id: p.card!, role: sp.positions[i] }) },
       ...links.map((l) => ({
         text: `Listen: ${l.title}`,
         onPress: () => router.push({ pathname: '/player/[id]', params: { id: l.folder, section: String(l.index) } }),
@@ -284,6 +287,7 @@ export default function ReadingScreen() {
         </Pressable>
       ))}
 
+      <CardSheet id={about?.id ?? null} role={about?.role} onClose={() => setAbout(null)} />
       <CardPicker
         visible={slot !== null}
         title={slot !== null ? sp.positions[slot] : ''}

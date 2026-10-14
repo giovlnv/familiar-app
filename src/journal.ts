@@ -1,7 +1,9 @@
 import { cardName } from './decks';
 import { listBooks } from './storage';
-import { loadLinks, sectionCard } from './sectionCards';
+import { loadLinks, loadSources, sectionCard, Sources, usesBook } from './sectionCards';
 import { load, save, Tracker, uid } from './tracker';
+
+export const bookPaths = (folder: string) => load().books.find((b) => b.audio === folder)?.paths ?? [];
 
 export type Person = { id: string; name: string; dob?: string; background?: string };
 export type Spread = { id: string; name: string; positions: string[]; custom?: boolean };
@@ -104,9 +106,10 @@ export function mostDrawn(readings: Reading[], limit = 3) {
   return [...n.entries()].sort((a, b) => b[1] - a[1]).slice(0, limit);
 }
 
-export function cardSections(id: string) {
+export function cardSections(id: string, sources: Sources | null = loadSources()) {
   const out: { folder: string; book: string; index: number; title: string }[] = [];
   for (const b of listBooks()) {
+    if (sources && !usesBook(sources, b.folder, bookPaths(b.folder))) continue;
     const links = loadLinks(b.folder);
     const i = b.book.sections.findIndex((s) => sectionCard(links, s)?.card === id);
     if (i >= 0) out.push({ folder: b.folder, book: b.book.title, index: i, title: b.book.sections[i].title });

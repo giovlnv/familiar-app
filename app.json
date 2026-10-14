@@ -59,6 +59,19 @@
             "deploymentTarget": "17.0"
           }
         }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 220,
+          "resizeMode": "contain",
+          "backgroundColor": "#0D1626",
+          "dark": {
+            "image": "./assets/splash-icon.png",
+            "backgroundColor": "#0D1626"
+          }
+        }
       ]
     ],
     "scheme": "tarotreader",

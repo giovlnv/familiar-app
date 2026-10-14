@@ -6,6 +6,7 @@ import { pushToGithub } from "../sync";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { PlaybackProvider } from "../playback";
+import { Splash } from "../components/Splash";
 import { c, mode, scheme } from "../theme";
 
 export default function RootLayout() {
@@ -50,6 +51,7 @@ export default function RootLayout() {
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="player/[id]" options={{ headerShown: false }} />
           </Stack>
+          <Splash />
         </View>
       </PlaybackProvider>
     </SafeAreaProvider>

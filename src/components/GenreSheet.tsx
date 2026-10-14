@@ -4,7 +4,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { fetchGenres, setGenres } from '../genres';
 import { TBook } from '../tracker';
 import { Button } from './ui';
-import { c } from '../theme';
+import { c, F } from '../theme';
 
 export function GenreSheet({ book, visible, onClose }: { book: TBook; visible: boolean; onClose: () => void }) {
   const [mine, setMine] = useState<string[]>(book.genres ?? []);
@@ -93,7 +93,7 @@ export function GenreSheet({ book, visible, onClose }: { book: TBook; visible: b
 const s = StyleSheet.create({
   dimBg: { flex: 1, backgroundColor: '#000a' },
   sheet: { backgroundColor: c.panel, padding: 16, paddingBottom: 36, borderTopLeftRadius: 18, borderTopRightRadius: 18, gap: 12 },
-  h2: { color: c.text, fontSize: 19, fontWeight: '700' },
+  h2: { color: c.text, fontSize: 19, fontFamily: F.heading },
   dim: { color: c.dim, fontSize: 13 },
   label: { color: c.dim, fontSize: 13, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1 },
   wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },

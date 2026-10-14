@@ -9,12 +9,11 @@ import { getClaudeLink, setClaudeLink } from '../components/Consults';
 import { backupToFile, getState, getToken, setToken } from '../sync';
 import { getProfile, setProfile } from '../tracker';
 import { parseDate, showDate } from '../journal';
-import { c } from '../theme';
+import { c, F } from '../theme';
 
 const STEPS = ['welcome', 'paths', 'species', 'shape', 'eyes', 'name', 'claude', 'about', 'backups', 'book'] as const;
 type Step = (typeof STEPS)[number];
 const GOALS = ['Learn the cards', 'Read for others', 'Know myself', 'Daily practice', 'Go deeper'];
-const SERIF = 'Georgia';
 
 export default function Onboarding() {
   const insets = useSafeAreaInsets();
@@ -313,14 +312,14 @@ const st = StyleSheet.create({
   heroBox: { width: '100%', aspectRatio: 393 / 520, overflow: 'hidden', justifyContent: 'flex-end' },
   hero: { width: '100%', aspectRatio: 393 / 600 },
   brand: { alignItems: 'center', gap: 6, marginTop: 14 },
-  word: { color: c.gold, fontFamily: SERIF, fontSize: 46, fontWeight: '500' },
-  tagline: { color: c.text, fontFamily: SERIF, fontStyle: 'italic', fontSize: 17 },
+  word: { color: c.gold, fontSize: 46, fontWeight: '500' },
+  tagline: { color: c.text, fontStyle: 'italic', fontSize: 17 },
   pad: { paddingHorizontal: 22 },
   top: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingBottom: 10 },
   dots: { flexDirection: 'row', gap: 6, alignItems: 'center' },
   stepDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: c.line },
   stepOn: { width: 18, backgroundColor: c.gold },
-  h1: { color: c.text, fontFamily: SERIF, fontSize: 28, fontWeight: '500' },
+  h1: { color: c.text, fontSize: 28, fontFamily: F.heading },
   sub: { color: c.dim, fontSize: 15, lineHeight: 21 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: c.panel, borderRadius: 14, padding: 12 },
   rowTitle: { color: c.text, fontSize: 15, fontWeight: '600' },

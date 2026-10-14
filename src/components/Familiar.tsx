@@ -3,7 +3,7 @@ import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-
 import { SvgXml } from 'react-native-svg';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { COATS, COLORS, EYES, Familiar, familiarXml, LIGHTS, MARKS, Pose, SPECIES } from '../familiar';
-import { c } from '../theme';
+import { c, F } from '../theme';
 
 export function FamiliarArt({ familiar, pose = 'idle', size }: { familiar: Familiar; pose?: Pose; size: number }) {
   const xml = useMemo(() => familiarXml(familiar, pose), [familiar, pose]);
@@ -197,5 +197,5 @@ export const s = StyleSheet.create({
   input: { backgroundColor: c.panel, color: c.text, borderRadius: 12, padding: 14, fontSize: 17 },
   pill: { backgroundColor: c.raised, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6 },
   pillText: { color: c.text, fontSize: 13 },
-  quote: { color: c.dim, fontStyle: 'italic', fontSize: 15, marginTop: 6 },
+  quote: { color: c.dim, fontFamily: F.headingItalic, fontSize: 15, marginTop: 6 },
 });

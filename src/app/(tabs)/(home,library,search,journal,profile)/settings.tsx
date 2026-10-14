@@ -22,7 +22,7 @@ import {
 } from "../../../sync";
 import * as Updates from "expo-updates";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { c, Mode, mode, PALETTES, paletteId, scheme, setMode, setPalette } from "../../../theme";
+import { c, Mode, mode, PALETTES, paletteId, scheme, setMode, setPalette, F } from "../../../theme";
 import { fetchAllGenres } from "../../../genres";
 import { getClaudeLink, setClaudeLink } from "../../../components/Consults";
 import { defaultDeck, deleteDeck, downloadRws, importDeckFromFiles, importDeckFromUrl, listDecks, setDefaultDeck } from "../../../decks";
@@ -336,10 +336,8 @@ const s = StyleSheet.create({
   h2: {
     color: c.text,
     fontSize: 18,
-    fontWeight: "700",
     marginTop: 12,
-    marginBottom: 6,
-  },
+    marginBottom: 6, fontFamily: F.heading },
   p: { color: c.dim, lineHeight: 20, marginBottom: 10 },
   card: {
     backgroundColor: c.panel,

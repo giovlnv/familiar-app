@@ -1,5 +1,5 @@
 import { Stack } from "expo-router";
-import { c } from "../../../theme";
+import { c, F } from "../../../theme";
 
 export const unstable_settings = { home: { anchor: "index" } };
 
@@ -18,7 +18,7 @@ export default function TabStack({ segment }: { segment: string }) {
       screenOptions={{
         headerStyle: { backgroundColor: c.bg },
         headerTintColor: c.gold,
-        headerTitleStyle: { color: c.text },
+        headerTitleStyle: { color: c.text, fontFamily: F.heading },
         headerShadowVisible: false,
         contentStyle: { backgroundColor: c.bg },
       }}

@@ -48,3 +48,5 @@ export const c: Palette = { ...(scheme === 'light' ? chosen.light : chosen.c) };
 
 export const setPalette = (id: string) => write('palette.txt', id);
 export const setMode = (m: Mode) => write('mode.txt', m);
+
+export const F = { heading: 'PlayfairDisplay_500Medium', headingItalic: 'PlayfairDisplay_500Medium_Italic' };

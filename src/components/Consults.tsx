@@ -20,7 +20,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Book, Consult, Note } from '../types';
 import { fmtTime } from '../format';
-import { c } from '../theme';
+import { c, F } from '../theme';
 
 export type AskDraft = { section: string; para: number; time: number; quote: string; parent?: Consult };
 
@@ -276,7 +276,7 @@ const s = StyleSheet.create({
   wrap: { flex: 1, backgroundColor: c.bg, paddingHorizontal: 16 },
   top: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 10 },
   topRight: { flexDirection: 'row', gap: 18 },
-  h2: { color: c.text, fontSize: 22, fontWeight: '700' },
+  h2: { color: c.text, fontSize: 22, fontFamily: F.heading },
   link: { color: c.gold, fontSize: 16 },
   filters: { flexDirection: 'row', gap: 8, marginBottom: 12 },
   chip: { paddingVertical: 6, paddingHorizontal: 12, borderRadius: 16, backgroundColor: c.panel },

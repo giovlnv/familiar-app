@@ -119,15 +119,21 @@ export function artKey(f: Familiar, pose: Pose) {
 export function familiarXml(f: Familiar, pose: Pose = 'idle') {
   const p = PROPS[paletteId] ?? PROPS.plum;
   const dark = lum(f.color) < 0.13;
-  const cream = f.coat !== 'solid' && f.coat !== 'tabby' && f.coat !== 'colourpoint';
+  const light = f.light ?? LIGHTS[0];
+  const on = (coat: Coat) => (f.coat === coat ? '1' : '0');
   const vals: Record<string, string> = {
     coat: f.color,
+    body: f.coat === 'colourpoint' ? light : f.color,
     iris: f.eyes,
-    light: f.light ?? LIGHTS[0],
+    light,
     stripe: dark ? '#FFFFFF' : '#000000',
     stripeOp: dark ? '0.14' : '0.3',
-    patternOpacity: cream ? '1' : '0',
-    bellyFill: cream ? '#DED5C9' : f.color,
+    bellyFill: f.coat === 'solid' ? f.color : '#DED5C9',
+    oSocks: on('socks'),
+    oTabby: on('tabby'),
+    oTuxedo: on('tuxedo'),
+    oCalico: on('calico'),
+    oPoint: on('colourpoint'),
     ...p,
   };
   let xml = (ART[artKey(f, pose)] ?? ART['cat-round-idle-solid']).replace(/\{\{(\w+)\}\}/g, (_, k) => vals[k] ?? '');
@@ -190,9 +196,13 @@ export function togglePath(id: string, path: string) {
   save(s);
 }
 
-export const familiarFor = (path?: string) => {
+export const familiarFor = (paths?: string[]) => {
   const s = loadFamiliars();
-  return (path && s.list.find((f) => f.paths.includes(path))) || withYou();
+  for (const p of paths ?? []) {
+    const f = s.list.find((x) => x.paths.includes(p));
+    if (f) return f;
+  }
+  return withYou();
 };
 
 export const newFamiliar = (): Familiar => ({ ...SHADOW, id: `f${Date.now().toString(36)}`, name: '', created: Date.now() });

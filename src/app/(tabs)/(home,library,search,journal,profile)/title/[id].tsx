@@ -46,9 +46,11 @@ import {
   fmtDate,
   Stars,
 } from "../../../../components/ui";
-import { c } from "../../../../theme";
+import { c, F } from "../../../../theme";
 import { GenreSheet } from "../../../../components/GenreSheet";
 import { newList } from "../lists";
+import { FamiliarArt } from "../../../../components/Familiar";
+import { familiarFor, PATHS } from "../../../../familiar";
 
 const STATUSES: Status[] = ["want", "reading", "read", "dnf"];
 
@@ -213,6 +215,25 @@ export default function Title() {
         </Text>
         <Ionicons name="chevron-forward" size={16} color={c.dim} />
       </Pressable>
+
+      <View style={s.row}>
+        <FamiliarArt familiar={familiarFor(b.paths)} size={30} />
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6 }}>
+          {PATHS.map((p) => {
+            const on = !!b.paths?.includes(p.id);
+            return (
+              <Pressable
+                key={p.id}
+                onPress={() => set({ paths: on ? b.paths!.filter((x) => x !== p.id) : [...(b.paths ?? []), p.id] })}
+                style={[s.pathChip, { borderColor: p.color }, on && { backgroundColor: p.color + '33' }]}
+                accessibilityState={{ selected: on }}
+              >
+                <Text style={[s.pathText, { color: on ? p.color : c.dim }]}>{p.name}</Text>
+              </Pressable>
+            );
+          })}
+        </ScrollView>
+      </View>
 
       <Pressable style={s.row} onPress={() => setGenring(true)}>
         <Ionicons name="pricetags-outline" size={18} color={c.gold} />
@@ -514,6 +535,8 @@ function LogSheet({
 }
 
 const s = StyleSheet.create({
+  pathChip: { borderWidth: 1, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 },
+  pathText: { fontSize: 12, fontWeight: '600' },
   wrap: { flex: 1, backgroundColor: c.bg, paddingHorizontal: 16 },
   head: { flexDirection: "row", gap: 16, marginTop: 8 },
   title: { color: c.text, fontSize: 22, fontWeight: "700" },
@@ -534,10 +557,8 @@ const s = StyleSheet.create({
   h2: {
     color: c.text,
     fontSize: 19,
-    fontWeight: "700",
     marginTop: 24,
-    marginBottom: 10,
-  },
+    marginBottom: 10, fontFamily: F.heading },
   log: {
     flexDirection: "row",
     alignItems: "center",

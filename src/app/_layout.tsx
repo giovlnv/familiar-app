@@ -8,9 +8,11 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { PlaybackProvider } from "../playback";
 import { Splash } from "../components/Splash";
 import { getOnboarding } from "../familiar";
-import { c, mode, scheme } from "../theme";
+import { c, F, mode, scheme } from "../theme";
+import { useFonts, PlayfairDisplay_500Medium, PlayfairDisplay_500Medium_Italic } from "@expo-google-fonts/playfair-display";
 
 export default function RootLayout() {
+  const [fontsLoaded] = useFonts({ PlayfairDisplay_500Medium, PlayfairDisplay_500Medium_Italic });
   useEffect(() => {
     let pending = false;
     const fetchUpdate = async () => {
@@ -41,11 +43,11 @@ export default function RootLayout() {
       <PlaybackProvider>
         <View style={{ flex: 1, backgroundColor: c.bg }}>
           <StatusBar style={scheme === "dark" ? "light" : "dark"} />
-          <Stack
+          {fontsLoaded && <Stack
             screenOptions={{
               headerStyle: { backgroundColor: c.bg },
               headerTintColor: c.gold,
-              headerTitleStyle: { color: c.text },
+              headerTitleStyle: { color: c.text, fontFamily: F.heading },
               headerShadowVisible: false,
               contentStyle: { backgroundColor: c.bg },
             }}
@@ -53,7 +55,7 @@ export default function RootLayout() {
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="player/[id]" options={{ headerShown: false }} />
             <Stack.Screen name="onboarding" options={{ headerShown: false, presentation: "fullScreenModal", gestureEnabled: false }} />
-          </Stack>
+          </Stack>}
           <Splash />
         </View>
       </PlaybackProvider>

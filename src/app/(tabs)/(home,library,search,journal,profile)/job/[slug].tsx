@@ -8,7 +8,7 @@ import { syncAudioBooks } from '../../../../tracker';
 import { shareToClaude } from '../../../../components/Consults';
 import { Button } from '../../../../components/ui';
 import { usePad } from '../../../../playback';
-import { c } from '../../../../theme';
+import { c, F } from '../../../../theme';
 
 const STEPS = ['review', 'explanations', 'voices', 'ready', 'imported'] as const;
 
@@ -183,7 +183,7 @@ export default function JobScreen() {
 
 const s = StyleSheet.create({
   wrap: { flex: 1, backgroundColor: c.bg },
-  h1: { color: c.text, fontSize: 22, fontWeight: '700' },
+  h1: { color: c.text, fontSize: 22, fontFamily: F.heading },
   dim: { color: c.dim, fontSize: 13 },
   p: { color: c.text, fontSize: 15, lineHeight: 21 },
   label: { color: c.dim, fontSize: 13, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1, marginTop: 8 },

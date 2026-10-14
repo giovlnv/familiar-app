@@ -3,7 +3,7 @@ import { FlatList, Image, Modal, Pressable, ScrollView, StyleSheet, Switch, Text
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { CARDS, cardName, cardUri, onDecksChange } from '../decks';
 import { Chip } from './ui';
-import { c } from '../theme';
+import { c, F } from '../theme';
 
 export function useDecks() {
   const [, bump] = useReducer((n: number) => n + 1, 0);
@@ -98,7 +98,7 @@ export function CardPicker({
 const s = StyleSheet.create({
   wrap: { flex: 1, backgroundColor: c.bg, paddingHorizontal: 16 },
   top: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 14 },
-  h2: { color: c.text, fontSize: 20, fontWeight: '700' },
+  h2: { color: c.text, fontSize: 20, fontFamily: F.heading },
   link: { color: c.gold, fontSize: 16, fontWeight: '600' },
   input: { backgroundColor: c.panel, color: c.text, borderRadius: 12, padding: 12, fontSize: 15 },
   chips: { gap: 8, paddingVertical: 10 },

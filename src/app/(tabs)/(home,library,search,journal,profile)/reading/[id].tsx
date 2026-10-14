@@ -25,7 +25,7 @@ import { CardImage, CardPicker } from '../../../../components/Cards';
 import { shareToClaude } from '../../../../components/Consults';
 import { Button, Chip, DateStepper, fmtDate } from '../../../../components/ui';
 import { usePad } from '../../../../playback';
-import { c } from '../../../../theme';
+import { c, F } from '../../../../theme';
 
 const short = (id: string) => cardName(id).split(' · ').pop()!;
 
@@ -365,5 +365,5 @@ const s = StyleSheet.create({
   answerText: { color: c.text, fontSize: 15, lineHeight: 21 },
   dimBg: { flex: 1, backgroundColor: '#000a' },
   sheet: { backgroundColor: c.panel, padding: 16, paddingBottom: 36, borderTopLeftRadius: 18, borderTopRightRadius: 18, gap: 10 },
-  h2: { color: c.text, fontSize: 19, fontWeight: '700' },
+  h2: { color: c.text, fontSize: 19, fontFamily: F.heading },
 });

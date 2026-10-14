@@ -11,7 +11,7 @@ import {
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { daysBetween, load, TBook } from "../../../../tracker";
 import { Cover, Stars } from "../../../../components/ui";
-import { c } from "../../../../theme";
+import { c, F } from "../../../../theme";
 
 const MONTHS = [
   "January",
@@ -184,10 +184,8 @@ const s = StyleSheet.create({
   h2: {
     color: c.text,
     fontSize: 19,
-    fontWeight: "700",
     marginTop: 24,
-    marginBottom: 10,
-  },
+    marginBottom: 10, fontFamily: F.heading },
   row: {
     flexDirection: "row",
     alignItems: "center",

@@ -6,7 +6,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { load, patchList, removeList, TBook, Tracker } from '../../../../tracker';
 import { Button, Cover } from '../../../../components/ui';
 import { usePad } from '../../../../playback';
-import { c } from '../../../../theme';
+import { c, F } from '../../../../theme';
 
 export default function ListScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -170,7 +170,7 @@ export default function ListScreen() {
 const s = StyleSheet.create({
   wrap: { flex: 1, backgroundColor: c.bg },
   dim: { color: c.dim, fontSize: 13, marginBottom: 8 },
-  h2: { color: c.text, fontSize: 19, fontWeight: '700' },
+  h2: { color: c.text, fontSize: 19, fontFamily: F.heading },
   row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 10, borderBottomWidth: StyleSheet.hairlineWidth, borderColor: c.line },
   rank: { color: c.gold, fontSize: 26, fontWeight: '800', width: 32, textAlign: 'center' },
   title: { color: c.text, fontSize: 15, fontWeight: '600' },

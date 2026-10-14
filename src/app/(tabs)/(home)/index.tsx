@@ -7,9 +7,9 @@ import { getBook as getAudio, installSampleOnce, loadProgress } from '../../../s
 import { syncAudioBooks, Tracker } from '../../../tracker';
 import { Cover, fmtDate, Stars } from '../../../components/ui';
 import { fmtTime } from '../../../format';
-import { c } from '../../../theme';
+import { c, F } from '../../../theme';
 import { FamiliarArt } from '../../../components/Familiar';
-import { withYou } from '../../../familiar';
+import { familiarFor } from '../../../familiar';
 
 export default function Home() {
   const pad = usePad();
@@ -30,6 +30,7 @@ export default function Home() {
     })
     .filter((x) => x.audio && (x.p.time > 0 || x.p.section > 0));
   const byId = new Map(t.books.map((b) => [b.id, b]));
+  const guide = familiarFor(listening[0]?.b.paths);
   const recent = [...t.logs].sort((a, b) => b.date.localeCompare(a.date) || b.created - a.created).slice(0, 6);
   const year = new Date().getFullYear();
   const readThisYear = t.logs.filter((l) => l.date.startsWith(String(year))).length;
@@ -39,9 +40,9 @@ export default function Home() {
   return (
     <ScrollView style={s.wrap} contentContainerStyle={{ paddingBottom: 40 + pad }}>
       <Pressable style={s.familiar} onPress={() => router.push('/familiars')}>
-        <FamiliarArt familiar={withYou()} pose={listening.length ? 'reading' : 'idle'} size={92} />
+        <FamiliarArt familiar={guide} pose={listening.length ? 'reading' : 'idle'} size={92} />
         <View style={{ flex: 1 }}>
-          <Text style={s.famName}>{withYou().name} is with you</Text>
+          <Text style={s.famName}>{guide.name} is with you</Text>
           <Text style={s.dim}>{listening.length ? 'Ready to pick up where you left off.' : 'Choose a book and study together.'}</Text>
         </View>
       </Pressable>
@@ -125,12 +126,12 @@ export default function Home() {
 
 const s = StyleSheet.create({
   familiar: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: c.panel, borderRadius: 14, paddingVertical: 4, paddingHorizontal: 10, marginTop: 12 },
-  famName: { color: c.text, fontSize: 17, fontWeight: '600', fontFamily: 'Georgia' },
+  famName: { color: c.text, fontSize: 18, fontFamily: F.heading },
   wrap: { flex: 1, backgroundColor: c.bg, paddingHorizontal: 16 },
   stat: { backgroundColor: c.panel, borderRadius: 14, padding: 16, marginTop: 12, flexDirection: 'row', alignItems: 'baseline', gap: 10 },
   statNum: { color: c.gold, fontSize: 34, fontWeight: '800' },
   statLabel: { color: c.dim, fontSize: 15 },
-  h2: { color: c.text, fontSize: 19, fontWeight: '700', marginTop: 24, marginBottom: 10 },
+  h2: { color: c.text, fontSize: 19, marginTop: 24, marginBottom: 10, fontFamily: F.heading },
   listen: { flexDirection: 'row', gap: 12, alignItems: 'center', backgroundColor: c.panel, borderRadius: 12, padding: 10, marginBottom: 8 },
   title: { color: c.text, fontSize: 15, fontWeight: '600' },
   small: { color: c.text, fontSize: 12, marginTop: 5 },

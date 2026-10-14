@@ -12,7 +12,7 @@ import { router, Stack, useFocusEffect } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { daysBetween, load, Tracker } from "../../../tracker";
 import { Chip, Cover } from "../../../components/ui";
-import { c } from "../../../theme";
+import { c, F } from "../../../theme";
 import ProfileHeader from "../../../components/ProfileHeader";
 import { FamiliarArt } from "../../../components/Familiar";
 import { loadFamiliars, withYou } from "../../../familiar";
@@ -364,10 +364,8 @@ const s = StyleSheet.create({
   h2: {
     color: c.text,
     fontSize: 19,
-    fontWeight: "700",
     marginTop: 24,
-    marginBottom: 10,
-  },
+    marginBottom: 10, fontFamily: F.heading },
   card: { backgroundColor: c.panel, borderRadius: 12, padding: 14 },
   hist: { flexDirection: "row", alignItems: "flex-end", height: 110, gap: 4 },
   col: {

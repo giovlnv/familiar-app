@@ -25,10 +25,11 @@ import {
 } from "../../../tracker";
 import { lastBackup } from "../../../sync";
 import { Chip, Cover, Stars } from "../../../components/ui";
+import { PATHS } from "../../../familiar";
 import { c } from "../../../theme";
 import DiaryList from "../../../components/DiaryList";
 
-type Filter = "all" | Status | `shelf:${string}`;
+type Filter = "all" | Status | `shelf:${string}` | `path:${string}`;
 const FILTERS: Filter[] = ["all", "reading", "want", "read", "dnf"];
 
 export default function Library() {
@@ -134,6 +135,14 @@ export default function Library() {
               label={`${f === "all" ? "All" : STATUS_LABEL[f as Status]} ${t.books.filter((b) => match(b, f)).length}`}
             />
           ))}
+          {PATHS.filter((p) => t.books.some((b) => b.paths?.includes(p.id))).map((p) => (
+            <Chip
+              key={p.id}
+              on={filter === `path:${p.id}`}
+              onPress={() => setFilter(`path:${p.id}`)}
+              label={`${p.name} ${t.books.filter((b) => b.paths?.includes(p.id)).length}`}
+            />
+          ))}
           {(t.shelves ?? []).map((sh) => (
             <Chip
               key={sh.id}
@@ -195,7 +204,7 @@ export default function Library() {
 }
 
 const match = (b: TBook, f: Filter) =>
-  f === "all" || b.status === f;
+  f === "all" || b.status === f || (f.startsWith("path:") && !!b.paths?.includes(f.slice(5)));
 
 const s = StyleSheet.create({
   wrap: { flex: 1, backgroundColor: c.bg, paddingHorizontal: 16 },

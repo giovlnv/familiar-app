@@ -15,6 +15,7 @@ export type TBook = {
   grId?: string;
   genres?: string[];
   genresEdited?: boolean;
+  paths?: string[];
   status: Status;
   audio?: string;
   isbn?: string;

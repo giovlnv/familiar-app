@@ -32,8 +32,11 @@ import {
   ConsultList,
   shareToClaude,
 } from "./Consults";
-import { c } from "../theme";
+import { c, F } from "../theme";
 import { usePlayback } from "../playback";
+import { FamiliarArt } from "./Familiar";
+import { familiarFor } from "../familiar";
+import { load as loadTracker } from "../tracker";
 
 const fmt = (t: number) => {
   const h = Math.floor(t / 3600);
@@ -63,6 +66,7 @@ export default function Player({
   onClose: () => void;
 }) {
   const { book, folder } = item;
+  const familiar = useMemo(() => familiarFor(loadTracker().books.find((b) => b.audio === folder)?.paths), [folder]);
   const pb = usePlayback();
   const { player, status, t, rate, goTo, skip, toggle } = pb;
   useEffect(() => pb.open(item, start), [item.folder, start]);
@@ -249,12 +253,15 @@ export default function Player({
         </View>
       </View>
 
-      <Pressable onPress={() => setPanel("chapters")}>
-        <Text style={s.book}>{book.title}</Text>
-        <Text style={s.sec}>
-          {section.title}{" "}
-          <Ionicons name="chevron-down" size={16} color={c.dim} />
-        </Text>
+      <Pressable onPress={() => setPanel("chapters")} style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+        <FamiliarArt familiar={familiar} pose={status.playing ? "reading" : "idle"} size={52} />
+        <View style={{ flex: 1 }}>
+          <Text style={s.book}>{book.title}</Text>
+          <Text style={s.sec}>
+            {section.title}{" "}
+            <Ionicons name="chevron-down" size={16} color={c.dim} />
+          </Text>
+        </View>
       </Pressable>
 
       <View style={{ flex: 1 }}>
@@ -675,7 +682,7 @@ const s = StyleSheet.create({
   },
   topRight: { flexDirection: "row", gap: 18 },
   link: { color: c.gold, fontSize: 16 },
-  h2: { color: c.text, fontSize: 22, fontWeight: "700" },
+  h2: { color: c.text, fontSize: 22, fontFamily: F.heading },
   book: { color: c.dim, fontSize: 13, marginTop: 4 },
   sec: { color: c.text, fontSize: 20, fontWeight: "700", marginBottom: 10 },
   para: {

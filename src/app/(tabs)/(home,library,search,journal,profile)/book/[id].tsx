@@ -6,7 +6,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { getBook, loadConsults, loadNotes, loadProgress } from '../../../../storage';
 import { fmtHours, fmtTime } from '../../../../format';
 import { Consult, Note, Progress } from '../../../../types';
-import { c } from '../../../../theme';
+import { c, F } from '../../../../theme';
 
 export default function BookPage() {
   const pad = usePad();
@@ -97,7 +97,7 @@ const s = StyleSheet.create({
   btn: { backgroundColor: c.gold, borderRadius: 12, padding: 14, alignItems: 'center', marginTop: 16 },
   btnText: { color: c.bg, fontWeight: '700', fontSize: 16 },
   btnSub: { color: c.bg, opacity: 0.75, fontSize: 13, marginTop: 2 },
-  h2: { color: c.text, fontSize: 18, fontWeight: '700', marginTop: 24, marginBottom: 8 },
+  h2: { color: c.text, fontSize: 18, marginTop: 24, marginBottom: 8, fontFamily: F.heading },
   row: { paddingVertical: 10, paddingHorizontal: 10, borderRadius: 10, marginBottom: 2 },
   rowOn: { backgroundColor: c.raised },
   rowTop: { flexDirection: 'row', alignItems: 'center', gap: 10 },

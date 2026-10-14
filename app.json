@@ -72,7 +72,8 @@
             "backgroundColor": "#0D1626"
           }
         }
-      ]
+      ],
+      "expo-font"
     ],
     "scheme": "tarotreader",
     "experiments": {

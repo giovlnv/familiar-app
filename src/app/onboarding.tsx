@@ -67,7 +67,7 @@ export default function Onboarding() {
 
   if (step === 'welcome')
     return (
-      <View style={[st.wrap, { paddingBottom: insets.bottom + 20 }]}>
+      <View style={[st.wrap, { paddingTop: insets.top + 12, paddingBottom: insets.bottom + 20 }]}>
         <View style={st.heroBox}>
           <Image source={require('../../assets/hero.jpg')} style={st.hero} />
         </View>
@@ -310,8 +310,8 @@ function Status({ icon, title, text }: { icon: keyof typeof Ionicons.glyphMap; t
 
 const st = StyleSheet.create({
   wrap: { flex: 1, backgroundColor: c.bg },
-  heroBox: { width: '100%', aspectRatio: 393 / 520, overflow: 'hidden', justifyContent: 'flex-end' },
-  hero: { width: '100%', aspectRatio: 393 / 600 },
+  heroBox: { alignSelf: 'center', height: '44%', aspectRatio: 393 / 600, borderRadius: 24, overflow: 'hidden', marginTop: 8 },
+  hero: { width: '100%', height: '100%' },
   brand: { alignItems: 'center', gap: 6, marginTop: 14 },
   word: { color: c.gold, fontSize: 46, fontWeight: '500' },
   tagline: { color: c.text, fontStyle: 'italic', fontSize: 17 },

@@ -30,8 +30,8 @@ export function Vial({ element, size }: { element: Element; size: number }) {
   );
 }
 
-export function FamiliarArt({ familiar, pose = 'idle', size, vial }: { familiar: Familiar; pose?: Pose; size: number; vial?: boolean }) {
-  const xml = useMemo(() => familiarXml(familiar, pose), [familiar, pose]);
+export function FamiliarArt({ familiar, pose = 'idle', size, vial, closed }: { familiar: Familiar; pose?: Pose; size: number; vial?: boolean; closed?: boolean }) {
+  const xml = useMemo(() => familiarXml(familiar, pose, closed), [familiar, pose, closed]);
   const el = vial ? myElement()?.element : undefined;
   if (!el) return <SvgXml xml={xml} width={size} height={size} />;
   return (

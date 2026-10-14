@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { describe, loadFamiliars, PATHS, setWithYou } from '../../../familiar';
+import { describe, loadFamiliars, PATHS } from '../../../familiar';
 import { FamiliarArt } from '../../../components/Familiar';
 import { usePad } from '../../../playback';
 import { c } from '../../../theme';
@@ -14,12 +14,12 @@ export default function Familiars() {
 
   return (
     <ScrollView style={s.wrap} contentContainerStyle={{ padding: 16, gap: 10, paddingBottom: 40 + pad }}>
-      <Text style={s.p}>Tap one to walk with it. Link a familiar to a path and it appears with that path’s books.</Text>
+      <Text style={s.p}>Tap a familiar to visit, pet it or walk with it. Link a familiar to a path and it appears with that path’s books.</Text>
       {st.list.map((f) => {
         const on = f.id === st.withYou;
         return (
           <View key={f.id} style={[s.card, on && s.cardOn]}>
-            <Pressable style={s.main} onPress={() => (setWithYou(f.id), setSt(loadFamiliars()))} accessibilityLabel={`Walk with ${f.name}`}>
+            <Pressable style={s.main} onPress={() => router.push({ pathname: '/den/[id]', params: { id: f.id } })} accessibilityLabel={`Open ${f.name}`}>
               <View style={s.art}>
                 <FamiliarArt familiar={f} size={64} vial />
               </View>

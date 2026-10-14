@@ -81,6 +81,8 @@ export const MARK_COLORS = [
   { hex: '#D49A9E', name: 'Rose' },
   { hex: '#8FB8DE', name: 'Moon blue' },
   { hex: '#F3ECDF', name: 'Pearl' },
+  { hex: '#7FC48A', name: 'Green' },
+  { hex: '#B48CD9', name: 'Purple' },
 ];
 
 export const STRIPES = [
@@ -120,8 +122,10 @@ export const SHADOW: Familiar = {
 
 const PROPS: Record<string, { accent: string; cover: string; cup: string }> = {
   plum: { accent: '#D9B45B', cover: '#5A3E6B', cup: '#14111C' },
-  marine: { accent: '#D4A95A', cover: '#2E4A6E', cup: '#0D1626' },
-  forest: { accent: '#C9A85A', cover: '#345440', cup: '#0E1813' },
+  water: { accent: '#C9D1DE', cover: '#2E4A6E', cup: '#0D1626' },
+  fire: { accent: '#D9B45B', cover: '#6B2A33', cup: '#1A0D10' },
+  earth: { accent: '#C29468', cover: '#5C4233', cup: '#0E1813' },
+  air: { accent: '#E8EEF8', cover: '#2B3F7A', cup: '#0F1730' },
 };
 
 const STAR = 'M256 136 Q258.5 147.5 270 150 Q258.5 152.5 256 164 Q253.5 152.5 242 150 Q253.5 147.5 256 136 Z';
@@ -136,7 +140,7 @@ export function artKey(f: Familiar, pose: Pose) {
   return pose === 'idle' ? `cat-${f.build}-idle-${f.coat}` : `cat-${f.build}-${pose}`;
 }
 
-export function familiarXml(f: Familiar, pose: Pose = 'idle') {
+export function familiarXml(f: Familiar, pose: Pose = 'idle', closed = false) {
   const p = PROPS[paletteId] ?? PROPS.plum;
   const dark = lum(f.color) < 0.13;
   const light = f.light ?? LIGHTS[0];
@@ -161,6 +165,28 @@ export function familiarXml(f: Familiar, pose: Pose = 'idle') {
   if (f.mark === 'none') xml = xml.replace(/<g id="mark"[^>]*>.*?<\/g>/, '');
   else if (f.markColor) xml = xml.replace('<g id="mark" fill="#E8C767"', `<g id="mark" fill="${f.markColor}"`);
   if (lum(f.color) > 0.5) xml = xml.replace(/#F3E8B9/g, '#6E6478');
+  return closed ? closeEyes(xml) : xml;
+}
+
+const section = (xml: string, id: string, fn: (part: string) => string) => {
+  const start = xml.indexOf(`<g id="${id}"`);
+  if (start < 0) return xml;
+  const next = xml.indexOf('<g id="', start + 6);
+  const end = next < 0 ? xml.length : next;
+  return xml.slice(0, start) + fn(xml.slice(start, end)) + xml.slice(end);
+};
+
+export function closeEyes(xml: string) {
+  if (!xml.includes('id="eye-white"')) return xml;
+  xml = section(xml, 'eye-white', (part) =>
+    part.replace(/<circle cx="([\d.]+)" cy="([\d.]+)" r="([\d.]+)"><\/circle>/g, (_, x, y, r) => {
+      const cx = +x, cy = +y, rr = +r;
+      return `<path d="M${cx - rr * 0.75} ${cy + 2} Q${cx} ${cy + rr * 0.62} ${cx + rr * 0.75} ${cy + 2}" fill="none" stroke="#8E7FA6" stroke-width="${Math.max(2.5, rr * 0.2)}" stroke-linecap="round"></path>`;
+    }),
+  );
+  xml = section(xml, 'eye-iris', (part) => part.replace(/<circle[^>]*><\/circle>/g, ''));
+  xml = section(xml, 'eye-pupil', (part) => part.replace(/<(ellipse|circle)[^>]*><\/\1>/g, ''));
+  xml = section(xml, 'detail', (part) => part.replace(/<circle[^>]*r="(?:[0-6](?:\.\d+)?|7)"[^>]*><\/circle>/g, ''));
   return xml;
 }
 

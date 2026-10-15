@@ -5,7 +5,7 @@ import { router, useFocusEffect } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { getBook as getAudio, installSampleOnce, loadProgress } from '../../../storage';
 import { patchBook, syncAudioBooks, Tracker } from '../../../tracker';
-import { cardOfTheDay, todaysDraw } from '../../../journal';
+import { cardOfTheDay, patchReading, todaysCotd, todaysDraw } from '../../../journal';
 import { cardName } from '../../../decks';
 import { CardImage, CardPicker } from '../../../components/Cards';
 import CardSheet from '../../../components/CardSheet';
@@ -38,8 +38,18 @@ export default function Home() {
   const [picking, setPicking] = useState(false);
   const [, tick] = useState(0);
   useFocusEffect(useCallback(() => tick((n) => n + 1), []));
-  const mine = todaysDraw();
-  const mineCard = mine?.cards[0];
+  const entry = todaysCotd();
+  const legacy = todaysDraw();
+  const mine = entry?.cards[1]?.card ? entry : legacy;
+  const mineCard = entry?.cards[1]?.card ? entry.cards[1] : legacy?.cards[0];
+  const openCotd = () => router.push({ pathname: '/reading/[id]', params: { id: entry?.id ?? 'draft' } });
+  const logDrawn = (card: string, rev: boolean) =>
+    setTimeout(() => {
+      if (entry) {
+        patchReading(entry.id, (x) => (x.cards[1] = { card, reversed: rev }));
+        router.push({ pathname: '/reading/[id]', params: { id: entry.id } });
+      } else router.push({ pathname: '/reading/[id]', params: { id: 'draft', card, reversed: rev ? '1' : '0' } });
+    }, 450);
   const { width: W, height: H } = useWindowDimensions();
   const cardW = Math.min((W - 32) / 4, (H * 0.3 - 90) / 1.72);
   const [how, setHow] = useState(false);
@@ -74,7 +84,7 @@ export default function Home() {
             <CardImage id={daily} width={cardW} />
           </Pressable>
           <Text style={s.cardName} numberOfLines={2}>{cardName(daily).split(' · ').pop()}</Text>
-          <Pressable style={s.logBtn} onPress={() => router.push({ pathname: '/reading/[id]', params: { id: 'draft', card: daily } })}>
+          <Pressable style={s.logBtn} onPress={openCotd}>
             <Ionicons name="create-outline" size={14} color={c.bg} />
             <Text style={s.logBtnText}>Write about it</Text>
           </Pressable>
@@ -130,7 +140,7 @@ export default function Home() {
         visible={picking}
         title="The card you drew today"
         onClose={() => setPicking(false)}
-        onPick={(id, rev) => setTimeout(() => router.push({ pathname: '/reading/[id]', params: { id: 'draft', card: id, daily: 'drawn', reversed: rev ? '1' : '0' } }), 450)}
+        onPick={(id, rev) => logDrawn(id, rev)}
       />
       <Pressable style={s.familiar} onPress={() => router.push({ pathname: '/den/[id]', params: { id: guide.id } })}>
         <FamiliarArt familiar={guide} pose={playing ? 'reading' : nightNow() ? 'sleeping' : 'idle'} size={92} vial alive />

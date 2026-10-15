@@ -21,13 +21,14 @@ export type Reading = {
   keyPoints?: string;
   openQuestions?: string;
   answers?: Answer[];
-  daily?: 'calculated' | 'drawn';
+  daily?: 'calculated' | 'drawn' | 'cotd';
   created: number;
 };
 export type JournalData = { readings: Reading[]; people: Person[]; spreads: Spread[]; areas: string[] };
 
 export const BASE_AREAS = ['Love', 'Family', 'Money', 'Job', 'Personal', 'Spiritual'];
 export const BASE_SPREADS: Spread[] = [
+  { id: 'cotd', name: 'COTD', positions: ['Calculated', 'Drawn'] },
   { id: 'one', name: 'One card', positions: ['Card'] },
   { id: 'three', name: 'Three cards', positions: ['Past', 'Present', 'Future'] },
   { id: 'situation', name: 'Situation · action · outcome', positions: ['Situation', 'Action', 'Outcome'] },
@@ -61,17 +62,19 @@ const stamp = () => {
   return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
 };
 
-export const draftReading = (card: string, daily: 'calculated' | 'drawn' = 'calculated', reversed = false): Reading => ({
+export const cotdDraft = (drawn?: string, reversed = false): Reading => ({
   id: uid(),
   at: stamp(),
-  question: daily === 'drawn' ? 'My card of the day' : 'Card of the day',
-  spreadId: 'one',
-  cards: [{ card, reversed }],
-  daily,
+  question: 'Card of the day',
+  spreadId: 'cotd',
+  cards: [{ card: cardOfTheDay() }, drawn ? { card: drawn, reversed } : {}],
+  daily: 'cotd',
   created: Date.now(),
 });
 
-export const todaysDraw = () => loadJournal().readings.filter((r) => r.daily === 'drawn' && r.at.slice(0, 10) === stamp().slice(0, 10)).pop();
+const isToday = (r: Reading) => r.at.slice(0, 10) === stamp().slice(0, 10);
+export const todaysCotd = () => loadJournal().readings.filter((r) => r.spreadId === 'cotd' && isToday(r)).pop();
+export const todaysDraw = () => loadJournal().readings.filter((r) => r.daily === 'drawn' && isToday(r)).pop();
 
 export const saveReading = (r: Reading) => updateJournal((j) => j.readings.push(r));
 

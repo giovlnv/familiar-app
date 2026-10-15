@@ -10,7 +10,7 @@ import {
   allSpreads,
   birthCards,
   cardSections,
-  draftReading,
+  cotdDraft,
   loadJournal,
   parseDate,
   patchReading,
@@ -35,11 +35,11 @@ const short = (id: string) => cardName(id).split(' · ').pop()!;
 
 export default function ReadingScreen() {
   const pad = usePad();
-  const { id, card, daily, reversed } = useLocalSearchParams<{ id: string; card?: string; daily?: 'calculated' | 'drawn'; reversed?: string }>();
+  const { id, card, reversed } = useLocalSearchParams<{ id: string; card?: string; reversed?: string }>();
   const { width } = useWindowDimensions();
   const [j, setJ] = useState(loadJournal);
   const [draft, setDraft] = useState(id === 'draft');
-  const [r, setR] = useState<Reading | undefined>(() => (id === 'draft' && card ? draftReading(card, daily, reversed === '1') : loadJournal().readings.find((x) => x.id === id)));
+  const [r, setR] = useState<Reading | undefined>(() => (id === 'draft' ? cotdDraft(card, reversed === '1') : loadJournal().readings.find((x) => x.id === id)));
   const [slot, setSlot] = useState<number | null>(null);
   const [about, setAbout] = useState<{ id: string; role: string } | null>(null);
   const [personSheet, setPersonSheet] = useState(false);
@@ -69,9 +69,10 @@ export default function ReadingScreen() {
   };
   const reload = () => setJ(loadJournal());
 
+  const locked = (i: number) => r.spreadId === 'cotd' && i === 0;
   const slotMenu = (i: number) => {
     const p = r.cards[i];
-    if (!p?.card) return setSlot(i);
+    if (!p?.card) return locked(i) ? undefined : setSlot(i);
     const links = cardSections(p.card);
     Alert.alert(`${sp.positions[i]} · ${short(p.card)}${p.reversed ? ' (reversed)' : ''}`, undefined, [
       { text: 'About this card', onPress: () => setAbout({ id: p.card!, role: sp.positions[i] }) },
@@ -79,9 +80,13 @@ export default function ReadingScreen() {
         text: `Listen: ${l.title}`,
         onPress: () => router.push({ pathname: '/player/[id]', params: { id: l.folder, section: String(l.index) } }),
       })),
-      { text: p.reversed ? 'Make upright' : 'Make reversed', onPress: () => placeCard(i, p.card, !p.reversed) },
-      { text: 'Change card', onPress: () => setSlot(i) },
-      { text: 'Remove card', style: 'destructive' as const, onPress: () => placeCard(i, undefined) },
+      ...(locked(i)
+        ? []
+        : [
+            { text: p.reversed ? 'Make upright' : 'Make reversed', onPress: () => placeCard(i, p.card, !p.reversed) },
+            { text: 'Change card', onPress: () => setSlot(i) },
+            { text: 'Remove card', style: 'destructive' as const, onPress: () => placeCard(i, undefined) },
+          ]),
       { text: 'Cancel', style: 'cancel' as const },
     ]);
   };
@@ -212,7 +217,7 @@ export default function ReadingScreen() {
 
       <Text style={s.label}>Spread</Text>
       <View style={s.chips}>
-        {allSpreads(j).map((x) => (
+        {allSpreads(j).filter((x) => (r.spreadId === 'cotd') === (x.id === 'cotd')).map((x) => (
           <Chip key={x.id} label={x.name} on={r.spreadId === x.id} onPress={() => set({ spreadId: x.id })} />
         ))}
         <Chip label="+ Custom" onPress={newSpread} />

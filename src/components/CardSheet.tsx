@@ -12,6 +12,7 @@ import { getBook } from '../storage';
 import { explanationsOn } from '../explanations';
 import { c, themed } from '../theme';
 import { cardNumber } from '../numerology';
+import { cardAstro } from '../astrology';
 
 const excerpt = (paras: { kind: string; text: string }[], kind: string, max: number) =>
   paras.filter((p) => p.kind === kind).slice(0, max).map((p) => p.text);
@@ -21,7 +22,9 @@ export default function CardSheet({ id, role, here, onClose }: { id: string | nu
   const [menu, setMenu] = useState(false);
   const [openBooks, setOpenBooks] = useState<string[]>([]);
   const [shownId, setShownId] = useState(id);
-  const num = id && (getOnboarding().paths ?? []).includes('numerology') ? cardNumber(id) : undefined;
+  const myPaths = getOnboarding().paths ?? [];
+  const num = id && myPaths.includes('numerology') ? cardNumber(id) : undefined;
+  const astro = id && myPaths.includes('astrology') ? cardAstro(id) : undefined;
   if (shownId !== id) {
     setShownId(id);
     if (id) setSources(loadSources());
@@ -59,6 +62,7 @@ export default function CardSheet({ id, role, here, onClose }: { id: string | nu
                 <Text style={s.name}>{cardName(id)}</Text>
                 {!!role && <Text style={s.role}>{role}</Text>}
                 {num && <Text style={s.role}>Numerology: {num}</Text>}
+                {astro && <Text style={s.role}>Astrology: {astro}</Text>}
               </View>
             </View>
 

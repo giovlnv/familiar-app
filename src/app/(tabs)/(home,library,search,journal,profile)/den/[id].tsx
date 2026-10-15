@@ -3,7 +3,7 @@ import { Animated, Easing, Pressable, ScrollView, Text, View } from 'react-nativ
 import { router, Stack, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Haptics from 'expo-haptics';
-import { describe, Familiar, loadFamiliars, setWithYou, withYou } from '../../../../familiar';
+import { describe, Familiar, loadFamiliars, setWithYou, withYou, nightNow } from '../../../../familiar';
 import { FamiliarArt, myElement } from '../../../../components/Familiar';
 import { usePad } from '../../../../playback';
 import { c, F, themed } from '../../../../theme';
@@ -28,10 +28,6 @@ const buzz = (sp: Familiar['species'], asleep: boolean) =>
 
 type Bubble = { id: number; text: string; x: number; y: Animated.Value; o: Animated.Value };
 
-const nightNow = () => {
-  const h = new Date().getHours();
-  return h >= 23 || h < 7;
-};
 
 export default function Den() {
   const { id } = useLocalSearchParams<{ id: string }>();

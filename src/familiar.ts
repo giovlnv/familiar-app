@@ -316,3 +316,8 @@ export function sunSign(iso?: string): { sign: string; element: Element } | unde
   const [sign, element] = SIGNS[i >= 0 ? i : month % 12];
   return { sign, element };
 }
+
+export const nightNow = () => {
+  const h = new Date().getHours();
+  return h >= 23 || h < 7;
+};

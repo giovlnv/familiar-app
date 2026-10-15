@@ -1,4 +1,4 @@
-import { usePad } from '../../../playback';
+import { usePad, usePlayback } from '../../../playback';
 import { useCallback, useEffect, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
@@ -13,10 +13,11 @@ import { Cover, fmtDate, Stars } from '../../../components/ui';
 import { fmtTime } from '../../../format';
 import { c, F, read, themed, write } from '../../../theme';
 import { FamiliarArt } from '../../../components/Familiar';
-import { familiarFor } from '../../../familiar';
+import { familiarFor, nightNow } from '../../../familiar';
 
 export default function Home() {
   const pad = usePad();
+  const playing = usePlayback().status.playing;
   const [t, setT] = useState<Tracker>({ books: [], logs: [] });
   const refresh = useCallback(() => setT(syncAudioBooks()), []);
   useFocusEffect(refresh);
@@ -62,10 +63,10 @@ export default function Home() {
   return (
     <ScrollView style={s.wrap} contentContainerStyle={{ paddingBottom: 40 + pad }}>
       <Pressable style={s.familiar} onPress={() => router.push({ pathname: '/den/[id]', params: { id: guide.id } })}>
-        <FamiliarArt familiar={guide} pose={listening.length ? 'reading' : 'idle'} size={92} vial alive />
+        <FamiliarArt familiar={guide} pose={playing ? 'reading' : nightNow() ? 'sleeping' : 'idle'} size={92} vial alive />
         <View style={{ flex: 1 }}>
           <Text style={s.famName}>{guide.name} is with you</Text>
-          <Text style={s.dim}>{listening.length ? 'Ready to pick up where you left off.' : 'Choose a book and study together.'}</Text>
+          <Text style={s.dim}>{playing ? 'Listening with you.' : nightNow() ? 'Asleep until morning. Press play to wake them.' : listening.length ? 'Ready to pick up where you left off.' : 'Choose a book and study together.'}</Text>
         </View>
       </Pressable>
       <View style={s.stat}>

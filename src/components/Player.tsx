@@ -104,7 +104,7 @@ export default function Player({
   const expOn = explanationsOn(folder);
   const [styling, setStyling] = useState(false);
   const lineH = lineHeight(ts);
-  const lines = Math.max(3, Math.min(6, Math.floor((stage.h * 0.45 - 20) / lineH)));
+  const lines = Math.max(2, Math.min(3, Math.floor((stage.h * 0.3 - 20) / lineH)));
   const passageH = lineH * lines + 20;
   const [panel, setPanel] = useState<
     "none" | "chapters" | "notes" | "consults"
@@ -754,7 +754,7 @@ function Passage({ para, t, ts, height }: { para?: Para; t: number; ts: TextStyl
   const last = useRef(0);
   const frac = para && para.end > para.start ? Math.min(1, Math.max(0, (t - para.start) / (para.end - para.start))) : 0;
   const room = Math.max(0, contentH - (height - 20));
-  const target = Math.floor((room * frac) / LINE) * LINE;
+  const target = frac > 0.9 ? room : Math.min(room, Math.floor((room * frac) / LINE) * LINE);
   useEffect(() => {
     if (target === last.current) return;
     last.current = target;

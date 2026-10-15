@@ -122,7 +122,7 @@ export default function VoiceLab() {
   const progress = Math.round(tts.downloadProgress <= 1 ? tts.downloadProgress * 100 : tts.downloadProgress);
 
   return (
-    <ScrollView style={s.wrap} contentContainerStyle={{ paddingBottom: 60 + pad }}>
+    <ScrollView automaticallyAdjustKeyboardInsets keyboardShouldPersistTaps="handled" style={s.wrap} contentContainerStyle={{ paddingBottom: 60 + pad }}>
       <Text style={s.p}>
         Tests the Kokoro voice running on this iPhone, with no internet once the voice is downloaded. Run each test, then tap
         “Copy results” and paste them in the chat.

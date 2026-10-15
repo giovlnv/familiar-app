@@ -1,6 +1,6 @@
 import { usePad, usePlayback } from '../../../playback';
 import { useCallback, useEffect, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { getBook as getAudio, installSampleOnce, loadProgress } from '../../../storage';
@@ -39,6 +39,9 @@ export default function Home() {
   useFocusEffect(useCallback(() => tick((n) => n + 1), []));
   const mine = todaysDraw();
   const mineCard = mine?.cards[0];
+  const { width: W, height: H } = useWindowDimensions();
+  const cardW = Math.min((W - 32 - 12) / 2 - 24, (H * 0.4 - 120) / 1.72);
+  const [how, setHow] = useState(false);
   const mark = (p: { section: number; time: number }) => `${p.section}:${Math.floor(p.time)}`;
   const hide = (folder: string, p: { section: number; time: number }) => {
     const next = { ...hidden, [folder]: mark(p) };
@@ -62,6 +65,63 @@ export default function Home() {
 
   return (
     <ScrollView style={s.wrap} contentContainerStyle={{ paddingBottom: 40 + pad }}>
+      <View style={s.daily}>
+        <View style={s.slot}>
+          <Text style={s.tag}>Calculated</Text>
+          <Pressable onPress={() => setAbout(daily)} accessibilityLabel={`About ${cardName(daily)}`}>
+            <CardImage id={daily} width={cardW} />
+          </Pressable>
+          <Text style={s.cardName} numberOfLines={2}>{cardName(daily).split(' · ').pop()}</Text>
+          <Pressable style={s.logBtn} onPress={() => router.push({ pathname: '/reading/[id]', params: { id: 'draft', card: daily } })}>
+            <Ionicons name="create-outline" size={14} color={c.bg} />
+            <Text style={s.logBtnText}>Write about it</Text>
+          </Pressable>
+        </View>
+        <View style={s.slot}>
+          <Text style={s.tag}>Yours</Text>
+          {mine && mineCard?.card ? (
+            <>
+              <Pressable onPress={() => router.push({ pathname: '/reading/[id]', params: { id: mine.id } })} accessibilityLabel="Your card of the day">
+                <CardImage id={mineCard.card} reversed={mineCard.reversed} width={cardW} />
+              </Pressable>
+              <Text style={s.cardName} numberOfLines={2}>
+                {cardName(mineCard.card).split(' · ').pop()}
+                {mineCard.reversed ? ' (rev.)' : ''}
+              </Text>
+              <Pressable style={[s.logBtn, s.logBtnAlt]} onPress={() => router.push({ pathname: '/reading/[id]', params: { id: mine.id } })}>
+                <Ionicons name="book-outline" size={14} color={c.gold} />
+                <Text style={[s.logBtnText, { color: c.gold }]}>Open entry</Text>
+              </Pressable>
+            </>
+          ) : (
+            <>
+              <Pressable style={[s.blank, { width: cardW, height: cardW * 1.72, borderRadius: cardW * 0.06 }]} onPress={() => setPicking(true)}>
+                <Ionicons name="add" size={28} color={c.gold} />
+              </Pressable>
+              <Text style={s.cardName}>Not drawn yet</Text>
+              <Pressable style={[s.logBtn, s.logBtnAlt]} onPress={() => setPicking(true)}>
+                <Ionicons name="add" size={14} color={c.gold} />
+                <Text style={[s.logBtnText, { color: c.gold }]}>Log yours</Text>
+              </Pressable>
+            </>
+          )}
+        </View>
+      </View>
+      <Pressable onPress={() => setHow(!how)} style={{ alignSelf: 'center', marginTop: 6 }}>
+        <Text style={s.how}>{how ? 'Hide' : 'How is the calculated card chosen?'}</Text>
+      </Pressable>
+      {how && (
+        <Text style={s.howText}>
+          Today’s date ({new Date().toLocaleDateString()}) is turned into a number with a simple hash, and that number picks one of the 78 cards. The same date always gives the same card, so it stays all day and changes at midnight. It doesn’t use your birth date, readings or anything about you, and it is never reversed.
+        </Text>
+      )}
+      <CardSheet id={about} onClose={() => setAbout(null)} />
+      <CardPicker
+        visible={picking}
+        title="The card you drew today"
+        onClose={() => setPicking(false)}
+        onPick={(id, rev) => setTimeout(() => router.push({ pathname: '/reading/[id]', params: { id: 'draft', card: id, daily: 'drawn', reversed: rev ? '1' : '0' } }), 450)}
+      />
       <Pressable style={s.familiar} onPress={() => router.push({ pathname: '/den/[id]', params: { id: guide.id } })}>
         <FamiliarArt familiar={guide} pose={playing ? 'reading' : nightNow() ? 'sleeping' : 'idle'} size={92} vial alive />
         <View style={{ flex: 1 }}>
@@ -69,39 +129,6 @@ export default function Home() {
           <Text style={s.dim}>{playing ? 'Listening with you.' : nightNow() ? 'Asleep until morning. Press play to wake them.' : listening.length ? 'Ready to pick up where you left off.' : 'Choose a book and study together.'}</Text>
         </View>
       </Pressable>
-      <View style={s.stat}>
-        <Pressable onPress={() => setAbout(daily)} accessibilityLabel={`About ${cardName(daily)}`}>
-          <CardImage id={daily} width={56} />
-        </Pressable>
-        <View style={{ flex: 1, gap: 2 }}>
-          <Text style={s.statLabel}>Card of the day</Text>
-          <Text style={s.cardName}>{cardName(daily)}</Text>
-          <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
-            <Pressable style={s.logBtn} onPress={() => router.push({ pathname: '/reading/[id]', params: { id: 'draft', card: daily } })}>
-              <Ionicons name="create-outline" size={15} color={c.bg} />
-              <Text style={s.logBtnText}>Write about it</Text>
-            </Pressable>
-            {!mine && (
-              <Pressable style={[s.logBtn, s.logBtnAlt]} onPress={() => setPicking(true)}>
-                <Ionicons name="add" size={15} color={c.gold} />
-                <Text style={[s.logBtnText, { color: c.gold }]}>Log yours</Text>
-              </Pressable>
-            )}
-          </View>
-        </View>
-        {mine && mineCard?.card && (
-          <Pressable style={{ alignItems: 'center', gap: 4 }} onPress={() => router.push({ pathname: '/reading/[id]', params: { id: mine.id } })} accessibilityLabel="Your card of the day">
-            <CardImage id={mineCard.card} reversed={mineCard.reversed} width={44} />
-            <Text style={s.statLabel}>Yours</Text>
-          </Pressable>
-        )}
-      </View>
-      <CardPicker
-        visible={picking}
-        title="The card you drew today"
-        onClose={() => setPicking(false)}
-        onPick={(id, rev) => setTimeout(() => router.push({ pathname: '/reading/[id]', params: { id: 'draft', card: id, daily: 'drawn', reversed: rev ? '1' : '0' } }), 450)}
-      />
       <CardSheet id={about} onClose={() => setAbout(null)} />
 
       {listening.length > 0 && (
@@ -188,10 +215,14 @@ const s = themed(() => ({
   familiar: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: c.panel, borderRadius: 14, paddingVertical: 4, paddingHorizontal: 10, marginTop: 12 },
   famName: { color: c.text, fontSize: 18, fontFamily: F.heading },
   wrap: { flex: 1, backgroundColor: c.bg, paddingHorizontal: 16 },
-  stat: { backgroundColor: c.panel, borderRadius: 14, padding: 12, marginTop: 12, flexDirection: 'row', alignItems: 'center', gap: 14 },
-  statLabel: { color: c.dim, fontSize: 12, textTransform: 'uppercase', letterSpacing: 1 },
-  cardName: { color: c.text, fontSize: 18, fontFamily: F.heading },
-  logBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start', backgroundColor: c.gold, borderRadius: 16, paddingVertical: 6, paddingHorizontal: 12, marginTop: 6 },
+  daily: { flexDirection: 'row', gap: 12, marginTop: 12 },
+  slot: { flex: 1, alignItems: 'center', gap: 6, backgroundColor: c.panel, borderRadius: 14, paddingVertical: 10, paddingHorizontal: 8 },
+  tag: { color: c.gold, fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1.2 },
+  cardName: { color: c.text, fontSize: 16, fontFamily: F.heading, textAlign: 'center' },
+  blank: { borderWidth: 1, borderStyle: 'dashed', borderColor: c.gold, alignItems: 'center', justifyContent: 'center' },
+  how: { color: c.dim, fontSize: 12, textDecorationLine: 'underline' },
+  howText: { color: c.dim, fontSize: 13, lineHeight: 19, marginTop: 6 },
+  logBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'center', backgroundColor: c.gold, borderRadius: 16, paddingVertical: 6, paddingHorizontal: 12, marginTop: 6 },
   logBtnText: { color: c.bg, fontWeight: '700', fontSize: 13 },
   logBtnAlt: { backgroundColor: 'transparent', borderWidth: 1, borderColor: c.gold },
   h2: { color: c.text, fontSize: 19, marginTop: 24, marginBottom: 10, fontFamily: F.heading },

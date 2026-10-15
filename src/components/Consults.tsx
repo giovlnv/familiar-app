@@ -182,7 +182,7 @@ export function ConsultList({
                   <View style={{ gap: 10, marginTop: 8 }}>
                     <Text style={s.quote}>“{x.quote}”</Text>
                     {x.answer ? (
-                      <ScrollView style={{ maxHeight: 320 }} nestedScrollEnabled>
+                      <ScrollView automaticallyAdjustKeyboardInsets keyboardShouldPersistTaps="handled" style={{ maxHeight: 320 }} nestedScrollEnabled>
                         <Text style={s.answer} selectable>
                           {x.answer}
                         </Text>

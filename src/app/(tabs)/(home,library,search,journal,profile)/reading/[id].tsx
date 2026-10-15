@@ -118,7 +118,7 @@ export default function ReadingScreen() {
   const pBirth = birthCards(person?.dob);
 
   return (
-    <ScrollView style={s.wrap} contentContainerStyle={{ paddingBottom: 60 + pad }} keyboardShouldPersistTaps="handled">
+    <ScrollView automaticallyAdjustKeyboardInsets style={s.wrap} contentContainerStyle={{ paddingBottom: 60 + pad }} keyboardShouldPersistTaps="handled">
       <Stack.Screen
         options={{
           title: fmtDate(date, { day: 'numeric', month: 'short' }),

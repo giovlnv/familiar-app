@@ -42,13 +42,6 @@ export default function MiniPlayer() {
           <Ionicons name="close" size={22} color={c.dim} />
         </Pressable>
       </View>
-      {!!para && (
-        <Pressable onPress={open}>
-          <Text style={[s.text, explain && { color: c.explain }]} numberOfLines={3}>
-            {para.text}
-          </Text>
-        </Pressable>
-      )}
     </View>
   );
 }

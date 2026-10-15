@@ -51,7 +51,7 @@ export default function AddBook() {
   };
 
   return (
-    <ScrollView style={s.wrap} contentContainerStyle={{ gap: 12, paddingBottom: 40 + pad }} keyboardShouldPersistTaps="handled">
+    <ScrollView automaticallyAdjustKeyboardInsets style={s.wrap} contentContainerStyle={{ gap: 12, paddingBottom: 40 + pad }} keyboardShouldPersistTaps="handled">
       <Pressable style={s.drop} onPress={pick}>
         <Ionicons name={file ? 'document-text-outline' : 'cloud-upload-outline'} size={34} color={c.gold} />
         <Text style={s.dropTitle}>{file ? file.name : 'Choose EPUB or PDF'}</Text>

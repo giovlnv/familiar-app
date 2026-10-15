@@ -1,7 +1,8 @@
 import { usePad } from '../playback';
 import { useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
-import { OLResult, searchOpenLibrary } from '../tracker';
+import { router } from 'expo-router';
+import { load, OLResult, searchOpenLibrary, STATUS_LABEL, TBook } from '../tracker';
 import { Cover } from './ui';
 import { c, themed } from '../theme';
 
@@ -11,6 +12,10 @@ export default function SearchView({ onPick }: { onPick: (r: OLResult) => void }
   const [results, setResults] = useState<OLResult[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const needle = q.trim().toLowerCase();
+  const mine: TBook[] = needle
+    ? load().books.filter((b) => b.title.toLowerCase().includes(needle) || b.authors.some((a) => a.toLowerCase().includes(needle)) || b.isbn === needle)
+    : [];
 
   const run = async () => {
     if (!q.trim()) return;
@@ -43,6 +48,27 @@ export default function SearchView({ onPick }: { onPick: (r: OLResult) => void }
         data={results}
         keyExtractor={(r) => r.olKey}
         keyboardShouldPersistTaps="handled"
+        ListHeaderComponent={
+          mine.length ? (
+            <View>
+              <Text style={s.section}>In your library</Text>
+              {mine.map((b) => (
+                <Pressable key={b.id} style={s.row} onPress={() => router.push({ pathname: '/title/[id]', params: { id: b.id } })}>
+                  <Cover book={b} width={48} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={s.title} numberOfLines={2}>
+                      {b.title}
+                    </Text>
+                    <Text style={s.dim} numberOfLines={1}>
+                      {[b.authors.join(', '), b.status !== 'none' ? STATUS_LABEL[b.status] : '', b.audio ? 'Audiobook' : ''].filter(Boolean).join(' · ')}
+                    </Text>
+                  </View>
+                </Pressable>
+              ))}
+              {!!results.length && <Text style={s.section}>Open Library</Text>}
+            </View>
+          ) : null
+        }
         contentContainerStyle={{ paddingBottom: 40 + pad }}
         renderItem={({ item: r }) => (
           <Pressable style={s.row} onPress={() => onPick(r)}>
@@ -65,6 +91,7 @@ export default function SearchView({ onPick }: { onPick: (r: OLResult) => void }
 
 const s = themed(() => ({
   wrap: { flex: 1, backgroundColor: c.bg, paddingHorizontal: 16, paddingTop: 12 },
+  section: { color: c.dim, fontSize: 12, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1, marginTop: 12, marginBottom: 2 },
   input: { backgroundColor: c.panel, color: c.text, borderRadius: 12, padding: 14, fontSize: 16, marginBottom: 8 },
   row: { flexDirection: 'row', gap: 12, alignItems: 'center', paddingVertical: 8, borderBottomWidth: StyleSheet.hairlineWidth, borderColor: c.line },
   title: { color: c.text, fontSize: 16, fontWeight: '600' },

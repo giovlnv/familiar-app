@@ -71,7 +71,7 @@ export default function Onboarding() {
 
   if (step === 'welcome')
     return (
-      <ScrollView style={st.wrap} contentContainerStyle={{ flexGrow: 1, paddingBottom: insets.bottom + 20 }} bounces={false}>
+      <ScrollView automaticallyAdjustKeyboardInsets keyboardShouldPersistTaps="handled" style={st.wrap} contentContainerStyle={{ flexGrow: 1, paddingBottom: insets.bottom + 20 }} bounces={false}>
         <View style={{ height: band, overflow: 'hidden' }}>
           <Image source={require('../../assets/hero.jpg')} style={[st.hero, { height: heroH, width: (heroH * 393) / 600, left: (width - (heroH * 393) / 600) / 2 }]} />
           <Svg style={StyleSheet.absoluteFill} preserveAspectRatio="none" viewBox="0 0 1 1">
@@ -238,7 +238,7 @@ export default function Onboarding() {
         </View>
         <View style={{ width: 26 }} />
       </View>
-      <ScrollView contentContainerStyle={[st.pad, { gap: 14, paddingBottom: 24 }]} keyboardShouldPersistTaps="handled">
+      <ScrollView automaticallyAdjustKeyboardInsets contentContainerStyle={[st.pad, { gap: 14, paddingBottom: 24 }]} keyboardShouldPersistTaps="handled">
         {content}
       </ScrollView>
       <View style={[st.pad, { paddingBottom: insets.bottom + 12, gap: 6 }]}>

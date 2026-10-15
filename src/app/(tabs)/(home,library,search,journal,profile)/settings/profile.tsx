@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
-import { getProfile, setProfile } from '../../../../tracker';
+import { getProfile, NameEntry, setProfile } from '../../../../tracker';
 import { getOnboarding, setOnboarding } from '../../../../familiar';
 import { parseDate, showDate } from '../../../../journal';
 import { DateInput, TimeInput } from '../../../../components/SplitInput';
@@ -22,8 +23,19 @@ export default function EditProfile() {
     ob.birthPlace ? { label: ob.birthPlace, lat: ob.birthLat ?? 0, lon: ob.birthLon ?? 0, timezone: ob.birthTz } : undefined,
   );
 
+  const [birthName, setBirthName] = useState(p.birthName ?? '');
+  const [names, setNames] = useState<NameEntry[]>(p.names ?? []);
+  const last = names.at(-1);
+  const [used, setUsed] = useState(last?.name ?? '');
+  const [since, setSince] = useState(showDate(last?.since));
+  const numerology = (ob.paths ?? []).includes('numerology');
+
   const save = () => {
-    setProfile({ name: name.trim(), username, dob: parseDate(dob) });
+    let list = names;
+    const u = used.trim().replace(/\s+/g, ' ');
+    if (u && u !== last?.name) list = [...names, { name: u, since: parseDate(since) }];
+    else if (u && last) list = [...names.slice(0, -1), { ...last, since: parseDate(since) }];
+    setProfile({ name: name.trim(), username, dob: parseDate(dob), birthName: birthName.trim().replace(/\s+/g, ' ') || undefined, names: list });
     setOnboarding({ birthTime: time, birthPlace: place?.label, birthLat: place?.lat, birthLon: place?.lon, birthTz: place?.timezone });
     router.back();
   };
@@ -60,6 +72,29 @@ export default function EditProfile() {
         <PlaceField value={place?.label ?? ''} onPick={setPlace} language={ob.language} />
         <Text style={ss.meta}>Used for your element vial, astrology and the personality, essence and year cards in the Journal.</Text>
       </View>
+      {numerology && (
+        <View style={ss.card}>
+          <Text style={ss.label}>Full birth name</Text>
+          <TextInput style={ss.input} value={birthName} onChangeText={setBirthName} placeholder="As on your birth certificate" placeholderTextColor={c.dim} autoCorrect={false} />
+          <Text style={ss.label}>Name you use</Text>
+          <TextInput style={ss.input} value={used} onChangeText={(v) => (setUsed(v), v.trim() !== last?.name && since === showDate(last?.since) && setSince(''))} placeholder="If different, e.g. after marriage" placeholderTextColor={c.dim} autoCorrect={false} />
+          <Text style={ss.label}>Using it since</Text>
+          <DateInput style={ss.input} value={since} onChange={setSince} />
+          {names.length > 1 && <Text style={ss.label}>Earlier names</Text>}
+          {names.slice(0, -1).map((n, i) => (
+            <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <Text style={[ss.meta, { flex: 1, color: c.text }]}>
+                {n.name}
+                {n.since ? `  ·  since ${showDate(n.since)}` : ''}
+              </Text>
+              <Pressable hitSlop={8} onPress={() => setNames(names.filter((_, j) => j !== i))}>
+                <Ionicons name="close-circle-outline" size={20} color={c.dim} />
+              </Pressable>
+            </View>
+          ))}
+          <Text style={ss.meta}>Numerology: the birth name gives your core numbers; the name you use gives your current ones. Typing a new name keeps the old one in the history.</Text>
+        </View>
+      )}
       <Btn label="Save" primary onPress={save} />
     </Page>
   );

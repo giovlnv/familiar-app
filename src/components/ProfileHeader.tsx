@@ -14,6 +14,7 @@ import { FamiliarArt } from './Familiar';
 import { getOnboarding, nightNow } from '../familiar';
 import { currentGuide } from '../guide';
 import { usePlayback } from '../playback';
+import { lifePath, show } from '../numerology';
 
 const SIGNS: [string, number, number, string][] = [
   ['Capricorn', 1, 19, 'Earth'], ['Aquarius', 2, 18, 'Air'], ['Pisces', 3, 20, 'Water'], ['Aries', 4, 19, 'Fire'],
@@ -24,11 +25,6 @@ const sunSign = (dob: string) => {
   const [, m, d] = dob.split('-').map(Number);
   const i = SIGNS.findIndex(([, mm, dd]) => m === mm && d <= dd);
   return i >= 0 ? SIGNS[i] : SIGNS[m % 12];
-};
-const lifePath = (dob: string) => {
-  let n = [...dob].filter((x) => /\d/.test(x)).reduce((a, x) => a + Number(x), 0);
-  while (n > 9 && ![11, 22, 33].includes(n)) n = [...String(n)].reduce((a, x) => a + Number(x), 0);
-  return n;
 };
 
 export async function pickPhoto() {
@@ -86,7 +82,11 @@ export default function ProfileHeader() {
       {(sign && paths.includes('astrology')) || (p.dob && paths.includes('numerology')) ? (
         <View style={s.chips}>
           {sign && paths.includes('astrology') && <Text style={s.chip}>☉ {sign[0]} · {sign[3]}</Text>}
-          {!!p.dob && paths.includes('numerology') && <Text style={s.chip}>Life path {lifePath(p.dob)}</Text>}
+          {!!p.dob && paths.includes('numerology') && (
+            <Text style={s.chip} onPress={() => router.push('/numerology')}>
+              Life path {show(lifePath(p.dob))} ›
+            </Text>
+          )}
         </View>
       ) : null}
       {birth.length > 0 && (

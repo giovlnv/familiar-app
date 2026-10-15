@@ -274,7 +274,8 @@ export const patchList = (id: string, fn: (l: RankedList) => void) =>
 
 export const removeList = (id: string) => update((t) => (t.lists = t.lists?.filter((x) => x.id !== id)));
 
-export type Profile = { name?: string; username?: string; photo?: string; dob?: string };
+export type NameEntry = { name: string; since?: string };
+export type Profile = { name?: string; username?: string; photo?: string; dob?: string; birthName?: string; names?: NameEntry[] };
 
 export const getProfile = (): Profile => load().profile ?? {};
 

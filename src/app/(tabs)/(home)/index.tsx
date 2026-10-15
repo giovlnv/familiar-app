@@ -15,6 +15,7 @@ import { c, F, read, themed, write } from '../../../theme';
 import { FamiliarArt } from '../../../components/Familiar';
 import { getOnboarding, nightNow } from '../../../familiar';
 import { personal } from '../../../numerology';
+import { sky } from '../../../astrology';
 import { currentGuide, moonPhase } from '../../../guide';
 import MoonIcon from '../../../components/MoonIcon';
 
@@ -75,6 +76,7 @@ export default function Home() {
   const moon = moonPhase();
   const dob = getProfile().dob;
   const pn = dob && (getOnboarding().paths ?? []).includes('numerology') ? personal(dob) : null;
+  const skyLine = (getOnboarding().paths ?? []).includes('astrology') ? sky() : '';
   const recent = [...t.logs].sort((a, b) => b.date.localeCompare(a.date) || b.created - a.created).slice(0, 6);
 
   const openTitle = (id: string) => router.push({ pathname: '/title/[id]', params: { id } });
@@ -133,8 +135,13 @@ export default function Home() {
           )}
         </View>
       </View>
+      {!!skyLine && (
+        <Pressable onPress={() => router.push('/astrology')} style={{ alignSelf: 'center', marginTop: 8 }}>
+          <Text style={s.today}>{skyLine}</Text>
+        </Pressable>
+      )}
       {pn && (
-        <Pressable onPress={() => router.push('/numerology')} style={{ alignSelf: 'center', marginTop: 8 }}>
+        <Pressable onPress={() => router.push('/numerology')} style={{ alignSelf: 'center', marginTop: skyLine ? 2 : 8 }}>
           <Text style={s.today}>
             Personal day {pn.day} · month {pn.month} · year {pn.year}
           </Text>

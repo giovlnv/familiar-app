@@ -23,6 +23,7 @@ import {
   updateJournal,
 } from '../../../../journal';
 import { personal } from '../../../../numerology';
+import { sky } from '../../../../astrology';
 import { getProfile } from '../../../../tracker';
 import { getOnboarding } from '../../../../familiar';
 import { cardName } from '../../../../decks';
@@ -125,6 +126,7 @@ export default function ReadingScreen() {
   const [date, time] = r.at.split('T');
   const myDob = getProfile().dob;
   const stamp = myDob && (getOnboarding().paths ?? []).includes('numerology') ? personal(myDob, new Date(`${date}T12:00:00`)) : null;
+  const skyStamp = (getOnboarding().paths ?? []).includes('astrology') ? sky(new Date(`${date}T${time || '12:00'}:00`)) : '';
   const filled = sp.positions.map((pos, i) => ({ pos, p: r.cards[i] })).filter((x) => x.p?.card);
   const pBirth = birthCards(person?.dob);
 
@@ -196,6 +198,7 @@ export default function ReadingScreen() {
           <Text style={s.timeText}>{time}</Text>
         </Pressable>
       </View>
+      {!!skyStamp && <Text style={s.stamp}>{skyStamp}</Text>}
       {stamp && <Text style={s.stamp}>Personal day {stamp.day} · month {stamp.month} · year {stamp.year}</Text>}
 
       <Text style={s.label}>For</Text>

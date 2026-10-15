@@ -183,3 +183,9 @@ export function myChart() {
   const place = ob.birthPlace && ob.birthLat != null && ob.birthLon != null ? { lat: ob.birthLat, lon: ob.birthLon, tz: ob.birthTz } : undefined;
   return chart(dob, ob.birthTime, place);
 }
+
+export function sky(date = new Date()) {
+  const moon = signOf(longitude('Moon', date)).name;
+  const back = BODIES.filter((b) => retro(b, date));
+  return `Moon in ${moon}${back.length ? ` · ℞\uFE0E ${back.join(', ')}` : ''}`;
+}

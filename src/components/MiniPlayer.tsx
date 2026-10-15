@@ -4,10 +4,13 @@ import { router } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { usePlayback } from '../playback';
 import { c, themed } from '../theme';
+import { explainStart, explanationsOn, useExplanations } from '../explanations';
 
 export default function MiniPlayer() {
   const { item, sec, t, status, toggle, skip, stop, setMiniH } = usePlayback();
   const section = item?.book.sections[sec];
+  useExplanations();
+  const endT = (item && !explanationsOn(item.folder) && explainStart(section)) || status.duration || 0;
   const para = useMemo(() => {
     const ps = section?.paras ?? [];
     let i = 0;
@@ -20,7 +23,7 @@ export default function MiniPlayer() {
   return (
     <View style={s.card} onLayout={(e) => setMiniH(e.nativeEvent.layout.height + 16)}>
       <View style={s.bar}>
-        <View style={[s.fill, { width: `${status.duration ? (t / status.duration) * 100 : 0}%` }]} />
+        <View style={[s.fill, { width: `${endT ? Math.min(1, t / endT) * 100 : 0}%` }]} />
       </View>
       <View style={s.row}>
         <Pressable style={{ flex: 1 }} onPress={open}>

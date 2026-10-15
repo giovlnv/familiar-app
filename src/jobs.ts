@@ -3,13 +3,14 @@ import { getToken } from './sync';
 
 const API = 'https://api.github.com/repos/giovlnv/ios_202610.familiar_library';
 
-export type Stage = 'splitting' | 'review' | 'fix' | 'explanations' | 'voices' | 'ready' | 'imported' | 'error';
+export type Stage = 'splitting' | 'review' | 'fix' | 'explanations' | 'queued' | 'voices' | 'ready' | 'imported' | 'error';
 export type Job = {
   slug: string;
   title: string;
   stage: Stage;
   lang?: string;
   instructions?: string;
+  explanations?: boolean;
   sections?: { title: string; words: number }[];
   words?: number;
   hours?: number;
@@ -26,6 +27,7 @@ export const STAGE_LABEL: Record<Stage, string> = {
   review: 'Check the sections',
   fix: 'Waiting for Claude to fix the split',
   explanations: 'Waiting for Claude’s explanations',
+  queued: 'Starting the voices…',
   voices: 'Generating voices',
   ready: 'Ready to download',
   imported: 'In your library',
@@ -60,13 +62,13 @@ export const slugify = (t: string) =>
   '-' +
   Date.now().toString(36).slice(-4);
 
-export async function uploadBook(o: { uri: string; name: string; title: string; instructions: string; lang: string }) {
+export async function uploadBook(o: { uri: string; name: string; title: string; instructions: string; lang: string; explanations: boolean }) {
   const slug = slugify(o.title);
   const ext = o.name.toLowerCase().endsWith('.pdf') ? 'pdf' : 'epub';
   await put(`inbox/${slug}/book.${ext}`, new File(o.uri).base64Sync(), `Upload ${o.title}`);
   await put(
     `inbox/${slug}/request.json`,
-    b64(JSON.stringify({ title: o.title, instructions: o.instructions, lang: o.lang, created: Date.now() })),
+    b64(JSON.stringify({ title: o.title, instructions: o.instructions, lang: o.lang, explanations: o.explanations, created: Date.now() })),
     `Request ${o.title}`
   );
   return slug;

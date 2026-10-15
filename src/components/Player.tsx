@@ -36,6 +36,16 @@ import { CardImage, CardPicker } from "./Cards";
 import CardSheet from "./CardSheet";
 import { cardName } from "../decks";
 import TextStyleSheet from "./TextStyleSheet";
+import {
+  allExplanationsOn,
+  bookOverride,
+  explainStart,
+  explanationsOn,
+  isExplain,
+  setAllExplanations,
+  setBookExplanations,
+  useExplanations,
+} from "../explanations";
 import { bodyText, lineHeight, TextStyle, useTextStyle } from "../textStyle";
 import { Link, loadLinks, sectionCard, setLink } from "../sectionCards";
 import { SleepKind, usePlayback } from "../playback";
@@ -89,6 +99,8 @@ export default function Player({
   const [cardInfo, setCardInfo] = useState<string | null>(null);
   const [stage, setStage] = useState({ w: 0, h: 0 });
   const ts = useTextStyle();
+  useExplanations();
+  const expOn = explanationsOn(folder);
   const [styling, setStyling] = useState(false);
   const lineH = lineHeight(ts);
   const lines = Math.max(3, Math.min(6, Math.floor((stage.h * 0.45 - 20) / lineH)));
@@ -104,6 +116,25 @@ export default function Player({
   const [draft, setDraft] = useState<Draft | null>(null);
   const list = useRef<FlatList<Para>>(null);
   const section = book.sections[sec];
+  const endT = (!expOn && explainStart(section)) || status.duration || 0;
+  const shownDuration = (x: typeof section) => (!expOn && explainStart(x)) || x.duration;
+  const explainMenu = () =>
+    fromMenu(() =>
+      Alert.alert(
+        "Explanations",
+        bookOverride(folder) === undefined
+          ? `${allExplanationsOn() ? "On" : "Off"} for all books.`
+          : `${expOn ? "On" : "Off"} for this book (all books: ${allExplanationsOn() ? "on" : "off"}).`,
+        [
+          { text: allExplanationsOn() ? "Turn off for all books" : "Turn on for all books", onPress: () => setAllExplanations(!allExplanationsOn()) },
+          { text: expOn ? "Turn off for this book only" : "Turn on for this book only", onPress: () => setBookExplanations(folder, !expOn) },
+          ...(bookOverride(folder) !== undefined
+            ? [{ text: "This book follows all books", onPress: () => setBookExplanations(folder, undefined) }]
+            : []),
+          { text: "Cancel", style: "cancel" as const },
+        ],
+      ),
+    );
   const card = sectionCard(links, section);
   const link = (l: Link | undefined) => setLinks(setLink(folder, section.id, l));
   const cardActions = () =>
@@ -319,7 +350,7 @@ export default function Player({
                   {card.reversed ? " · reversed" : ""}
                 </Text>
               </Pressable>
-              <Passage para={section.paras[current]} t={t} ts={ts} height={passageH} />
+              <Passage para={!expOn && isExplain(section.paras[current]?.kind ?? "") ? undefined : section.paras[current]} t={t} ts={ts} height={passageH} />
             </View>
           ) : (
             <View style={{ alignItems: "center", gap: 14 }}>
@@ -349,7 +380,7 @@ export default function Player({
             )
           }
           contentContainerStyle={{ paddingBottom: 200 }}
-          renderItem={({ item: p, index }) => (
+          renderItem={({ item: p, index }) => !expOn && isExplain(p.kind) ? null : (
             <Pressable
               onPress={() => goTo(sec, p.start + 0.01)}
               onLongPress={() => paraActions(index, p.start)}
@@ -388,7 +419,7 @@ export default function Player({
             style={[
               s.barFill,
               {
-                width: `${status.duration ? (t / status.duration) * 100 : 0}%`,
+                width: `${endT ? Math.min(1, t / endT) * 100 : 0}%`,
               },
             ]}
           />
@@ -399,7 +430,7 @@ export default function Player({
             {sec + 1}/{book.sections.length}
           </Text>
           <Text style={s.time}>
-            -{fmt(Math.max(0, (status.duration || 0) - t))}
+            -{fmt(Math.max(0, endT - t))}
           </Text>
         </View>
         <View style={s.row}>
@@ -449,7 +480,7 @@ export default function Player({
               ["section", "End of this section"],
               ["explain", "End of the explanation"],
             ] as [SleepKind, string][]
-          ).map(([k, label]) => {
+          ).filter(([k]) => expOn || k !== "explain").map(([k, label]) => {
             const on =
               (k === "off" && !sleep) ||
               (k === "section" && sleep?.kind === "section") ||
@@ -489,6 +520,12 @@ export default function Player({
             value={sleep ? (sleepLeft !== null ? fmtLeft(sleepLeft) : sleep.kind === "section" ? "End of section" : "End of explanation") : "Off"}
             onPress={() => fromMenu(() => setSleepOpen(true))}
           />
+          <MenuRow
+            icon="bulb-outline"
+            label="Explanations"
+            value={`${expOn ? "On" : "Off"}${bookOverride(folder) !== undefined ? " · this book" : ""}`}
+            onPress={explainMenu}
+          />
           <MenuRow icon="text-outline" label="Text size and style" onPress={() => fromMenu(() => setStyling(true))} />
           <MenuRow icon="create-outline" label="Add a note here" onPress={() => fromMenu(() => newNote(current, t))} />
           <MenuRow icon="sparkles-outline" label="Ask Claude about this" color={c.claude} onPress={() => fromMenu(() => startAsk(current, t))} />
@@ -520,7 +557,7 @@ export default function Player({
                   const k = sectionCard(links, x);
                   return k ? <CardImage id={k.card} reversed={k.reversed} width={22} /> : null;
                 })()}
-                <Text style={s.time}>{fmt(x.duration)}</Text>
+                <Text style={s.time}>{fmt(shownDuration(x))}</Text>
               </Pressable>
             )}
           />

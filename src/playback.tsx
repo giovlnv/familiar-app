@@ -2,6 +2,7 @@ import { createContext, ReactNode, useContext, useEffect, useRef, useState } fro
 import { AudioPlayer, AudioStatus, setAudioModeAsync, useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import { audioUri, LibraryItem, loadProgress, saveProgress } from './storage';
 import { addListening } from './tracker';
+import { explainStart, explanationsOn, useExplanations } from './explanations';
 
 export type SleepKind = 'off' | 'section' | 'explain' | number;
 type Sleep = { kind: 'min'; until: number } | { kind: 'section' } | { kind: 'explain'; sec: number; end: number } | null;
@@ -50,6 +51,9 @@ export function PlaybackProvider({ children }: { children: ReactNode }) {
   const pending = useRef<{ time: number; play: boolean } | null>(null);
   const t = status.currentTime ?? 0;
   const section = item?.book.sections[sec];
+  useExplanations();
+  const skipFrom = item && !explanationsOn(item.folder) ? explainStart(section) : undefined;
+  const skipped = useRef('');
 
   const save = (i: number, time: number) =>
     item && saveProgress(item.folder, { section: i, time, done: [...done.current] });
@@ -163,6 +167,25 @@ export function PlaybackProvider({ children }: { children: ReactNode }) {
         : sleep?.kind === 'section'
           ? Math.max(0, Math.round(((status.duration || 0) - t) / rate))
           : null;
+
+  useEffect(() => {
+    if (skipFrom !== undefined && t < skipFrom - 1) skipped.current = '';
+    if (skipFrom === undefined || !item || !section || !status.playing || t < skipFrom - 0.05) return;
+    const key = `${item.folder}/${sec}`;
+    if (skipped.current === key) return;
+    skipped.current = key;
+    done.current.add(section.id);
+    const stopHere = sleep && sleep.kind !== 'min';
+    if (stopHere) queueMicrotask(() => setSleepState(null));
+    if (sec < item.book.sections.length - 1) goTo(sec + 1, 0, !stopHere);
+    else {
+      player.pause();
+      save(sec, skipFrom);
+    }
+  }, [t, skipFrom]);
+  useEffect(() => {
+    skipped.current = '';
+  }, [sec, item]);
 
   const lastSave = useRef(0);
   const prevT = useRef(0);

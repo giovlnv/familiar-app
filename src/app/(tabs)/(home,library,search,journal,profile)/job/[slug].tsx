@@ -42,7 +42,8 @@ export default function JobScreen() {
   };
 
   if (!job) return <View style={s.wrap} />;
-  const step = STEPS.indexOf(job.stage as (typeof STEPS)[number]);
+  const noExplain = job.explanations === false;
+  const step = STEPS.indexOf((job.stage === 'queued' ? 'explanations' : job.stage) as (typeof STEPS)[number]);
   const askClaude = `Familiar job "${job.slug}" (${job.title}) is ready for explanations. Please write them following the audiobook explanation prompt${job.instructions ? ` and these instructions: ${job.instructions}` : ''}, then run Generate audiobook.`;
   const fixMsg = `Familiar job "${job.slug}" (${job.title}): the section split needs fixing. ${job.note ?? ''}`;
 
@@ -57,7 +58,7 @@ export default function JobScreen() {
       <Text style={[s.dim, { color: job.stage === 'error' ? c.claude : c.gold }]}>{STAGE_LABEL[job.stage]}</Text>
 
       <View style={s.card}>
-        {['Split into sections', 'You check the split', 'Claude writes explanations', 'Voices on GitHub', 'Download & import'].map((t, i) => {
+        {['Split into sections', 'You check the split', noExplain ? 'No explanations (skipped)' : 'Claude writes explanations', 'Voices on GitHub', 'Download & import'].map((t, i) => {
           const done = job.stage === 'imported' || (step >= 0 && i < step + 1) || (job.stage !== 'splitting' && i === 0);
           const now = step + 1 === i || (job.stage === 'splitting' && i === 0) || (job.stage === 'fix' && i === 1);
           return (
@@ -77,12 +78,12 @@ export default function JobScreen() {
         <>
           <Text style={s.p}>
             {job.sections?.length} sections · {(job.words ?? 0).toLocaleString()} words · about {Math.round((job.words ?? 0) / 150 / 60 * 10) / 10} h of audio
-            (plus explanations). Check the titles and lengths: very short or very long sections usually mean a bad split.
+            {noExplain ? '(no explanations)' : '(plus explanations)'}. Check the titles and lengths: very short or very long sections usually mean a bad split.
           </Text>
           {job.stage === 'review' && (
             <View style={s.row}>
               <View style={{ flex: 1 }}>
-                <Button label="Looks right" icon="checkmark-circle" primary onPress={() => run(() => setStage(job, 'explanations'))} />
+                <Button label="Looks right" icon="checkmark-circle" primary onPress={() => run(() => setStage(job, noExplain ? 'queued' : 'explanations'))} />
               </View>
               <View style={{ flex: 1 }}>
                 <Button
@@ -135,6 +136,8 @@ export default function JobScreen() {
         </>
       )}
 
+      {job.stage === 'queued' && <Text style={s.p}>No explanations for this book, so the voices start on GitHub by themselves in a minute. Pull down to refresh.</Text>}
+
       {job.stage === 'voices' && (
         <Text style={s.p}>
           Generating the two voices on GitHub (6 parallel jobs). Usually about {estimateMinutes(job)} minutes
@@ -170,7 +173,7 @@ export default function JobScreen() {
 
       {!!job.instructions && (
         <>
-          <Text style={s.label}>Your instructions</Text>
+          <Text style={s.label}>How the explanations should be</Text>
           <Text style={s.p}>{job.instructions}</Text>
         </>
       )}

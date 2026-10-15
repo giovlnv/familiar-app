@@ -1,13 +1,17 @@
 import { usePad } from '../../../playback';
 import { useCallback, useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { getBook as getAudio, installSampleOnce, loadProgress } from '../../../storage';
-import { syncAudioBooks, Tracker } from '../../../tracker';
+import { patchBook, syncAudioBooks, Tracker } from '../../../tracker';
+import { cardOfTheDay } from '../../../journal';
+import { cardName } from '../../../decks';
+import { CardImage } from '../../../components/Cards';
+import CardSheet from '../../../components/CardSheet';
 import { Cover, fmtDate, Stars } from '../../../components/ui';
 import { fmtTime } from '../../../format';
-import { c, F, themed } from '../../../theme';
+import { c, F, read, themed, write } from '../../../theme';
 import { FamiliarArt } from '../../../components/Familiar';
 import { familiarFor } from '../../../familiar';
 
@@ -20,6 +24,21 @@ export default function Home() {
     installSampleOnce().then((added) => added && refresh()).catch(() => {});
   }, [refresh]);
 
+  const [hidden, setHidden] = useState<Record<string, string>>(() => {
+    try {
+      return JSON.parse(read('hidden-listening.json') || '{}');
+    } catch {
+      return {};
+    }
+  });
+  const [about, setAbout] = useState<string | null>(null);
+  const daily = cardOfTheDay();
+  const mark = (p: { section: number; time: number }) => `${p.section}:${Math.floor(p.time)}`;
+  const hide = (folder: string, p: { section: number; time: number }) => {
+    const next = { ...hidden, [folder]: mark(p) };
+    setHidden(next);
+    write('hidden-listening.json', JSON.stringify(next));
+  };
   const reading = t.books.filter((b) => b.status === 'reading');
   const listening = t.books
     .filter((b) => b.audio)
@@ -28,12 +47,10 @@ export default function Home() {
       const p = loadProgress(b.audio!);
       return { b, audio, p };
     })
-    .filter((x) => x.audio && (x.p.time > 0 || x.p.section > 0));
+    .filter((x) => x.audio && (x.p.time > 0 || x.p.section > 0) && hidden[x.b.audio!] !== mark(x.p));
   const byId = new Map(t.books.map((b) => [b.id, b]));
   const guide = familiarFor(listening[0]?.b.paths);
   const recent = [...t.logs].sort((a, b) => b.date.localeCompare(a.date) || b.created - a.created).slice(0, 6);
-  const year = new Date().getFullYear();
-  const readThisYear = t.logs.filter((l) => l.date.startsWith(String(year))).length;
 
   const openTitle = (id: string) => router.push({ pathname: '/title/[id]', params: { id } });
 
@@ -47,9 +64,19 @@ export default function Home() {
         </View>
       </Pressable>
       <View style={s.stat}>
-        <Text style={s.statNum}>{readThisYear}</Text>
-        <Text style={s.statLabel}>books finished in {year}</Text>
+        <Pressable onPress={() => setAbout(daily)} accessibilityLabel={`About ${cardName(daily)}`}>
+          <CardImage id={daily} width={56} />
+        </Pressable>
+        <View style={{ flex: 1, gap: 2 }}>
+          <Text style={s.statLabel}>Card of the day</Text>
+          <Text style={s.cardName}>{cardName(daily)}</Text>
+          <Pressable style={s.logBtn} onPress={() => router.push({ pathname: '/reading/[id]', params: { id: 'draft', card: daily } })}>
+            <Ionicons name="create-outline" size={15} color={c.bg} />
+            <Text style={s.logBtnText}>Write about it</Text>
+          </Pressable>
+        </View>
       </View>
+      <CardSheet id={about} onClose={() => setAbout(null)} />
 
       {listening.length > 0 && (
         <>
@@ -59,6 +86,13 @@ export default function Home() {
               key={b.id}
               style={s.listen}
               onPress={() => router.push({ pathname: '/player/[id]', params: { id: b.audio! } })}
+              onLongPress={() =>
+                Alert.alert(b.title, 'It comes back here when you play it again.', [
+                  { text: 'Remove from Continue listening', onPress: () => hide(b.audio!, p) },
+                  { text: 'Stop listening (Did not finish)', style: 'destructive', onPress: () => (patchBook(b.id, { status: 'dnf' }), hide(b.audio!, p), refresh()) },
+                  { text: 'Cancel', style: 'cancel' },
+                ])
+              }
             >
               <Cover book={b} width={56} />
               <View style={{ flex: 1 }}>
@@ -128,9 +162,11 @@ const s = themed(() => ({
   familiar: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: c.panel, borderRadius: 14, paddingVertical: 4, paddingHorizontal: 10, marginTop: 12 },
   famName: { color: c.text, fontSize: 18, fontFamily: F.heading },
   wrap: { flex: 1, backgroundColor: c.bg, paddingHorizontal: 16 },
-  stat: { backgroundColor: c.panel, borderRadius: 14, padding: 16, marginTop: 12, flexDirection: 'row', alignItems: 'baseline', gap: 10 },
-  statNum: { color: c.gold, fontSize: 34, fontWeight: '800' },
-  statLabel: { color: c.dim, fontSize: 15 },
+  stat: { backgroundColor: c.panel, borderRadius: 14, padding: 12, marginTop: 12, flexDirection: 'row', alignItems: 'center', gap: 14 },
+  statLabel: { color: c.dim, fontSize: 12, textTransform: 'uppercase', letterSpacing: 1 },
+  cardName: { color: c.text, fontSize: 18, fontFamily: F.heading },
+  logBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start', backgroundColor: c.gold, borderRadius: 16, paddingVertical: 6, paddingHorizontal: 12, marginTop: 6 },
+  logBtnText: { color: c.bg, fontWeight: '700', fontSize: 13 },
   h2: { color: c.text, fontSize: 19, marginTop: 24, marginBottom: 10, fontFamily: F.heading },
   listen: { flexDirection: 'row', gap: 12, alignItems: 'center', backgroundColor: c.panel, borderRadius: 12, padding: 10, marginBottom: 8 },
   title: { color: c.text, fontSize: 15, fontWeight: '600' },

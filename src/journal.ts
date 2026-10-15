@@ -1,4 +1,4 @@
-import { cardName } from './decks';
+import { CARDS, cardName } from './decks';
 import { listBooks } from './storage';
 import { loadLinks, loadSources, sectionCard, Sources, usesBook } from './sectionCards';
 import { load, save, Tracker, uid } from './tracker';
@@ -53,6 +53,30 @@ export function updateJournal(fn: (j: JournalData) => void) {
 export const allSpreads = (j: JournalData) => [...BASE_SPREADS, ...j.spreads];
 export const spreadOf = (j: JournalData, id: string) => allSpreads(j).find((s) => s.id === id) ?? BASE_SPREADS[0];
 export const allAreas = (j: JournalData) => [...BASE_AREAS, ...j.areas];
+
+const stamp = () => {
+  const now = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+};
+
+export const draftReading = (card: string): Reading => ({
+  id: uid(),
+  at: stamp(),
+  question: 'Card of the day',
+  spreadId: 'one',
+  cards: [{ card }],
+  created: Date.now(),
+});
+
+export const saveReading = (r: Reading) => updateJournal((j) => j.readings.push(r));
+
+export function cardOfTheDay(date = new Date()) {
+  const key = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+  let h = 2166136261;
+  for (const ch of key) h = Math.imul(h ^ ch.charCodeAt(0), 16777619) >>> 0;
+  return CARDS[h % CARDS.length].id;
+}
 
 export function newReading(): Reading {
   const now = new Date();

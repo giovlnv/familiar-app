@@ -10,12 +10,14 @@ import {
   allSpreads,
   birthCards,
   cardSections,
+  draftReading,
   loadJournal,
   parseDate,
   patchReading,
   Reading,
   readingPrompt,
   removeReading,
+  saveReading,
   showDate,
   spreadOf,
   updateJournal,
@@ -33,10 +35,11 @@ const short = (id: string) => cardName(id).split(' · ').pop()!;
 
 export default function ReadingScreen() {
   const pad = usePad();
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, card } = useLocalSearchParams<{ id: string; card?: string }>();
   const { width } = useWindowDimensions();
   const [j, setJ] = useState(loadJournal);
-  const [r, setR] = useState<Reading | undefined>(() => loadJournal().readings.find((x) => x.id === id));
+  const [draft, setDraft] = useState(id === 'draft');
+  const [r, setR] = useState<Reading | undefined>(() => (id === 'draft' && card ? draftReading(card) : loadJournal().readings.find((x) => x.id === id)));
   const [slot, setSlot] = useState<number | null>(null);
   const [about, setAbout] = useState<{ id: string; role: string } | null>(null);
   const [personSheet, setPersonSheet] = useState(false);
@@ -57,7 +60,7 @@ export default function ReadingScreen() {
   const set = (patch: Partial<Reading>) => {
     const next = { ...r, ...patch };
     setR(next);
-    patchReading(next.id, (x) => Object.assign(x, next));
+    if (!draft) patchReading(next.id, (x) => Object.assign(x, next));
   };
   const placeCard = (i: number, card: string | undefined, reversed = false) => {
     const cards = [...r.cards];
@@ -119,7 +122,11 @@ export default function ReadingScreen() {
       <Stack.Screen
         options={{
           title: fmtDate(date, { day: 'numeric', month: 'short' }),
-          headerRight: () => (
+          headerRight: () => draft ? (
+            <Pressable hitSlop={10} onPress={() => (saveReading(r), setDraft(false), setJ(loadJournal()))}>
+              <Text style={{ color: c.gold, fontSize: 16, fontWeight: '700' }}>Save</Text>
+            </Pressable>
+          ) : (
             <Pressable
               hitSlop={10}
               onPress={() =>
@@ -141,6 +148,9 @@ export default function ReadingScreen() {
           ),
         }}
       />
+      {draft && (
+        <Text style={{ color: c.dim, fontSize: 13, marginBottom: 4 }}>Not saved yet. Tap Save (top right) to keep it in your journal.</Text>
+      )}
 
       <TextInput
         style={s.question}

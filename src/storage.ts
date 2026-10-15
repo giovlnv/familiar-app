@@ -107,6 +107,27 @@ export function clearCache() {
   }
 }
 
+export function dirSize(d: Directory): number {
+  if (!d.exists) return 0;
+  let n = 0;
+  for (const x of d.list()) n += x instanceof Directory ? dirSize(x) : ((x as File).size ?? 0);
+  return n;
+}
+
+export function storageBreakdown() {
+  let audio = 0, books = 0;
+  for (const b of listBooks()) {
+    const z = bookSizes(b.folder);
+    audio += z.audio;
+    books += z.other;
+  }
+  const decks = dirSize(new Directory(Paths.document, 'decks'));
+  const temp = dirSize(new Directory(Paths.cache));
+  const all = dirSize(new Directory(Paths.document));
+  const other = Math.max(0, all - audio - books - decks);
+  return { audio, books, decks, other, temp, total: all + temp };
+}
+
 export const freeSpace = () => {
   try {
     return Paths.availableDiskSpace;

@@ -22,8 +22,7 @@ export default function Settings() {
       </View>
       <Text style={ss.label}>Account</Text>
       <View style={[ss.menu, { marginTop: 6 }]}>
-        <MenuRow icon="logo-github" title="GitHub" sub="Key for books and streaming" to="/settings/account" />
-        <MenuRow icon="sparkles-outline" title="Claude" sub="Chat for explanations and consults" to="/settings/account" />
+        <MenuRow icon="key-outline" title="Keys" sub="GitHub and Claude" to="/settings/account" />
         <MenuRow icon="cloud-upload-outline" title="Backups" sub={`Last GitHub sync: ${when(sync.lastGithub)}`} to="/settings/backups" />
       </View>
       <Text style={ss.label}>App</Text>

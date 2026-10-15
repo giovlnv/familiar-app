@@ -97,13 +97,13 @@ export async function setStage(job: Job, stage: Stage, extra: Partial<Job> = {})
   return next;
 }
 
-export async function downloadJob(job: Job, onProgress: (done: number, total: number) => void) {
+export async function downloadJob(job: Job, onProgress: (done: number, total: number) => void, withAudio = false) {
   const token = await getToken();
   const files = (job.files ?? []).filter((f) => !f.startsWith('.'));
   if (!files.includes('book.json')) throw new Error('This job has no files yet.');
   const dir = new Directory(Paths.document, 'books', job.slug);
   dir.create({ idempotent: true, intermediates: true });
-  const order = [...files.filter((f) => f !== 'book.json'), 'book.json'];
+  const order = withAudio ? [...files.filter((f) => f !== 'book.json'), 'book.json'] : ['book.json'];
   for (let i = 0; i < order.length; i++) {
     await File.downloadFileAsync(`${API}/contents/${order[i]}?ref=${encodeURIComponent(`audio/${job.slug}`)}`, new File(dir, order[i]), {
       headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github.raw' },
@@ -111,7 +111,6 @@ export async function downloadJob(job: Job, onProgress: (done: number, total: nu
     });
     onProgress(i + 1, order.length);
   }
-  await gh(`/git/refs/heads/audio/${job.slug}`, { method: 'DELETE' }).catch(() => {});
   return setStage(job, 'imported');
 }
 

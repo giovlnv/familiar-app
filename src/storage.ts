@@ -38,7 +38,72 @@ export function getBook(folder: string): LibraryItem | null {
   return book ? { folder, book } : null;
 }
 
-export const audioUri = (folder: string, name: string) => new File(root(), folder, name).uri;
+const RAW = 'https://raw.githubusercontent.com/giovlnv/ios_202610.familiar_library/refs/heads/audio';
+let token = '';
+export const setStreamToken = (t: string | null) => (token = t ?? '');
+
+export const remoteAudio = (folder: string, name: string) => ({
+  uri: `${RAW}/${encodeURIComponent(folder)}/${encodeURIComponent(name)}`,
+  headers: token ? { Authorization: `token ${token}` } : undefined,
+});
+
+export function audioSource(folder: string, name: string) {
+  const f = new File(root(), folder, name);
+  return f.exists ? { uri: f.uri } : remoteAudio(folder, name);
+}
+
+const audioFiles = (folder: string) =>
+  new Directory(root(), folder).list().filter((x): x is File => x instanceof File && /\.(m4a|mp3|aac)$/i.test(x.name));
+
+export function bookSizes(folder: string) {
+  const d = new Directory(root(), folder);
+  if (!d.exists) return { audio: 0, other: 0 };
+  let audio = 0, other = 0;
+  for (const x of d.list()) if (x instanceof File) /\.(m4a|mp3|aac)$/i.test(x.name) ? (audio += x.size ?? 0) : (other += x.size ?? 0);
+  return { audio, other };
+}
+
+export async function canStream(folder: string, book: Book) {
+  const first = book.sections[0];
+  if (!first || !token) return false;
+  const src = remoteAudio(folder, first.audio);
+  const r = await fetch(src.uri, { method: 'HEAD', headers: src.headers }).catch(() => null);
+  return !!r?.ok;
+}
+
+export function removeAudio(folder: string) {
+  for (const f of audioFiles(folder)) f.delete();
+}
+
+export async function downloadAudio(folder: string, book: Book, onProgress: (done: number, total: number) => void) {
+  const dir = new Directory(root(), folder);
+  for (let i = 0; i < book.sections.length; i++) {
+    const s = book.sections[i];
+    const dest = new File(dir, s.audio);
+    if (!dest.exists) {
+      const src = remoteAudio(folder, s.audio);
+      await File.downloadFileAsync(src.uri, dest, { headers: src.headers, idempotent: true });
+    }
+    onProgress(i + 1, book.sections.length);
+  }
+}
+
+export function cacheSize() {
+  const d = new Directory(Paths.cache);
+  return d.exists ? d.list().reduce((n, x) => n + ((x as File).size ?? 0), 0) : 0;
+}
+
+export function clearCache() {
+  const d = new Directory(Paths.cache);
+  if (!d.exists) return;
+  for (const x of d.list()) {
+    try {
+      x.delete();
+    } catch {}
+  }
+}
+
+export const mb = (bytes: number) => (bytes >= 1e9 ? `${(bytes / 1e9).toFixed(1)} GB` : `${Math.round(bytes / 1e6)} MB`);
 
 export async function importBook(): Promise<string | null> {
   const res = await DocumentPicker.getDocumentAsync({ multiple: true, copyToCacheDirectory: true });

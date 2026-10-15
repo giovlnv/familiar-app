@@ -5,6 +5,7 @@ import { fetchAllGenres } from '../../../../genres';
 import { defaultDeck, deleteDeck, downloadRws, importDeckFromFiles, importDeckFromUrl, listDecks, setDefaultDeck } from '../../../../decks';
 import { CardImage, CardPicker, useDecks } from '../../../../components/Cards';
 import { c } from '../../../../theme';
+import { bookSizes, cacheSize, clearCache, listBooks, mb } from '../../../../storage';
 import { Btn, MenuRow, Page, ss } from '../../../../components/settings-ui';
 
 export default function Configuration() {
@@ -39,8 +40,16 @@ export default function Configuration() {
       <View style={ss.menu}>
         <MenuRow icon="paw-outline" title="Your familiars" sub="Add, edit, link to paths" to="/familiars" />
       </View>
+      <Text style={ss.h2}>Storage</Text>
+      <Text style={ss.p}>
+        Audiobooks: {mb(listBooks().reduce((n, b) => n + bookSizes(b.folder).audio, 0))} of audio on this iPhone. To free space, open a book’s page → ⋯ → Remove downloaded audio; it then streams from GitHub.
+      </Text>
+      <Btn
+        label={`Clear temporary files (${mb(cacheSize())})`}
+        onPress={() => (clearCache(), setDeckMsg(''), Alert.alert('Cleared', 'Temporary files removed. Decks, books and notes are untouched.'))}
+      />
       <Text style={ss.h2}>Decks</Text>
-      <Text style={ss.p}>The default deck is used for every card in the app. Changing it updates all your readings.</Text>
+      <Text style={ss.p}>The default deck is used for every card in the app. Changing it updates all your readings. The default deck is always kept: to remove it, choose another default first.</Text>
       <View style={[ss.card, { gap: 2 }]}>
         {decks.map((d) => (
           <Pressable
@@ -50,7 +59,9 @@ export default function Configuration() {
             onLongPress={() =>
               Alert.alert(d.name, `${d.cards.length} cards · ${d.source ?? ''}`, [
                 { text: 'View cards', onPress: () => setBrowse(d.id) },
-                { text: 'Delete deck', style: 'destructive', onPress: () => deleteDeck(d.id) },
+                ...(d.id === defaultDeck()
+                  ? []
+                  : [{ text: 'Make default', onPress: () => setDefaultDeck(d.id) }, { text: 'Delete deck', style: 'destructive' as const, onPress: () => deleteDeck(d.id) }]),
                 { text: 'Cancel', style: 'cancel' },
               ])
             }

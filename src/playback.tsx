@@ -1,6 +1,7 @@
 import { createContext, ReactNode, useContext, useEffect, useRef, useState } from 'react';
 import { AudioPlayer, AudioStatus, setAudioModeAsync, useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
-import { audioUri, LibraryItem, loadProgress, saveProgress } from './storage';
+import { audioSource, LibraryItem, loadProgress, saveProgress, setStreamToken } from './storage';
+import { getToken } from './sync';
 import { addListening } from './tracker';
 import { explainStart, explanationsOn, useExplanations } from './explanations';
 
@@ -60,11 +61,12 @@ export function PlaybackProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     setAudioModeAsync({ playsInSilentMode: true, shouldPlayInBackground: true, interruptionMode: 'doNotMix' });
+    getToken().then(setStreamToken);
   }, []);
 
   useEffect(() => {
     if (!item || !section) return;
-    player.replace({ uri: audioUri(item.folder, section.audio) });
+    player.replace(audioSource(item.folder, section.audio));
     player.setActiveForLockScreen(true, { title: section.title, artist: item.book.title, albumTitle: item.book.title });
   }, [item, sec]);
 

@@ -148,17 +148,30 @@ export default function JobScreen() {
       {job.stage === 'ready' && (
         <>
           <Text style={s.p}>
-            {job.hours} h of audio · {job.files?.filter((f) => f.endsWith(".m4a")).length ?? 0} audio files. Download over Wi-Fi; the copy on GitHub is removed afterwards (the zip in Releases stays as a backup).
+            {job.hours} h of audio · {job.files?.filter((f) => f.endsWith(".m4a")).length ?? 0} audio files. Streaming keeps it off your iPhone (needs internet); you can download the audio later from the book page.
           </Text>
           <Button
-            label={progress || 'Download & import'}
-            icon="cloud-download-outline"
+            label={progress || 'Add to library (stream)'}
+            icon="headset"
             primary
             onPress={() =>
               busy
                 ? undefined
                 : run(async () => {
-                    const j = await downloadJob(job, (d, t) => setProgress(`Downloading ${d}/${t}`));
+                    const j = await downloadJob(job, (d, t) => setProgress(`Adding ${d}/${t}`));
+                    syncAudioBooks();
+                    return j;
+                  })
+            }
+          />
+          <Button
+            label="Add and download audio for offline"
+            icon="cloud-download-outline"
+            onPress={() =>
+              busy
+                ? undefined
+                : run(async () => {
+                    const j = await downloadJob(job, (d, t) => setProgress(`Downloading ${d}/${t}`), true);
                     syncAudioBooks();
                     return j;
                   })

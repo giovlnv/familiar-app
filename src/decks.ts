@@ -84,6 +84,7 @@ export function cardUri(cardId: string, deckId = defaultDeck()) {
 }
 
 export function deleteDeck(id: string) {
+  if (id === defaultDeck()) throw new Error('This is your default deck. Choose another default first.');
   const d = new Directory(root(), id);
   if (d.exists) d.delete();
   changed();

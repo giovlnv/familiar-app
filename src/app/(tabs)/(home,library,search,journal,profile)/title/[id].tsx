@@ -17,7 +17,7 @@ import {
   useLocalSearchParams,
 } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { deleteBook, loadConsults, loadNotes } from "../../../../storage";
+import { bookSizes, canStream, deleteBook, downloadAudio, getBook, loadConsults, loadNotes, mb, removeAudio } from "../../../../storage";
 import {
   addLog,
   patchList,
@@ -118,6 +118,36 @@ export default function Title() {
                       refresh();
                     },
                   },
+                  ...(b.audio && getBook(b.audio)
+                    ? (() => {
+                        const folder = b.audio!;
+                        const item = getBook(folder)!;
+                        const size = bookSizes(folder).audio;
+                        return size > 0
+                          ? [
+                              {
+                                text: `Remove downloaded audio (${mb(size)})`,
+                                onPress: async () => {
+                                  if (!(await canStream(folder, item.book)))
+                                    return Alert.alert("Can't stream this book yet", "Its audio isn't on GitHub, so removing it would lose it. Keep it for now.");
+                                  Alert.alert(`Free ${mb(size)}?`, "Notes, progress and card links stay. The book plays by streaming from your library on GitHub (needs internet).", [
+                                    { text: "Cancel", style: "cancel" },
+                                    { text: "Remove audio", style: "destructive", onPress: () => (removeAudio(folder), setT(load())) },
+                                  ]);
+                                },
+                              },
+                            ]
+                          : [
+                              {
+                                text: "Download audio for offline",
+                                onPress: () =>
+                                  downloadAudio(folder, item.book, () => {})
+                                    .then(() => Alert.alert("Downloaded", `${mb(bookSizes(folder).audio)} on this iPhone.`))
+                                    .catch((e) => Alert.alert("Download failed", String(e?.message ?? e))),
+                              },
+                            ];
+                      })()
+                    : []),
                   {
                     text: "Find details on Open Library",
                     onPress: () =>

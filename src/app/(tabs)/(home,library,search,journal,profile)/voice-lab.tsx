@@ -5,6 +5,7 @@ import { File, Paths } from "expo-file-system";
 import { AudioPlayer, createAudioPlayer } from "expo-audio";
 import { KokoroTtsModel, models, useTextToSpeech } from "react-native-executorch";
 import { c, themed } from "../../../theme";
+import { wav } from "../../../kokoro";
 import { usePad, usePlayback } from "../../../playback";
 
 type Lang = "EN" | "PT";
@@ -22,31 +23,6 @@ const SAMPLES: Record<Lang, string> = {
 
 const config = (lang: Lang, backend: Backend) =>
   (lang === "EN" ? models.textToSpeech.KOKORO.EN_US : models.textToSpeech.KOKORO.PT)[backend] as KokoroTtsModel<string>;
-
-const wav = (parts: Float32Array[], rate: number) => {
-  const n = parts.reduce((a, p) => a + p.length, 0);
-  const v = new DataView(new ArrayBuffer(44 + n * 2));
-  const str = (o: number, s: string) => [...s].forEach((ch, i) => v.setUint8(o + i, ch.charCodeAt(0)));
-  str(0, "RIFF");
-  v.setUint32(4, 36 + n * 2, true);
-  str(8, "WAVEfmt ");
-  v.setUint32(16, 16, true);
-  v.setUint16(20, 1, true);
-  v.setUint16(22, 1, true);
-  v.setUint32(24, rate, true);
-  v.setUint32(28, rate * 2, true);
-  v.setUint16(32, 2, true);
-  v.setUint16(34, 16, true);
-  str(36, "data");
-  v.setUint32(40, n * 2, true);
-  let o = 44;
-  for (const p of parts)
-    for (let i = 0; i < p.length; i++, o += 2) {
-      const s = Math.max(-1, Math.min(1, p[i]));
-      v.setInt16(o, s < 0 ? s * 0x8000 : s * 0x7fff, true);
-    }
-  return new Uint8Array(v.buffer);
-};
 
 const sec = (ms: number) => `${(ms / 1000).toFixed(1)} s`;
 

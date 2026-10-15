@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { KeyboardAvoidingView, Modal, Pressable, ScrollView, Share, Text, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Modal, Pressable, ScrollView, Share, Switch, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Clipboard from 'expo-clipboard';
 import { CARDS, cardName, cardUri } from '../decks';
@@ -7,6 +7,7 @@ import { CHIPS, explainPrompt, loadChips, Saved, saveChips } from '../explain';
 import { Book, Section } from '../types';
 import { shareToClaude } from './Consults';
 import ToastHost, { toast } from './Toast';
+import ListenBar from './ListenBar';
 import { c, F, themed } from '../theme';
 
 export type ExplainTarget = { kind: 'passage' | 'section'; section: Section; para?: number; text?: string; card?: string; saved?: Saved; builtIn?: string[] };
@@ -26,12 +27,14 @@ export default function ExplainSheet({
   const [image, setImage] = useState(true);
   const [sel, setSel] = useState({ start: 0, end: 0 });
   const [answer, setAnswer] = useState(target?.saved?.text ?? '');
+  const [listen, setListen] = useState(false);
   const [prev, setPrev] = useState(target);
   if (prev !== target) {
     setPrev(target);
     setSel({ start: 0, end: 0 });
     setAnswer(target?.saved?.text ?? '');
     setImage(true);
+    setListen(false);
   }
   if (!target) return null;
 
@@ -111,6 +114,13 @@ export default function ExplainSheet({
               <Text style={s.askText}>Ask Claude</Text>
             </Pressable>
             <Text style={s.label}>Claude’s answer</Text>
+            {!!(answer.trim() || target.builtIn?.length) && (
+              <View style={s.listenRow}>
+                <Text style={s.chipText}>Listen</Text>
+                <Switch value={listen} onValueChange={setListen} trackColor={{ true: c.gold }} />
+              </View>
+            )}
+            {listen && <ListenBar text={answer.trim() || (target.builtIn ?? []).join('\n\n')} />}
             <TextInput style={s.answer} multiline value={answer} onChangeText={setAnswer} placeholder="Paste Claude’s answer here" placeholderTextColor={c.dim} />
             <View style={{ flexDirection: 'row', gap: 10 }}>
               <Pressable style={[s.btn, { flex: 1 }]} onPress={paste}>
@@ -147,6 +157,7 @@ const s = themed(() => ({
   chipOn: { backgroundColor: c.gold, borderColor: c.gold },
   chipText: { color: c.text, fontSize: 14 },
   chipTextOn: { color: c.bg, fontWeight: '700' },
+  listenRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   ask: { backgroundColor: c.claude, borderRadius: 12, padding: 14, alignItems: 'center' },
   askText: { color: c.bg, fontSize: 16, fontWeight: '700' },
   answer: { minHeight: 140, color: c.text, fontSize: 15, lineHeight: 22, backgroundColor: c.panel, borderRadius: 12, padding: 12, textAlignVertical: 'top' },

@@ -6,6 +6,7 @@ import { pushToGithub } from "../sync";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { PlaybackProvider } from "../playback";
+import ToastHost from "../components/Toast";
 import { Splash } from "../components/Splash";
 import { getOnboarding } from "../familiar";
 import { applyTheme, c, F, mode, onThemeChange, scheme } from "../theme";
@@ -77,6 +78,7 @@ export default function RootLayout() {
             <Stack.Screen name="player/[id]" options={{ headerShown: false }} />
             <Stack.Screen name="onboarding" options={{ headerShown: false, presentation: "fullScreenModal", gestureEnabled: false }} />
           </Stack>}
+          <ToastHost />
           <Splash />
         </View>
       </PlaybackProvider>

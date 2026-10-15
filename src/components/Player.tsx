@@ -36,6 +36,8 @@ import { CardImage, CardPicker } from "./Cards";
 import CardSheet from "./CardSheet";
 import { cardName } from "../decks";
 import TextStyleSheet from "./TextStyleSheet";
+import ExplainSheet, { ExplainTarget } from "./ExplainSheet";
+import { loadExplained, saveExplained } from "../explain";
 import {
   allExplanationsOn,
   bookOverride,
@@ -96,6 +98,8 @@ export default function Player({
     setFollow(true);
   };
   const [links, setLinks] = useState(() => loadLinks(folder));
+  const [explained, setExplained] = useState(() => loadExplained(folder));
+  const [explain, setExplain] = useState<ExplainTarget | null>(null);
   const [picking, setPicking] = useState(false);
   const [cardInfo, setCardInfo] = useState<string | null>(null);
   const [stage, setStage] = useState({ w: 0, h: 0 });
@@ -261,8 +265,20 @@ export default function Player({
     if (await Sharing.isAvailableAsync())
       await Sharing.shareAsync(uri, { UTI: "public.plain-text" });
   };
+  const explainPassage = (index: number) =>
+    setExplain({
+      kind: "passage",
+      section,
+      para: index,
+      text: section.paras[index]?.text,
+      card: card?.card,
+      saved: explained[section.id]?.passages?.filter((x) => x.para === index).pop(),
+    });
+  const explainSection = () =>
+    setExplain({ kind: "section", section, card: card?.card, saved: explained[section.id]?.section, builtIn: section.explain });
   const paraActions = (index: number, time: number) =>
     Alert.alert("This passage", undefined, [
+      { text: "Explain this passage", onPress: () => explainPassage(index) },
       { text: "Add note", onPress: () => newNote(index, time) },
       { text: "Ask Claude", onPress: () => startAsk(index, time) },
       { text: "Cancel", style: "cancel" },
@@ -275,6 +291,8 @@ export default function Player({
       ),
     [consults, section],
   );
+
+  const lit = useMemo(() => new Set((explained[section.id]?.passages ?? []).map((x) => x.para)), [explained, section]);
 
   const noted = useMemo(
     () =>
@@ -401,7 +419,8 @@ export default function Player({
                 {noted.has(index) && (
                   <Ionicons name="create-outline" size={15} color={c.gold} />
                 )}
-                {(asked.has(index) || noted.has(index)) && " "}
+                {lit.has(index) && <Ionicons name="bulb-outline" size={15} color={c.explain} />}
+                {(asked.has(index) || noted.has(index) || lit.has(index)) && " "}
                 {p.text}
               </Text>
             </Pressable>
@@ -527,6 +546,12 @@ export default function Player({
             label="Explanations"
             value={`${expOn ? "On" : "Off"}${bookOverride(folder) !== undefined ? " · this book" : ""}`}
             onPress={explainMenu}
+          />
+          <MenuRow
+            icon="bulb-outline"
+            label="Explain this section"
+            value={explained[section.id]?.section || section.explain?.length ? "Saved" : undefined}
+            onPress={() => fromMenu(explainSection)}
           />
           <MenuRow icon="text-outline" label="Text size and style" onPress={() => fromMenu(() => setStyling(true))} />
           <MenuRow icon="create-outline" label="Add a note here" onPress={() => fromMenu(() => newNote(current, t))} />
@@ -665,6 +690,12 @@ export default function Player({
         title="Card for this section"
         onClose={() => setPicking(false)}
         onPick={(id, reversed) => link({ card: id, reversed })}
+      />
+      <ExplainSheet
+        target={explain}
+        book={book}
+        onClose={() => setExplain(null)}
+        onSave={(tg, text, quote) => setExplained(saveExplained(folder, tg.section.id, { para: tg.para, quote, text, at: Date.now() }, tg.kind))}
       />
       <TextStyleSheet visible={styling} sample={section.paras[current]?.text} onClose={() => setStyling(false)} />
       <CardSheet id={cardInfo} here={folder} onClose={() => setCardInfo(null)} />

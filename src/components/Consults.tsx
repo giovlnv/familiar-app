@@ -19,6 +19,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Book, Consult, Note } from '../types';
 import { fmtTime } from '../format';
+import { toast } from './Toast';
 import { c, F, themed } from '../theme';
 
 export type AskDraft = { section: string; para: number; time: number; quote: string; parent?: Consult };
@@ -260,6 +261,8 @@ const askForLink = () =>
 
 export async function shareToClaude(message: string) {
   await Clipboard.setStringAsync(message);
+  toast('Copied to clipboard');
+  await new Promise((r) => setTimeout(r, 700));
   const url = getClaudeLink() || (await askForLink());
   if (!url) return Share.share({ message });
   await Linking.openURL(url);

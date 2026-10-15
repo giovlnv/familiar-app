@@ -288,7 +288,9 @@ export type Onboarding = {
   birthLon?: number;
   birthTz?: string;
   yVowel?: boolean;
+  houses?: HouseSystem;
 };
+export type HouseSystem = 'placidus' | 'whole' | 'equal';
 export function getOnboarding(): Onboarding {
   try {
     const f = onboardFile();

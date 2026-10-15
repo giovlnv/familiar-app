@@ -1,7 +1,8 @@
 import { useCallback, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
-import { astroCards, fmtDeg, myChart, Placement, signOf } from '../../../astrology';
+import { astroCards, fmtDeg, HOUSES, myChart, Placement, signOf } from '../../../astrology';
+import { getOnboarding } from '../../../familiar';
 import { CardImage } from '../../../components/Cards';
 import CardSheet from '../../../components/CardSheet';
 import { c, themed } from '../../../theme';
@@ -54,7 +55,7 @@ export default function Astrology() {
       .join(' · ');
   return (
     <Page>
-      <Text style={ss.p}>Tropical zodiac, Placidus houses. Tap a planet to see its tarot cards.</Text>
+      <Text style={ss.p}>Tropical zodiac, {HOUSES.find((h) => h.id === (getOnboarding().houses ?? 'placidus'))?.name} houses. Tap a planet to see its tarot cards.</Text>
       {!ch.timed && <Text style={ss.p}>Add your birth time and place for the Ascendant, Midheaven and houses.</Text>}
       <View style={ss.card}>
         {ch.list.map((p) => (

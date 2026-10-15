@@ -3,6 +3,7 @@ import { Text, View } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { getProfile } from '../../../../tracker';
 import { getOnboarding } from '../../../../familiar';
+import { HOUSES } from '../../../../astrology';
 import { PALETTES, paletteId } from '../../../../theme';
 import { getState } from '../../../../sync';
 import { MenuRow, Page, ss, when } from '../../../../components/settings-ui';
@@ -25,6 +26,9 @@ export default function Settings() {
         <MenuRow icon="albums-outline" title="Tarot" sub="Decks: default deck, custom decks" to="/settings/configuration" />
         <MenuRow icon="albums-outline" title="Lenormand" sub="Decks" to="/settings/decks/lenormand" />
         <MenuRow icon="albums-outline" title="Make your own" sub="Decks: build your own system" to="/settings/decks/custom" />
+        {(getOnboarding().paths ?? []).includes('astrology') && (
+          <MenuRow icon="planet-outline" title="Astrology" sub={`Houses: ${HOUSES.find((h) => h.id === (getOnboarding().houses ?? 'placidus'))?.name}`} to="/settings/astrology" />
+        )}
         {(getOnboarding().paths ?? []).includes('numerology') && (
           <MenuRow icon="keypad-outline" title="Numerology" sub={`Pythagorean · Y as ${getOnboarding().yVowel ? 'vowel' : 'consonant'}`} to="/settings/numerology" />
         )}

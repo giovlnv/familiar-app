@@ -1,6 +1,6 @@
 import * as A from 'astronomy-engine';
 import { getProfile } from './tracker';
-import { getOnboarding } from './familiar';
+import { getOnboarding, HouseSystem } from './familiar';
 
 const T = '︎';
 
@@ -128,7 +128,13 @@ const retro = (body: string, date: Date) => {
   return norm(b - a) > 180;
 };
 
-function angles(date: Date, lat: number, lon: number) {
+export const HOUSES = [
+  { id: 'placidus', name: 'Placidus' },
+  { id: 'whole', name: 'Whole sign' },
+  { id: 'equal', name: 'Equal' },
+] as const;
+
+function angles(date: Date, lat: number, lon: number, sys: HouseSystem = 'placidus') {
   const t = A.MakeTime(date);
   const eps = A.e_tilt(t).tobl * rad;
   const ramc = norm(A.SiderealTime(date) * 15 + lon);
@@ -146,6 +152,10 @@ function angles(date: Date, lat: number, lon: number) {
     }
     return l;
   };
+  if (sys !== 'placidus') {
+    const start = sys === 'whole' ? Math.floor(asc / 30) * 30 : asc;
+    return { asc, mc, cusps: Array.from({ length: 12 }, (_, i) => norm(start + i * 30)) };
+  }
   const c11 = cusp(1 / 3, false), c12 = cusp(2 / 3, false), c2 = cusp(2 / 3, true), c3 = cusp(1 / 3, true);
   const half = [asc, c2, c3, norm(mc + 180), norm(c11 + 180), norm(c12 + 180)];
   return { asc, mc, cusps: [...half, ...half.map((x) => norm(x + 180))] };
@@ -161,7 +171,7 @@ export type Placement = { name: string; glyph: string; lon: number; house?: numb
 export function chart(date: string, time?: string, place?: { lat: number; lon: number; tz?: string }) {
   const when = birthUtc(date, time, place?.tz);
   const timed = !!time && /^\d{2}:\d{2}$/.test(time) && !!place;
-  const ang = timed ? angles(when, place!.lat, place!.lon) : null;
+  const ang = timed ? angles(when, place!.lat, place!.lon, getOnboarding().houses) : null;
   const T = (A.MakeTime(when).tt) / 36525;
   const node = norm(125.04452 - 1934.136261 * T);
   const list: Placement[] = BODIES.map((b) => {

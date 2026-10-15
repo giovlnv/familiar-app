@@ -1,8 +1,8 @@
 import { useCallback, useMemo, useState } from 'react';
-import { Pressable, ScrollView, SectionList, Text, View } from 'react-native';
+import { Pressable, ScrollView, SectionList, Text, TextInput, View } from 'react-native';
 import { router, Stack, useFocusEffect } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { JournalData, loadJournal, mostDrawn, newReading, Reading } from '../../../journal';
+import { JournalData, loadJournal, matchesReading, mostDrawn, newReading, Reading } from '../../../journal';
 import { today } from '../../../tracker';
 import { cardName } from '../../../decks';
 import { CardImage } from '../../../components/Cards';
@@ -23,6 +23,7 @@ export default function Journal() {
   const [area, setArea] = useState<string | null>(null);
   const [month, setMonth] = useState(() => today().slice(0, 7));
   const [picked, setPicked] = useState<string | null>(null);
+  const [q, setQ] = useState('');
   const [open, setOpen] = useState<{ id: string; role: string } | null>(null);
   useFocusEffect(
     useCallback(() => {
@@ -34,8 +35,11 @@ export default function Journal() {
   );
 
   const readings = useMemo(
-    () => [...j.readings].filter((r) => !area || r.area === area).sort((a, b) => b.at.localeCompare(a.at) || b.created - a.created),
-    [j, area],
+    () =>
+      [...j.readings]
+        .filter((r) => (!area || r.area === area) && matchesReading(r, q, j.people))
+        .sort((a, b) => b.at.localeCompare(a.at) || b.created - a.created),
+    [j, area, q],
   );
   const areas = [...new Set(j.readings.map((r) => r.area).filter((a): a is string => !!a))];
   const top = mostDrawn(j.readings, 1)[0];
@@ -77,6 +81,9 @@ export default function Journal() {
           <Text style={s.tileLabel}>this month</Text>
           <Text style={[s.statLine, { marginTop: 10 }]}>{j.readings.length} in total</Text>
           {topArea && <Text style={s.statLine}>Most asked about: {topArea[0]}</Text>}
+          <Pressable onPress={() => router.push('/journal-stats')} hitSlop={6} style={{ marginTop: 8 }}>
+            <Text style={s.moreStats}>More stats ›</Text>
+          </Pressable>
         </View>
         {top ? (
           <Pressable style={{ alignItems: 'center', gap: 4, width: 96 }} onPress={() => setOpen({ id: top[0], role: `Your most drawn card · ${top[1]} times.` })}>
@@ -89,6 +96,19 @@ export default function Journal() {
         ) : null}
       </View>
 
+      <View style={s.search}>
+        <Ionicons name="search" size={16} color={c.dim} />
+        <TextInput
+          style={s.searchInput}
+          value={q}
+          onChangeText={setQ}
+          placeholder="Search questions, notes, cards, people"
+          placeholderTextColor={c.dim}
+          autoCorrect={false}
+          clearButtonMode="while-editing"
+          returnKeyType="search"
+        />
+      </View>
       <View style={s.views}>
         {(['timeline', 'calendar'] as const).map((v) => (
           <Pressable key={v} style={[s.view, view === v && s.viewOn]} onPress={() => (setView(v), setPicked(null))}>
@@ -206,6 +226,9 @@ const s = themed(() => ({
   addBirth: { flexDirection: 'row', gap: 10, alignItems: 'center', backgroundColor: c.panel, borderRadius: 12, padding: 14 },
   stats: { flexDirection: 'row', alignItems: 'center', backgroundColor: c.panel, borderRadius: 14, padding: 16, marginBottom: 14 },
   statLine: { color: c.text, fontSize: 14 },
+  moreStats: { color: c.gold, fontWeight: '600', fontSize: 14 },
+  search: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: c.panel, borderRadius: 10, paddingHorizontal: 12, marginBottom: 10 },
+  searchInput: { flex: 1, color: c.text, fontSize: 15, paddingVertical: 10 },
   tileLabel: { color: c.dim, fontSize: 12 },
   tileCard: { color: c.text, fontSize: 13, fontWeight: '600', textAlign: 'center', paddingHorizontal: 4 },
   big: { color: c.gold, fontSize: 40, fontWeight: '700' },

@@ -178,3 +178,71 @@ export function parseDate(text: string) {
 }
 
 export const showDate = (iso?: string) => (iso ? iso.split('-').reverse().join('/') : '');
+
+export function matchesReading(r: Reading, q: string, people: Person[]) {
+  const words = q.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').split(/\s+/).filter(Boolean);
+  if (!words.length) return true;
+  const text = [
+    r.question, r.interpretation, r.keyPoints, r.openQuestions, r.area,
+    people.find((p) => p.id === r.personId)?.name,
+    ...(r.answers ?? []).map((a) => a.text),
+    ...r.cards.map((p) => (p.card ? cardName(p.card) : '')),
+  ]
+    .join(' ')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+  return words.every((w) => text.includes(w));
+}
+
+export function journalStats(j: JournalData) {
+  const rs = j.readings;
+  const placed = rs.flatMap((r) => r.cards.filter((p) => p.card));
+  const count = <T,>(xs: T[]) => {
+    const m = new Map<T, number>();
+    for (const x of xs) m.set(x, (m.get(x) ?? 0) + 1);
+    return [...m.entries()].sort((a, b) => b[1] - a[1]);
+  };
+  const days = new Set(rs.map((r) => r.at.slice(0, 10)));
+  const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  let streak = 0;
+  const d = new Date();
+  if (!days.has(iso(d))) d.setDate(d.getDate() - 1);
+  while (days.has(iso(d))) {
+    streak++;
+    d.setDate(d.getDate() - 1);
+  }
+  let best = 0;
+  let run = 0;
+  let prev = '';
+  for (const x of [...days].sort()) {
+    const y = new Date(`${prev}T12:00:00`);
+    y.setDate(y.getDate() + 1);
+    run = prev && iso(y) === x ? run + 1 : 1;
+    best = Math.max(best, run);
+    prev = x;
+  }
+  const months = Array.from({ length: 12 }, (_, i) => {
+    const m = new Date();
+    m.setDate(1);
+    m.setMonth(m.getMonth() - 11 + i);
+    const key = iso(m).slice(0, 7);
+    return [key, rs.filter((r) => r.at.startsWith(key)).length] as const;
+  });
+  const suitOf = (id: string) => (id.startsWith('m') ? 'Major Arcana' : (CARDS.find((c) => c.id === id)?.group ?? ''));
+  const WEEK = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  return {
+    total: rs.length,
+    cards: placed.length,
+    reversed: placed.length ? Math.round((placed.filter((p) => p.reversed).length / placed.length) * 100) : 0,
+    streak,
+    best,
+    months,
+    groups: count(placed.map((p) => suitOf(p.card!))),
+    top: count(placed.map((p) => p.card!)).slice(0, 10),
+    areas: count(rs.map((r) => r.area).filter((a): a is string => !!a)),
+    people: count(rs.map((r) => (r.personId ? (j.people.find((p) => p.id === r.personId)?.name ?? 'Someone') : 'Me'))),
+    spreads: count(rs.map((r) => [...BASE_SPREADS, ...j.spreads].find((x) => x.id === r.spreadId)?.name ?? r.spreadId)),
+    weekdays: WEEK.map((w, i) => [w, rs.filter((r) => new Date(`${r.at.slice(0, 10)}T12:00:00`).getDay() === i).length] as const),
+  };
+}

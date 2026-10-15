@@ -4,7 +4,7 @@ import { Alert, Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, Vi
 import { router, useFocusEffect } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { getBook as getAudio, installSampleOnce, loadProgress } from '../../../storage';
-import { patchBook, syncAudioBooks, Tracker } from '../../../tracker';
+import { getProfile, patchBook, syncAudioBooks, Tracker } from '../../../tracker';
 import { cardOfTheDay, patchReading, todaysCotd, todaysDraw } from '../../../journal';
 import { cardName } from '../../../decks';
 import { CardImage, CardPicker } from '../../../components/Cards';
@@ -13,7 +13,8 @@ import { Cover, fmtDate, Stars } from '../../../components/ui';
 import { fmtTime } from '../../../format';
 import { c, F, read, themed, write } from '../../../theme';
 import { FamiliarArt } from '../../../components/Familiar';
-import { nightNow } from '../../../familiar';
+import { getOnboarding, nightNow } from '../../../familiar';
+import { personal } from '../../../numerology';
 import { currentGuide, moonPhase } from '../../../guide';
 import MoonIcon from '../../../components/MoonIcon';
 
@@ -72,6 +73,8 @@ export default function Home() {
   const byId = new Map(t.books.map((b) => [b.id, b]));
   const guide = currentGuide();
   const moon = moonPhase();
+  const dob = getProfile().dob;
+  const pn = dob && (getOnboarding().paths ?? []).includes('numerology') ? personal(dob) : null;
   const recent = [...t.logs].sort((a, b) => b.date.localeCompare(a.date) || b.created - a.created).slice(0, 6);
 
   const openTitle = (id: string) => router.push({ pathname: '/title/[id]', params: { id } });
@@ -130,6 +133,13 @@ export default function Home() {
           )}
         </View>
       </View>
+      {pn && (
+        <Pressable onPress={() => router.push('/numerology')} style={{ alignSelf: 'center', marginTop: 8 }}>
+          <Text style={s.today}>
+            Personal day {pn.day} · month {pn.month} · year {pn.year}
+          </Text>
+        </Pressable>
+      )}
       <Pressable onPress={() => setHow(!how)} style={{ alignSelf: 'center', marginTop: 6 }}>
         <Text style={s.how}>{how ? 'Hide' : 'How is the calculated card chosen?'}</Text>
       </Pressable>
@@ -242,6 +252,7 @@ const s = themed(() => ({
   slot: { flex: 1, alignItems: 'center', gap: 5 },
   mid: { alignItems: 'center', gap: 1, paddingHorizontal: 4 },
   midDay: { color: c.dim, fontSize: 11 },
+  today: { color: c.text, fontSize: 13 },
   midDate: { color: c.text, fontSize: 28, fontFamily: F.heading },
   moonName: { color: c.text, fontSize: 12, textAlign: 'center' },
   tag: { color: c.gold, fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1.2 },

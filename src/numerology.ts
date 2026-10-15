@@ -60,6 +60,13 @@ export function cardNumber(id: string) {
   return i === 10 ? '10 → 1' : String(i);
 }
 
+export function personal(dob: string, on = new Date()) {
+  const [, m, d] = dob.split('-').map(Number);
+  const year = reduce(reduce(d, false) + reduce(m, false) + reduce(on.getFullYear(), false), false);
+  const month = reduce(year + on.getMonth() + 1, false);
+  return { year, month, day: reduce(month + on.getDate(), false) };
+}
+
 export type NumberRow = { key: string; label: string; value: number; about: string };
 
 export const MEANING: Record<string, string> = {

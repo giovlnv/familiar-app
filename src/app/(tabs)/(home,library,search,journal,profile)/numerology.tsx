@@ -1,7 +1,8 @@
 import { useCallback, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
-import { numberCards, numbers, NumberRow, show } from '../../../numerology';
+import { numberCards, numbers, NumberRow, personal, show } from '../../../numerology';
+import { getProfile } from '../../../tracker';
 import { CardImage } from '../../../components/Cards';
 import CardSheet from '../../../components/CardSheet';
 import { showDate } from '../../../journal';
@@ -31,6 +32,15 @@ function Rows({ rows, onCard }: { rows: NumberRow[]; onCard: (id: string, n: num
   );
 }
 
+const today = (dob: string): NumberRow[] => {
+  const p = personal(dob);
+  return [
+    { key: 'day', label: 'Personal day', value: p.day, about: 'The theme of today.' },
+    { key: 'month', label: 'Personal month', value: p.month, about: 'The theme of this month.' },
+    { key: 'year', label: 'Personal year', value: p.year, about: `The theme of ${new Date().getFullYear()}, in a nine-year cycle.` },
+  ];
+};
+
 export default function Numerology() {
   const [n, setN] = useState(numbers);
   useFocusEffect(useCallback(() => setN(numbers()), []));
@@ -40,6 +50,12 @@ export default function Numerology() {
   return (
     <Page>
       <Text style={ss.p}>Pythagorean numerology. Master numbers are shown with their reduced digit, like 11/2.</Text>
+      {!!getProfile().dob && (
+        <>
+          <Text style={ss.h2}>Today</Text>
+          <Rows rows={today(getProfile().dob!)} onCard={onCard} />
+        </>
+      )}
       {n.core.length > 0 && (
         <>
           <Text style={ss.h2}>Core numbers{n.birthName ? ` · ${n.birthName}` : ''}</Text>

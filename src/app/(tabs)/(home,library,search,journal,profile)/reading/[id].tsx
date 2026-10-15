@@ -22,6 +22,9 @@ import {
   spreadOf,
   updateJournal,
 } from '../../../../journal';
+import { personal } from '../../../../numerology';
+import { getProfile } from '../../../../tracker';
+import { getOnboarding } from '../../../../familiar';
 import { cardName } from '../../../../decks';
 import { CardImage, CardPicker } from '../../../../components/Cards';
 import CardSheet from '../../../../components/CardSheet';
@@ -120,6 +123,8 @@ export default function ReadingScreen() {
   };
 
   const [date, time] = r.at.split('T');
+  const myDob = getProfile().dob;
+  const stamp = myDob && (getOnboarding().paths ?? []).includes('numerology') ? personal(myDob, new Date(`${date}T12:00:00`)) : null;
   const filled = sp.positions.map((pos, i) => ({ pos, p: r.cards[i] })).filter((x) => x.p?.card);
   const pBirth = birthCards(person?.dob);
 
@@ -191,6 +196,7 @@ export default function ReadingScreen() {
           <Text style={s.timeText}>{time}</Text>
         </Pressable>
       </View>
+      {stamp && <Text style={s.stamp}>Personal day {stamp.day} · month {stamp.month} · year {stamp.year}</Text>}
 
       <Text style={s.label}>For</Text>
       <View style={s.chips}>
@@ -367,6 +373,7 @@ function PersonSheet({
 const s = themed(() => ({
   wrap: { flex: 1, backgroundColor: c.bg, paddingHorizontal: 16 },
   question: { color: c.text, fontSize: 20, fontWeight: '700', paddingVertical: 12 },
+  stamp: { color: c.dim, fontSize: 13, marginTop: 6, textAlign: 'center' },
   dateRow: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: c.panel, borderRadius: 12, padding: 10 },
   time: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   timeText: { color: c.text, fontSize: 16, fontWeight: '600' },

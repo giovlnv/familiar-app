@@ -10,7 +10,9 @@ import { birthCards, showDate } from '../journal';
 import { cardName } from '../decks';
 import { CardImage } from './Cards';
 import { FamiliarArt } from './Familiar';
-import { getOnboarding, withYou } from '../familiar';
+import { getOnboarding, nightNow } from '../familiar';
+import { currentGuide } from '../guide';
+import { usePlayback } from '../playback';
 
 const SIGNS: [string, number, number, string][] = [
   ['Capricorn', 1, 19, 'Earth'], ['Aquarius', 2, 18, 'Air'], ['Pisces', 3, 20, 'Water'], ['Aries', 4, 19, 'Fire'],
@@ -56,6 +58,7 @@ export default function ProfileHeader() {
   const [p, setP] = useState<Profile>(getProfile);
   useFocusEffect(useCallback(() => setP(getProfile()), []));
   const paths = getOnboarding().paths ?? [];
+  const playing = usePlayback().status.playing;
   const bc = birthCards(p.dob);
   const sign = p.dob ? sunSign(p.dob) : null;
   const birth: [string, string | undefined][] = bc
@@ -65,7 +68,7 @@ export default function ProfileHeader() {
     <Pressable style={s.head} onPress={() => router.push('/settings/profile')}>
       <View style={s.top}>
         <Avatar photo={p.photo} name={p.name} size={84} />
-        <FamiliarArt familiar={withYou()} size={84} />
+        <FamiliarArt familiar={currentGuide()} pose={playing ? 'reading' : nightNow() ? 'sleeping' : 'idle'} size={84} vial alive />
         <View style={{ flex: 1 }}>
           <Text style={s.name}>{p.name || 'Set up your profile'}</Text>
           <Text style={s.user}>{p.username ? `@${p.username}` : 'Add a photo, name and username'}</Text>

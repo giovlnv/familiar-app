@@ -13,7 +13,8 @@ import { Cover, fmtDate, Stars } from '../../../components/ui';
 import { fmtTime } from '../../../format';
 import { c, F, read, themed, write } from '../../../theme';
 import { FamiliarArt } from '../../../components/Familiar';
-import { familiarFor, nightNow } from '../../../familiar';
+import { nightNow } from '../../../familiar';
+import { currentGuide, moonPhase } from '../../../guide';
 
 export default function Home() {
   const pad = usePad();
@@ -40,7 +41,7 @@ export default function Home() {
   const mine = todaysDraw();
   const mineCard = mine?.cards[0];
   const { width: W, height: H } = useWindowDimensions();
-  const cardW = Math.min((W - 32 - 12) / 2 - 24, (H * 0.4 - 120) / 1.72);
+  const cardW = Math.min((W - 32) / 4, (H * 0.3 - 90) / 1.72);
   const [how, setHow] = useState(false);
   const mark = (p: { section: number; time: number }) => `${p.section}:${Math.floor(p.time)}`;
   const hide = (folder: string, p: { section: number; time: number }) => {
@@ -58,7 +59,8 @@ export default function Home() {
     })
     .filter((x) => x.audio && (x.p.time > 0 || x.p.section > 0) && hidden[x.b.audio!] !== mark(x.p));
   const byId = new Map(t.books.map((b) => [b.id, b]));
-  const guide = familiarFor(listening[0]?.b.paths);
+  const guide = currentGuide();
+  const moon = moonPhase();
   const recent = [...t.logs].sort((a, b) => b.date.localeCompare(a.date) || b.created - a.created).slice(0, 6);
 
   const openTitle = (id: string) => router.push({ pathname: '/title/[id]', params: { id } });
@@ -76,6 +78,14 @@ export default function Home() {
             <Ionicons name="create-outline" size={14} color={c.bg} />
             <Text style={s.logBtnText}>Write about it</Text>
           </Pressable>
+        </View>
+        <View style={s.mid}>
+          <Text style={s.midDay}>{new Date().toLocaleDateString(undefined, { weekday: 'short' })}</Text>
+          <Text style={s.midDate}>{new Date().getDate()}</Text>
+          <Text style={s.midDay}>{new Date().toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}</Text>
+          <Text style={s.moonIcon}>{moon.icon}</Text>
+          <Text style={s.moonName}>{moon.name}</Text>
+          <Text style={s.midDay}>{moon.lit}% lit</Text>
         </View>
         <View style={s.slot}>
           <Text style={s.tag}>Yours</Text>
@@ -215,10 +225,15 @@ const s = themed(() => ({
   familiar: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: c.panel, borderRadius: 14, paddingVertical: 4, paddingHorizontal: 10, marginTop: 12 },
   famName: { color: c.text, fontSize: 18, fontFamily: F.heading },
   wrap: { flex: 1, backgroundColor: c.bg, paddingHorizontal: 16 },
-  daily: { flexDirection: 'row', gap: 12, marginTop: 12 },
-  slot: { flex: 1, alignItems: 'center', gap: 6, backgroundColor: c.panel, borderRadius: 14, paddingVertical: 10, paddingHorizontal: 8 },
+  daily: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 12, backgroundColor: c.panel, borderRadius: 14, paddingVertical: 12, paddingHorizontal: 8 },
+  slot: { flex: 1, alignItems: 'center', gap: 5 },
+  mid: { alignItems: 'center', gap: 1, paddingHorizontal: 4 },
+  midDay: { color: c.dim, fontSize: 11 },
+  midDate: { color: c.text, fontSize: 28, fontFamily: F.heading },
+  moonIcon: { fontSize: 24, marginTop: 6 },
+  moonName: { color: c.text, fontSize: 12, textAlign: 'center' },
   tag: { color: c.gold, fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1.2 },
-  cardName: { color: c.text, fontSize: 16, fontFamily: F.heading, textAlign: 'center' },
+  cardName: { color: c.text, fontSize: 14, fontFamily: F.heading, textAlign: 'center' },
   blank: { borderWidth: 1, borderStyle: 'dashed', borderColor: c.gold, alignItems: 'center', justifyContent: 'center' },
   how: { color: c.dim, fontSize: 12, textDecorationLine: 'underline' },
   howText: { color: c.dim, fontSize: 13, lineHeight: 19, marginTop: 6 },

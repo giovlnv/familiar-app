@@ -85,6 +85,7 @@ export default function Player({
   const pb = usePlayback();
   const { player, status, t, rate, goTo, skip, toggle, sleep, sleepLeft, setSleep } = pb;
   const [sleepOpen, setSleepOpen] = useState(false);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => pb.open(item, start), [item.folder, start]);
   const sec = pb.item?.folder === folder ? pb.sec : 0;
   const [follow, setFollow] = useState(true);
@@ -162,6 +163,7 @@ export default function Player({
         viewPosition: 0.3,
         animated: true,
       });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [current, follow, showText]);
 
   const [more, setMore] = useState(false);

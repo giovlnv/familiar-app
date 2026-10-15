@@ -59,7 +59,11 @@ export function bookSizes(folder: string) {
   const d = new Directory(root(), folder);
   if (!d.exists) return { audio: 0, other: 0 };
   let audio = 0, other = 0;
-  for (const x of d.list()) if (x instanceof File) /\.(m4a|mp3|aac)$/i.test(x.name) ? (audio += x.size ?? 0) : (other += x.size ?? 0);
+  for (const x of d.list()) {
+    if (!(x instanceof File)) continue;
+    if (/\.(m4a|mp3|aac)$/i.test(x.name)) audio += x.size ?? 0;
+    else other += x.size ?? 0;
+  }
   return { audio, other };
 }
 

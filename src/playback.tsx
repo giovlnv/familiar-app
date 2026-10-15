@@ -68,6 +68,7 @@ export function PlaybackProvider({ children }: { children: ReactNode }) {
     if (!item || !section) return;
     player.replace(audioSource(item.folder, section.audio));
     player.setActiveForLockScreen(true, { title: section.title, artist: item.book.title, albumTitle: item.book.title });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [item, sec]);
 
   const open = (next: LibraryItem, start?: number) => {
@@ -106,6 +107,7 @@ export function PlaybackProvider({ children }: { children: ReactNode }) {
       player.setPlaybackRate(rate, 'high');
       if (p.play) player.play();
     });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready, sec, item]);
 
   const fallAsleep = () => {
@@ -121,6 +123,7 @@ export function PlaybackProvider({ children }: { children: ReactNode }) {
     if (stopHere) queueMicrotask(() => setSleepState(null));
     if (sec < item.book.sections.length - 1) goTo(sec + 1, 0, !stopHere);
     else save(sec, 0);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status.didJustFinish]);
 
   useEffect(() => {
@@ -137,6 +140,7 @@ export function PlaybackProvider({ children }: { children: ReactNode }) {
       else setVolume(player, left < 10 ? Math.max(0.05, left / 10) : 1);
     }
     if (sleep.kind === 'explain' && (sleep.sec !== sec || t >= sleep.end)) fallAsleep();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [now, t, sleep]);
 
   /** End of the explanation the listener is in, or the next one in this section; undefined if none is left. */
@@ -184,6 +188,7 @@ export function PlaybackProvider({ children }: { children: ReactNode }) {
       player.pause();
       save(sec, skipFrom);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [t, skipFrom]);
   useEffect(() => {
     skipped.current = '';
@@ -205,10 +210,12 @@ export function PlaybackProvider({ children }: { children: ReactNode }) {
       lastSave.current = t;
       save(sec, t);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [t]);
 
   useEffect(() => {
     if (!status.playing) flushHeard();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status.playing]);
 
   const value: Playback = {

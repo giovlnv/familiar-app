@@ -45,7 +45,7 @@ export default function ListScreen() {
 
   const share = async () => {
     try {
-      const { captureRef } = require('react-native-view-shot');
+      const { captureRef } = await import('react-native-view-shot');
       const uri = await captureRef(card, { format: 'png', quality: 1 });
       await Sharing.shareAsync(uri, { mimeType: 'image/png', UTI: 'public.png' });
     } catch {

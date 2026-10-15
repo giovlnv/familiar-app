@@ -15,6 +15,7 @@ import { c, F, read, themed, write } from '../../../theme';
 import { FamiliarArt } from '../../../components/Familiar';
 import { nightNow } from '../../../familiar';
 import { currentGuide, moonPhase } from '../../../guide';
+import MoonIcon from '../../../components/MoonIcon';
 
 export default function Home() {
   const pad = usePad();
@@ -93,7 +94,9 @@ export default function Home() {
           <Text style={s.midDay}>{new Date().toLocaleDateString(undefined, { weekday: 'short' })}</Text>
           <Text style={s.midDate}>{new Date().getDate()}</Text>
           <Text style={s.midDay}>{new Date().toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}</Text>
-          <Text style={s.moonIcon}>{moon.icon}</Text>
+          <View style={{ marginTop: 6 }}>
+            <MoonIcon frac={moon.frac} size={26} />
+          </View>
           <Text style={s.moonName}>{moon.name}</Text>
           <Text style={s.midDay}>{moon.lit}% lit</Text>
         </View>
@@ -240,7 +243,6 @@ const s = themed(() => ({
   mid: { alignItems: 'center', gap: 1, paddingHorizontal: 4 },
   midDay: { color: c.dim, fontSize: 11 },
   midDate: { color: c.text, fontSize: 28, fontFamily: F.heading },
-  moonIcon: { fontSize: 24, marginTop: 6 },
   moonName: { color: c.text, fontSize: 12, textAlign: 'center' },
   tag: { color: c.gold, fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1.2 },
   cardName: { color: c.text, fontSize: 14, fontFamily: F.heading, textAlign: 'center' },

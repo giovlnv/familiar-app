@@ -19,10 +19,9 @@ export function currentGuide() {
 const SYNODIC = 29.530588853;
 const NEW_MOON = Date.UTC(2000, 0, 6, 18, 14);
 const PHASES = ['New moon', 'Waxing crescent', 'First quarter', 'Waxing gibbous', 'Full moon', 'Waning gibbous', 'Last quarter', 'Waning crescent'];
-const ICONS = ['🌑', '🌒', '🌓', '🌔', '🌕', '🌖', '🌗', '🌘'];
 
 export function moonPhase(date = new Date()) {
   const age = ((((date.getTime() - NEW_MOON) / 86400000) % SYNODIC) + SYNODIC) % SYNODIC;
   const i = Math.floor((age / SYNODIC) * 8 + 0.5) % 8;
-  return { name: PHASES[i], icon: ICONS[i], age: Math.round(age), lit: Math.round(((1 - Math.cos((2 * Math.PI * age) / SYNODIC)) / 2) * 100) };
+  return { name: PHASES[i], frac: age / SYNODIC, age: Math.round(age), lit: Math.round(((1 - Math.cos((2 * Math.PI * age) / SYNODIC)) / 2) * 100) };
 }

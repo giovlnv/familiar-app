@@ -15,6 +15,7 @@ import { c, F, read, themed, write } from '../../../theme';
 import { FamiliarArt } from '../../../components/Familiar';
 import { getOnboarding, nightNow } from '../../../familiar';
 import { personal } from '../../../numerology';
+import { dailyMessage } from '../../../daily';
 import { sky } from '../../../astrology';
 import { currentGuide, moonPhase } from '../../../guide';
 import MoonIcon from '../../../components/MoonIcon';
@@ -74,6 +75,7 @@ export default function Home() {
   const byId = new Map(t.books.map((b) => [b.id, b]));
   const guide = currentGuide();
   const moon = moonPhase();
+  const msg = dailyMessage(daily);
   const dob = getProfile().dob;
   const pn = dob && (getOnboarding().paths ?? []).includes('numerology') ? personal(dob) : null;
   const skyLine = (getOnboarding().paths ?? []).includes('astrology') ? sky() : '';
@@ -83,6 +85,14 @@ export default function Home() {
 
   return (
     <ScrollView style={s.wrap} contentContainerStyle={{ paddingBottom: 40 + pad }}>
+      <Pressable style={s.familiar} onPress={() => router.push({ pathname: '/den/[id]', params: { id: guide.id } })}>
+        <FamiliarArt familiar={guide} pose={playing ? 'reading' : nightNow() ? 'sleeping' : 'idle'} size={92} vial alive />
+        <View style={{ flex: 1 }}>
+          <Text style={s.famName}>{msg.title}</Text>
+          <Text style={s.greet}>{msg.text}</Text>
+        </View>
+      </Pressable>
+      <View style={s.todayBox}>
       <View style={s.daily}>
         <View style={s.slot}>
           <Text style={s.tag}>Calculated</Text>
@@ -155,6 +165,7 @@ export default function Home() {
           Today’s date ({new Date().toLocaleDateString()}) is turned into a number with a simple hash, and that number picks one of the 78 cards. The same date always gives the same card, so it stays all day and changes at midnight. It doesn’t use your birth date, readings or anything about you, and it is never reversed.
         </Text>
       )}
+      </View>
       <CardSheet id={about} onClose={() => setAbout(null)} />
       <CardPicker
         visible={picking}
@@ -162,13 +173,6 @@ export default function Home() {
         onClose={() => setPicking(false)}
         onPick={(id, rev) => logDrawn(id, rev)}
       />
-      <Pressable style={s.familiar} onPress={() => router.push({ pathname: '/den/[id]', params: { id: guide.id } })}>
-        <FamiliarArt familiar={guide} pose={playing ? 'reading' : nightNow() ? 'sleeping' : 'idle'} size={92} vial alive />
-        <View style={{ flex: 1 }}>
-          <Text style={s.famName}>{guide.name} is with you</Text>
-          <Text style={s.dim}>{playing ? 'Listening with you.' : nightNow() ? 'Asleep until morning. Press play to wake them.' : listening.length ? 'Ready to pick up where you left off.' : 'Choose a book and study together.'}</Text>
-        </View>
-      </Pressable>
       <CardSheet id={about} onClose={() => setAbout(null)} />
 
       {listening.length > 0 && (
@@ -252,10 +256,12 @@ export default function Home() {
 }
 
 const s = themed(() => ({
-  familiar: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: c.panel, borderRadius: 14, paddingVertical: 4, paddingHorizontal: 10, marginTop: 12 },
+  familiar: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: c.panel, borderRadius: 14, paddingVertical: 8, paddingHorizontal: 10, marginTop: 12 },
   famName: { color: c.text, fontSize: 18, fontFamily: F.heading },
   wrap: { flex: 1, backgroundColor: c.bg, paddingHorizontal: 16 },
-  daily: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 12, backgroundColor: c.panel, borderRadius: 14, paddingVertical: 12, paddingHorizontal: 8 },
+  todayBox: { marginTop: 12, backgroundColor: c.panel, borderRadius: 14, paddingVertical: 12, paddingHorizontal: 8 },
+  daily: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  greet: { color: c.text, fontSize: 14, lineHeight: 20, marginTop: 4 },
   slot: { flex: 1, alignItems: 'center', gap: 5 },
   mid: { alignItems: 'center', gap: 1, paddingHorizontal: 4 },
   midDay: { color: c.dim, fontSize: 11 },

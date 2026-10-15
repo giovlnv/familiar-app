@@ -150,6 +150,14 @@ export function storageBreakdown() {
   return { audio, books, decks, other, temp, total: all + temp };
 }
 
+export const totalSpace = () => {
+  try {
+    return Paths.totalDiskSpace;
+  } catch {
+    return 0;
+  }
+};
+
 export const freeSpace = () => {
   try {
     return Paths.availableDiskSpace;

@@ -1,13 +1,14 @@
 import { useState } from 'react';
-import { Alert, Text, View } from 'react-native';
-import { bookSizes, clearCache, freeSpace, listBooks, mb, storageBreakdown } from '../../../../storage';
+import { Alert, Switch, Text, View } from 'react-native';
+import { bookSizes, clearCache, freeSpace, listBooks, mb, storageBreakdown, totalSpace } from '../../../../storage';
 import { Btn, Page, ss } from '../../../../components/settings-ui';
-import { c, themed } from '../../../../theme';
+import { c, read, themed, write } from '../../../../theme';
 
 const gb = (b: number) => (b >= 1e9 ? `${(b / 1e9).toFixed(2)} GB` : mb(b));
 
 export default function Storage() {
   const [, tick] = useState(0);
+  const [detail, setDetail] = useState(() => read('storage-detail.txt') === '1');
   const z = storageBreakdown();
   const parts = [
     { label: 'Audio', bytes: z.audio, color: c.gold },
@@ -16,11 +17,50 @@ export default function Storage() {
     { label: 'Temporary', bytes: z.temp, color: c.dim },
     { label: 'Other app data', bytes: z.other, color: c.line },
   ].filter((p) => p.bytes > 0);
+  const total = totalSpace();
+  const free = freeSpace();
+  const phone = total
+    ? [
+        { label: 'Familiar', bytes: z.total, color: c.gold },
+        { label: 'Other apps and files', bytes: Math.max(0, total - free - z.total), color: c.dim },
+        { label: 'Free', bytes: free, color: c.raised },
+      ]
+    : [];
   const books = listBooks()
     .map((b) => ({ title: b.book.title, audio: bookSizes(b.folder).audio }))
     .filter((b) => b.audio > 0);
   return (
     <Page>
+      {!!total && (
+        <View style={s.card}>
+          <Text style={s.used}>Your iPhone</Text>
+          <View style={s.row}>
+            <Text style={s.big}>{gb(z.total)}</Text>
+            <Text style={s.free}>of {gb(total)}</Text>
+          </View>
+          <View style={s.bar}>
+            {phone.map((p) => (
+              <View key={p.label} style={{ flex: Math.max(p.bytes, total * 0.006), backgroundColor: p.color }} />
+            ))}
+          </View>
+          <View style={s.legend}>
+            {phone.map((p) => (
+              <View key={p.label} style={s.item}>
+                <View style={[s.dot, { backgroundColor: p.color, borderWidth: 1, borderColor: c.line }]} />
+                <Text style={s.legendText}>
+                  {p.label} · {gb(p.bytes)}
+                </Text>
+              </View>
+            ))}
+          </View>
+        </View>
+      )}
+      <View style={s.toggle}>
+        <Text style={s.legendText}>Show Familiar breakdown</Text>
+        <Switch value={detail} onValueChange={(v) => (write('storage-detail.txt', v ? '1' : '0'), setDetail(v))} trackColor={{ true: c.gold }} />
+      </View>
+      {detail && (
+        <>
       <View style={s.card}>
         <Text style={s.used}>Used by Familiar</Text>
         <View style={s.row}>
@@ -43,6 +83,8 @@ export default function Storage() {
           ))}
         </View>
       </View>
+        </>
+      )}
       {books.length ? (
         <>
           <Text style={ss.h2}>Audio on this iPhone</Text>
@@ -63,7 +105,8 @@ export default function Storage() {
 }
 
 const s = themed(() => ({
-  card: { backgroundColor: c.panel, borderRadius: 18, padding: 16, gap: 10 },
+  card: { backgroundColor: c.panel, borderRadius: 18, padding: 16, gap: 10, marginBottom: 12 },
+  toggle: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
   used: { color: c.dim, fontSize: 15 },
   row: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' },
   big: { color: c.text, fontSize: 38, fontWeight: '700' },

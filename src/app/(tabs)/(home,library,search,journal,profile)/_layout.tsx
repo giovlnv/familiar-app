@@ -35,6 +35,7 @@ export default function TabStack({ segment }: { segment: string }) {
       <Stack.Screen name="settings/backups" options={{ title: "Backups" }} />
       <Stack.Screen name="settings/configuration" options={{ title: "Decks" }} />
       <Stack.Screen name="settings/storage" options={{ title: "Storage" }} />
+      <Stack.Screen name="settings/languages" options={{ title: "Languages" }} />
       <Stack.Screen name="settings/development" options={{ title: "Development" }} />
       <Stack.Screen name="book/[id]" options={{ title: "" }} />
       <Stack.Screen name="title/[id]" options={{ title: "" }} />

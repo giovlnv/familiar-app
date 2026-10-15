@@ -6,6 +6,7 @@ import { AudioPlayer, createAudioPlayer } from 'expo-audio';
 import { useTextToSpeech } from 'react-native-executorch';
 import { englishVoice, wav } from '../kokoro';
 import { usePlayback } from '../playback';
+import { chosenVoice, langOf } from '../languages';
 import { c, themed } from '../theme';
 
 const hash = (t: string) => {
@@ -35,14 +36,14 @@ export default function ListenBar({ text }: { text: string }) {
   const start = async () => {
     if (state === 'playing') return (player.current?.pause(), setState('paused'));
     if (state === 'paused') return (player.current?.play(), setState('playing'));
-    const f = new File(Paths.cache, `explain-${hash(text)}.wav`);
+    const f = new File(Paths.cache, `explain-${hash(chosenVoice(langOf('en')) + text)}.wav`);
     if (f.exists) return play(f.uri);
     if (!tts.isReady || !tts.synthesize) return setMsg('The voice is still loading…');
     setState('making');
     try {
       const parts: Float32Array[] = [];
       let rate = 24000;
-      for await (const ch of tts.synthesize(text, { voice: 'af_heart' as never, speed: 1 })) {
+      for await (const ch of tts.synthesize(text, { voice: chosenVoice(langOf('en')) as never, speed: 1 })) {
         parts.push(ch.audio);
         rate = ch.sampleRate;
         setMsg(`Preparing ${ch.chunkIndex + 1} of ${ch.totalChunks}`);

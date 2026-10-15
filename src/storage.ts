@@ -138,37 +138,6 @@ export function dirSize(d: Directory): number {
 
 const voiceDir = () => new Directory(Paths.document, 'react-native-executorch');
 
-const VOICE_LANGS: Record<string, RegExp> = { pt: /^(pf_|pm_|phonemizer_pt)/i, es: /^(ef_|em_|phonemizer_es)/i, fr: /^(ff_|phonemizer_fr)/i };
-
-export function bookLanguages() {
-  const langs = new Set(['en']);
-  for (const b of listBooks()) {
-    const l = (b.book as Book & { lang?: string }).lang;
-    if (l) langs.add(l);
-  }
-  return langs;
-}
-
-export function unusedVoices() {
-  const d = voiceDir();
-  if (!d.exists) return [] as File[];
-  const keep = bookLanguages();
-  return d.list().filter((x): x is File => {
-    if (!(x instanceof File)) return false;
-    if (/xnnpack/i.test(x.name)) return true;
-    return Object.entries(VOICE_LANGS).some(([lang, re]) => !keep.has(lang) && re.test(x.name.replace(/^\d+_/, '')));
-  });
-}
-
-export function removeUnusedVoices() {
-  let freed = 0;
-  for (const f of unusedVoices()) {
-    freed += f.size ?? 0;
-    f.delete();
-  }
-  return freed;
-}
-
 export function clearOldExplanationAudio(days = 7) {
   const d = new Directory(Paths.cache);
   if (!d.exists) return;

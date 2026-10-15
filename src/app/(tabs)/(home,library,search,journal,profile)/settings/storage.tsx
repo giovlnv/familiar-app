@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Alert, Switch, Text, View } from 'react-native';
-import { bookSizes, clearCache, freeSpace, listBooks, mb, removeUnusedVoices, storageBreakdown, totalSpace, unusedVoices } from '../../../../storage';
+import { bookSizes, clearCache, freeSpace, listBooks, mb, storageBreakdown, totalSpace } from '../../../../storage';
+import { removeUnusedVoices, unusedVoices } from '../../../../languages';
 import { Btn, Page, ss } from '../../../../components/settings-ui';
 import { c, read, themed, write } from '../../../../theme';
 

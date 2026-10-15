@@ -2,7 +2,7 @@
 
 Personal-use app first; a public App Store version later. New books arrive occasionally, so automation can be slow (hours) as long as it needs no effort.
 
-Status: ✅ done · 🔨 next · 📋 planned · Last revised: 14 Oct 2026 (app 1.4.0)
+Status: ✅ done · 🔨 next · 📋 planned · Last revised: 15 Oct 2026 (app 1.4.0)
 
 ---
 
@@ -52,31 +52,45 @@ Status: ✅ done · 🔨 next · 📋 planned · Last revised: 14 Oct 2026 (app 
 
 ## Next 🔨
 
-Very important (added 14 Oct), in this order:
-1. **Storage management** — storage screen, remove audio but keep notes/progress, re-download later, auto-remove finished books, clear caches, smaller speech audio
-2. **To-do: streaming options** — find ways to keep files off the phone (stream from the private repo, rolling download window, iCloud offload, cloud bucket)
-3. **Keep the book itself** — the original sections with pictures and formatting, read alongside the audio
+Arranged 15 Oct. Hours include building and testing.
 
-The full backlog order is being decided on a tier list; the list below is the earlier order.
+**Now — keep the app small**
+1. Storage screen: space per book, remove audio but keep notes and progress, clear caches (2–3 h)
+2. Smaller speech audio: mono AAC ~32 kbps, re-encode existing books (2 h)
+3. Offer to remove finished books' audio; warn before big downloads (1 h)
 
-1. First real book through the upload flow
-2. Expressions for familiars (free): angry, silly, happy
-3. Familiar in the mini player and empty states
-4. Journal stats and search
-5. Full Lenormand / astrology / numerology content
+**Next**
+4. Research keeping audio off the phone: on-phone voices vs streaming downloaded audio (1–2 h)
+5. Build the chosen option (3–5 h)
+6. Take explanations out of the book audio; strip them from old books (2–3 h)
+7. On-demand explanations: tap a passage, get text and audio; listening off by default (3–4 h)
 
-## Public version 📋
+**Soon**
+8. Journal stats and search
+9. Next native build: book-ready notification
+10. Familiar in the mini player and empty states
 
-Variant flag (personal build keeps Claude and unlocks everything) → public onboarding → on-device Kokoro + iOS voices → bring your own book or audiobook → backup export → free/paid tiers (Familiar+, accessories, own-key cloud voices) → privacy → TestFlight → App Store. Then accounts + sync, then Android.
+**Design** (new art drawn by a commissioned illustrator)
+- Now: illustrator briefing document; expressions (angry, silly, happy)
+- Later: more poses and per-path props; wordmark fine-tuning
+- Public-later: petting sounds, paid familiars (owl, toad, snake), accessories
 
 ## Later 📋
 
-- Notification when a book finishes generating (needs a reinstall)
-- Accessories (collars, hats), more poses, per-system props, paid familiars (owl, toad, snake)
-- Search in books and notes, bookmarks, highlight colours
-- Home-screen widget / Siri "continue my book"
-- Portuguese, French and Arabic books, UI and voices (Arabic right-to-left)
-- Shareable cards (Year in review, lists, daily card)
+- Lenormand path (cards, spreads, public-domain deck)
+- Astrology path (ephemeris/chart API research, natal chart from birth details, signs, houses, aspects)
+- Numerology path (calculations and meanings)
+- Custom systems
+- Books and voices in Portuguese, French and Arabic
+- Home-screen widget
+
+## Public version 📋
+
+Variant flag (personal build keeps Claude and unlocks everything) → public onboarding → viability check for bring-your-own-books → bring your own book or audiobook → voices on the phone → Portuguese UI (French and Arabic for books and voices only) → "Other" study path (notes, flashcards) → free/paid tiers → privacy → TestFlight → App Store. Then accounts + sync, Android, shareable cards with streaks.
+
+## Parked 💤
+
+Keep the book itself (an Apple Books/Kindle-style reader with a Listen option), search in books and notes, bookmarks and highlights — after we decide how books are kept.
 
 ## Constraints
 

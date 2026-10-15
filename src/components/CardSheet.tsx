@@ -105,7 +105,7 @@ export default function CardSheet({ id, role, here, onClose }: { id: string | nu
               if (!sec) return null;
               const open = openBooks.includes(f.folder);
               const book = excerpt(sec.paras, 'book', 3);
-              const explain = explanationsOn(f.folder) ? excerpt(sec.paras, 'explain', 2) : [];
+              const explain = explanationsOn(f.folder) ? (sec.explain?.slice(0, 2) ?? excerpt(sec.paras, 'explain', 2)) : [];
               return (
                 <View key={f.folder} style={s.card}>
                   <Pressable style={s.cardHead} onPress={() => setOpenBooks(flip(openBooks, f.folder))} accessibilityState={{ expanded: open }}>

@@ -75,6 +75,28 @@ export async function canStream(folder: string, book: Book) {
   return !!r?.ok;
 }
 
+export async function refreshStreamingBooks() {
+  if (!token) return 0;
+  let n = 0;
+  for (const b of listBooks()) {
+    if (bookSizes(b.folder).audio > 0) continue;
+    const src = remoteAudio(b.folder, 'book.json');
+    const r = await fetch(src.uri, { headers: src.headers }).catch(() => null);
+    if (!r?.ok) continue;
+    const text = await r.text();
+    const f = new File(root(), b.folder, 'book.json');
+    if (f.exists && f.textSync() === text) continue;
+    try {
+      JSON.parse(text);
+    } catch {
+      continue;
+    }
+    f.write(text);
+    n++;
+  }
+  return n;
+}
+
 export function removeAudio(folder: string) {
   for (const f of audioFiles(folder)) f.delete();
 }

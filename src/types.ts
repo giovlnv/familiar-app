@@ -2,7 +2,7 @@ export type ParaKind = 'title' | 'head' | 'book' | 'explainhead' | 'explain';
 
 export type Para = { kind: ParaKind; text: string; start: number; end: number };
 
-export type Section = { id: string; title: string; summary?: string; audio: string; duration: number; paras: Para[] };
+export type Section = { id: string; title: string; summary?: string; audio: string; duration: number; paras: Para[]; explain?: string[] };
 
 export type Book = { title: string; sections: Section[] };
 

@@ -17,7 +17,7 @@ import {
   useLocalSearchParams,
 } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { bookSizes, canStream, deleteBook, downloadAudio, estimateAudio, freeSpace, getBook, loadConsults, loadNotes, mb, removeAudio } from "../../../../storage";
+import { bookSizes, canStream, deleteBook, downloadAudio, estimateAudio, freeSpace, getBook, loadConsults, loadNotes, mb, refreshStreamingBooks, removeAudio } from "../../../../storage";
 import {
   addLog,
   patchList,
@@ -132,7 +132,7 @@ export default function Title() {
                                     return Alert.alert("Can't stream this book yet", "Its audio isn't on GitHub, so removing it would lose it. Keep it for now.");
                                   Alert.alert(`Free ${mb(size)}?`, "Notes, progress and card links stay. The book plays by streaming from your library on GitHub (needs internet).", [
                                     { text: "Cancel", style: "cancel" },
-                                    { text: "Remove audio", style: "destructive", onPress: () => (removeAudio(folder), setT(load())) },
+                                    { text: "Remove audio", style: "destructive", onPress: () => (removeAudio(folder), refreshStreamingBooks().catch(() => {}), setT(load())) },
                                   ]);
                                 },
                               },
@@ -374,7 +374,7 @@ export default function Title() {
               if (!(await canStream(folder, item.book))) return;
               Alert.alert(`Finished! Free ${mb(size)}?`, "Remove this book’s audio from your iPhone. Notes and progress stay, and it streams from GitHub if you listen again.", [
                 { text: "Keep", style: "cancel" },
-                { text: "Remove audio", style: "destructive", onPress: () => (removeAudio(folder), refresh()) },
+                { text: "Remove audio", style: "destructive", onPress: () => (removeAudio(folder), refreshStreamingBooks().catch(() => {}), refresh()) },
               ]);
             }, 500);
         }}

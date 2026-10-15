@@ -14,6 +14,10 @@ Status: ✅ done · 🔨 next · 📋 planned · Last revised: 14 Oct 2026 (app 
 - ✅ Speed menu (1.0/1.3/1.5/2.0× + custom), 15 s skips, mini player with the passage being read
 - ✅ Sleep timer: 5–60 min, 1 hour, end of this section, end of the explanation; fades out
 - ✅ Notes tied to time + passage; Ask Claude consults (#C1…) with answers, follow-ups, export
+- ✅ A tarot card per section (auto from the title or picked by hand); card view instead of the text, with the passage being read in a fixed box
+- ✅ Text size, font, colour, line and paragraph spacing, alignment — for the follow-along text and the card view
+- ✅ Speed, sleep timer, text style, note and Ask grouped in one … menu
+- ✅ "About this card": choose which books/paths it draws from; each book collapsed
 
 ### Adding books
 - ✅ Upload EPUB/PDF from the iPhone → split → you confirm → Claude writes explanations → Kokoro voices on GitHub → download in the app
@@ -46,6 +50,11 @@ Status: ✅ done · 🔨 next · 📋 planned · Last revised: 14 Oct 2026 (app 
 ---
 
 ## Next 🔨
+
+Very important (added 14 Oct):
+- **Explanations on/off** — globally and per book: off hides the explanation text and skips the explanation audio; a book can also be made without explanations
+- **Storage management** — keep the app small: storage screen, remove audio but keep notes/progress, re-download later, auto-remove finished books, clear caches, smaller speech audio
+- **Keep the book itself** — the original sections with pictures and formatting (headings, italics, lists, tables), read alongside the audio
 
 1. First real book through the upload flow
 2. Expressions for familiars (free): angry, silly, happy

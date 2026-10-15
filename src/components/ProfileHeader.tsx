@@ -15,6 +15,7 @@ import { getOnboarding, nightNow } from '../familiar';
 import { currentGuide } from '../guide';
 import { usePlayback } from '../playback';
 import { lifePath, show } from '../numerology';
+import { myChart, signOf } from '../astrology';
 
 const SIGNS: [string, number, number, string][] = [
   ['Capricorn', 1, 19, 'Earth'], ['Aquarius', 2, 18, 'Air'], ['Pisces', 3, 20, 'Water'], ['Aries', 4, 19, 'Fire'],
@@ -64,6 +65,13 @@ export default function ProfileHeader() {
   const roleOf = (label: string) => ROLE[label] ?? `Your card for ${new Date().getFullYear()}: the theme of the year, from your birth day and month plus the current year.`;
   const bc = birthCards(p.dob);
   const sign = p.dob ? sunSign(p.dob) : null;
+  const ch = sign && paths.includes('astrology') ? myChart() : null;
+  const big = ch
+    ? ch.list
+        .filter((x) => ['Sun', 'Moon', 'Ascendant'].includes(x.name))
+        .map((x) => `${x.glyph} ${signOf(x.lon).name}`)
+        .join(' · ')
+    : '';
   const birth: [string, string | undefined][] = bc
     ? [['Personality', bc.personality], ['Essence', bc.essence !== bc.personality ? bc.essence : undefined], [`Year ${new Date().getFullYear()}`, bc.yearCard]]
     : [];
@@ -81,7 +89,11 @@ export default function ProfileHeader() {
       </View>
       {(sign && paths.includes('astrology')) || (p.dob && paths.includes('numerology')) ? (
         <View style={s.chips}>
-          {sign && paths.includes('astrology') && <Text style={s.chip}>☉ {sign[0]} · {sign[3]}</Text>}
+          {sign && paths.includes('astrology') && (
+            <Text style={s.chip} onPress={() => router.push('/astrology')}>
+              {big || `☉ ${sign[0]}`} ›
+            </Text>
+          )}
           {!!p.dob && paths.includes('numerology') && (
             <Text style={s.chip} onPress={() => router.push('/numerology')}>
               Life path {show(lifePath(p.dob))} ›

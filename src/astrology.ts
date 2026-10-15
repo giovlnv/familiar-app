@@ -1,3 +1,7 @@
+import * as A from 'astronomy-engine';
+import { getProfile } from './tracker';
+import { getOnboarding } from './familiar';
+
 const T = '︎';
 
 export const SIGNS = [
@@ -77,4 +81,105 @@ export function astroCards(name: string) {
     return ids;
   });
   return [...majors, ...minors];
+}
+
+const rad = Math.PI / 180;
+const norm = (x: number) => ((x % 360) + 360) % 360;
+
+export const signOf = (lon: number) => SIGNS[Math.floor(norm(lon) / 30)];
+export const fmtDeg = (lon: number) => {
+  const d = norm(lon) % 30;
+  const m = Math.floor((d % 1) * 60);
+  return `${Math.floor(d)}°${String(m).padStart(2, '0')}′`;
+};
+
+function tzOffset(t: number, tz: string) {
+  const parts = new Intl.DateTimeFormat('en-US', { timeZone: tz, hourCycle: 'h23', year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric' }).formatToParts(new Date(t));
+  const v = (k: string) => Number(parts.find((x) => x.type === k)?.value);
+  return Date.UTC(v('year'), v('month') - 1, v('day'), v('hour'), v('minute')) - Math.floor(t / 60000) * 60000;
+}
+
+export function birthUtc(date: string, time: string | undefined, tz: string | undefined) {
+  const [y, m, d] = date.split('-').map(Number);
+  const [h, mi] = (time && /^\d{2}:\d{2}$/.test(time) ? time : '12:00').split(':').map(Number);
+  const local = Date.UTC(y, m - 1, d, h, mi);
+  if (!tz) return new Date(y, m - 1, d, h, mi);
+  try {
+    let utc = local - tzOffset(local, tz);
+    utc = local - tzOffset(utc, tz);
+    return new Date(utc);
+  } catch {
+    return new Date(y, m - 1, d, h, mi);
+  }
+}
+
+const BODIES = ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'] as const;
+
+export function longitude(body: string, date: Date) {
+  if (body === 'Sun') return A.SunPosition(date).elon;
+  if (body === 'Moon') return A.EclipticGeoMoon(date).lon;
+  return A.Ecliptic(A.GeoVector(body as A.Body, date, true)).elon;
+}
+
+const retro = (body: string, date: Date) => {
+  if (body === 'Sun' || body === 'Moon') return false;
+  const a = longitude(body, date);
+  const b = longitude(body, new Date(date.getTime() + 86400000));
+  return norm(b - a) > 180;
+};
+
+function angles(date: Date, lat: number, lon: number) {
+  const t = A.MakeTime(date);
+  const eps = A.e_tilt(t).tobl * rad;
+  const ramc = norm(A.SiderealTime(date) * 15 + lon);
+  const r = ramc * rad;
+  const phi = lat * rad;
+  const mc = norm(Math.atan2(Math.sin(r), Math.cos(r) * Math.cos(eps)) / rad);
+  const asc = norm(Math.atan2(Math.cos(r), -(Math.sin(r) * Math.cos(eps) + Math.tan(phi) * Math.sin(eps))) / rad);
+  const cusp = (f: number, below: boolean) => {
+    let l = norm(mc + (below ? 180 : 0) + (below ? -1 : 1) * f * 90);
+    for (let i = 0; i < 12; i++) {
+      const dec = Math.asin(Math.sin(eps) * Math.sin(l * rad));
+      const sda = Math.acos(Math.max(-1, Math.min(1, -Math.tan(phi) * Math.tan(dec)))) / rad;
+      const ra = below ? ramc + 180 - f * (180 - sda) : ramc + f * sda;
+      l = norm(Math.atan2(Math.sin(ra * rad), Math.cos(ra * rad) * Math.cos(eps)) / rad);
+    }
+    return l;
+  };
+  const c11 = cusp(1 / 3, false), c12 = cusp(2 / 3, false), c2 = cusp(2 / 3, true), c3 = cusp(1 / 3, true);
+  const half = [asc, c2, c3, norm(mc + 180), norm(c11 + 180), norm(c12 + 180)];
+  return { asc, mc, cusps: [...half, ...half.map((x) => norm(x + 180))] };
+}
+
+const houseOf = (lon: number, cusps: number[]) => {
+  for (let i = 0; i < 12; i++) if (norm(lon - cusps[i]) < norm(cusps[(i + 1) % 12] - cusps[i])) return i + 1;
+  return 1;
+};
+
+export type Placement = { name: string; glyph: string; lon: number; house?: number; retro?: boolean };
+
+export function chart(date: string, time?: string, place?: { lat: number; lon: number; tz?: string }) {
+  const when = birthUtc(date, time, place?.tz);
+  const timed = !!time && /^\d{2}:\d{2}$/.test(time) && !!place;
+  const ang = timed ? angles(when, place!.lat, place!.lon) : null;
+  const T = (A.MakeTime(when).tt) / 36525;
+  const node = norm(125.04452 - 1934.136261 * T);
+  const list: Placement[] = BODIES.map((b) => {
+    const lon = longitude(b, when);
+    return { name: b, glyph: glyph(b), lon, retro: retro(b, when), house: ang ? houseOf(lon, ang.cusps) : undefined };
+  });
+  list.push({ name: 'North Node', glyph: '☊︎', lon: node, house: ang ? houseOf(node, ang.cusps) : undefined });
+  if (ang) list.push({ name: 'Ascendant', glyph: 'AC', lon: ang.asc }, { name: 'Midheaven', glyph: 'MC', lon: ang.mc });
+  const counted = list.filter((p) => BODIES.includes(p.name as (typeof BODIES)[number]) || p.name === 'Ascendant');
+  const tally = (k: 'element' | 'mode') =>
+    counted.reduce<Record<string, number>>((a, p) => ((a[signOf(p.lon)[k]] = (a[signOf(p.lon)[k]] ?? 0) + 1), a), {});
+  return { list, timed, cusps: ang?.cusps, elements: tally('element'), modes: tally('mode') };
+}
+
+export function myChart() {
+  const dob = getProfile().dob;
+  if (!dob) return null;
+  const ob = getOnboarding();
+  const place = ob.birthPlace && ob.birthLat != null && ob.birthLon != null ? { lat: ob.birthLat, lon: ob.birthLon, tz: ob.birthTz } : undefined;
+  return chart(dob, ob.birthTime, place);
 }

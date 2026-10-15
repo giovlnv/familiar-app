@@ -107,6 +107,16 @@ export function clearCache() {
   }
 }
 
+export const freeSpace = () => {
+  try {
+    return Paths.availableDiskSpace;
+  } catch {
+    return 0;
+  }
+};
+
+export const estimateAudio = (book: Book) => book.sections.reduce((n, s) => n + s.duration, 0) * 8400;
+
 export const mb = (bytes: number) => (bytes >= 1e9 ? `${(bytes / 1e9).toFixed(1)} GB` : `${Math.round(bytes / 1e6)} MB`);
 
 export async function importBook(): Promise<string | null> {

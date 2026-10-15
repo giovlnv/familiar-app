@@ -165,7 +165,7 @@ export default function JobScreen() {
             }
           />
           <Button
-            label="Add and download audio for offline"
+            label={`Add and download audio (~${Math.round((job.hours ?? 0) * 30)} MB)`}
             icon="cloud-download-outline"
             onPress={() =>
               busy

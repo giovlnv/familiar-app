@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Alert, Text } from 'react-native';
-import { bookSizes, cacheSize, clearCache, listBooks, mb } from '../../../../storage';
+import { bookSizes, cacheSize, clearCache, freeSpace, listBooks, mb } from '../../../../storage';
 import { Btn, Page, ss } from '../../../../components/settings-ui';
 
 export default function Storage() {
@@ -8,6 +8,7 @@ export default function Storage() {
   const books = listBooks().map((b) => ({ title: b.book.title, audio: bookSizes(b.folder).audio }));
   return (
     <Page>
+      <Text style={ss.p}>{mb(freeSpace())} free on this iPhone.</Text>
       <Text style={ss.p}>
         {mb(books.reduce((n, b) => n + b.audio, 0))} of audiobook audio on this iPhone. To free space, open a book’s page → ⋯ → Remove downloaded audio; it then streams from GitHub.
       </Text>

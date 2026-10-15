@@ -17,7 +17,7 @@ import {
   useLocalSearchParams,
 } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { bookSizes, canStream, deleteBook, downloadAudio, getBook, loadConsults, loadNotes, mb, removeAudio } from "../../../../storage";
+import { bookSizes, canStream, deleteBook, downloadAudio, estimateAudio, freeSpace, getBook, loadConsults, loadNotes, mb, removeAudio } from "../../../../storage";
 import {
   addLog,
   patchList,
@@ -139,11 +139,24 @@ export default function Title() {
                             ]
                           : [
                               {
-                                text: "Download audio for offline",
-                                onPress: () =>
-                                  downloadAudio(folder, item.book, () => {})
-                                    .then(() => Alert.alert("Downloaded", `${mb(bookSizes(folder).audio)} on this iPhone.`))
-                                    .catch((e) => Alert.alert("Download failed", String(e?.message ?? e))),
+                                text: `Download audio for offline (~${mb(estimateAudio(item.book))})`,
+                                onPress: () => {
+                                  const need = estimateAudio(item.book);
+                                  const free = freeSpace();
+                                  const go = () =>
+                                    downloadAudio(folder, item.book, () => {})
+                                      .then(() => Alert.alert("Downloaded", `${mb(bookSizes(folder).audio)} on this iPhone.`))
+                                      .catch((e) => Alert.alert("Download failed", String(e?.message ?? e)));
+                                  if (free && need > free * 0.8)
+                                    return Alert.alert("Not much space left", `This needs about ${mb(need)} and your iPhone has ${mb(free)} free.`, [
+                                      { text: "Cancel", style: "cancel" },
+                                      { text: "Download anyway", onPress: go },
+                                    ]);
+                                  Alert.alert(`Download ~${mb(need)}?`, `${mb(free)} free on your iPhone.`, [
+                                    { text: "Cancel", style: "cancel" },
+                                    { text: "Download", onPress: go },
+                                  ]);
+                                },
                               },
                             ];
                       })()
@@ -353,6 +366,17 @@ export default function Title() {
           addLog(b.id, date, rating, reread, started);
           setLogging(false);
           refresh();
+          const folder = b.audio;
+          const item = folder ? getBook(folder) : null;
+          const size = folder ? bookSizes(folder).audio : 0;
+          if (folder && item && size > 0)
+            setTimeout(async () => {
+              if (!(await canStream(folder, item.book))) return;
+              Alert.alert(`Finished! Free ${mb(size)}?`, "Remove this book’s audio from your iPhone. Notes and progress stay, and it streams from GitHub if you listen again.", [
+                { text: "Keep", style: "cancel" },
+                { text: "Remove audio", style: "destructive", onPress: () => (removeAudio(folder), refresh()) },
+              ]);
+            }, 500);
         }}
       />
 

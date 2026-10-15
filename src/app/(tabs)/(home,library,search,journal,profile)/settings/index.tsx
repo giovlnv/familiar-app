@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react';
 import { Text, View } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { getProfile } from '../../../../tracker';
+import { getOnboarding } from '../../../../familiar';
 import { PALETTES, paletteId } from '../../../../theme';
 import { getState } from '../../../../sync';
 import { MenuRow, Page, ss, when } from '../../../../components/settings-ui';
@@ -20,6 +21,14 @@ export default function Settings() {
         <MenuRow icon="paw-outline" title="Familiar" sub="Your familiars, linked paths" to="/familiars" />
         <MenuRow icon="albums-outline" title="Decks" sub="Default deck, custom decks" to="/settings/configuration" />
       </View>
+      {(getOnboarding().paths ?? []).includes('numerology') && (
+        <>
+          <Text style={ss.label}>Paths</Text>
+          <View style={[ss.menu, { marginTop: 6 }]}>
+            <MenuRow icon="keypad-outline" title="Numerology" sub={`Pythagorean · Y as ${getOnboarding().yVowel ? 'vowel' : 'consonant'}`} to="/settings/numerology" />
+          </View>
+        </>
+      )}
       <Text style={ss.label}>Account</Text>
       <View style={[ss.menu, { marginTop: 6 }]}>
         <MenuRow icon="key-outline" title="Keys" sub="GitHub and Claude" to="/settings/account" />

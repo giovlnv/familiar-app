@@ -1,7 +1,8 @@
 import { getProfile } from './tracker';
+import { getOnboarding } from './familiar';
+import { CARDS } from './decks';
 
 const MASTERS = [11, 22, 33];
-const VOWELS = 'AEIOU';
 
 const digitSum = (n: number) => [...String(n)].reduce((a, x) => a + Number(x), 0);
 
@@ -30,8 +31,9 @@ const nameNumber = (name: string, pick: (ch: string) => boolean) =>
   );
 
 export const expression = (name: string) => nameNumber(name, () => true);
-export const soulUrge = (name: string) => nameNumber(name, (ch) => VOWELS.includes(ch));
-export const personality = (name: string) => nameNumber(name, (ch) => !VOWELS.includes(ch));
+const vowels = () => (getOnboarding().yVowel ? 'AEIOUY' : 'AEIOU');
+export const soulUrge = (name: string, v = vowels()) => nameNumber(name, (ch) => v.includes(ch));
+export const personality = (name: string, v = vowels()) => nameNumber(name, (ch) => !v.includes(ch));
 
 export const lifePath = (dob: string) => {
   const [y, m, d] = dob.split('-').map(Number);
@@ -39,6 +41,24 @@ export const lifePath = (dob: string) => {
 };
 export const birthday = (dob: string) => reduce(Number(dob.split('-')[2]));
 export const maturity = (dob: string, name: string) => reduce(lifePath(dob) + expression(name));
+
+const RANK_IDS = ['wands', 'cups', 'swords', 'pents'];
+
+export function numberCards(n: number) {
+  const root = reduce(n, false);
+  const majors = CARDS.filter((c, i) => i > 0 && i < 22 && reduce(i, false) === root);
+  const own = n === 22 ? ['m00'] : n === 11 ? ['m11'] : [];
+  const minors = RANK_IDS.flatMap((s) => [`${s}${String(root).padStart(2, '0')}`, ...(root === 1 ? [`${s}10`] : [])]);
+  return [...own, ...majors.map((c) => c.id).filter((id) => !own.includes(id)), ...minors];
+}
+
+export function cardNumber(id: string) {
+  if (id === 'm00') return '0 · also read as 22/4';
+  const i = Number(id.slice(-2));
+  if (id.startsWith('m')) return i > 9 ? `${i} → ${reduce(i, false)}` : String(i);
+  if (i > 10) return undefined;
+  return i === 10 ? '10 → 1' : String(i);
+}
 
 export type NumberRow = { key: string; label: string; value: number; about: string };
 

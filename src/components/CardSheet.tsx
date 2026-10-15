@@ -7,10 +7,11 @@ import { CardImage } from './Cards';
 import { cardName } from '../decks';
 import { bookPaths, cardSections } from '../journal';
 import { allSources, loadSources, saveSources, Sources, usesBook } from '../sectionCards';
-import { PATHS } from '../familiar';
+import { getOnboarding, PATHS } from '../familiar';
 import { getBook } from '../storage';
 import { explanationsOn } from '../explanations';
 import { c, themed } from '../theme';
+import { cardNumber } from '../numerology';
 
 const excerpt = (paras: { kind: string; text: string }[], kind: string, max: number) =>
   paras.filter((p) => p.kind === kind).slice(0, max).map((p) => p.text);
@@ -20,6 +21,7 @@ export default function CardSheet({ id, role, here, onClose }: { id: string | nu
   const [menu, setMenu] = useState(false);
   const [openBooks, setOpenBooks] = useState<string[]>([]);
   const [shownId, setShownId] = useState(id);
+  const num = id && (getOnboarding().paths ?? []).includes('numerology') ? cardNumber(id) : undefined;
   if (shownId !== id) {
     setShownId(id);
     if (id) setSources(loadSources());
@@ -56,6 +58,7 @@ export default function CardSheet({ id, role, here, onClose }: { id: string | nu
               <View style={{ flex: 1, gap: 6 }}>
                 <Text style={s.name}>{cardName(id)}</Text>
                 {!!role && <Text style={s.role}>{role}</Text>}
+                {num && <Text style={s.role}>Numerology: {num}</Text>}
               </View>
             </View>
 

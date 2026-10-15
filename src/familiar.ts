@@ -287,6 +287,7 @@ export type Onboarding = {
   birthLat?: number;
   birthLon?: number;
   birthTz?: string;
+  yVowel?: boolean;
 };
 export function getOnboarding(): Onboarding {
   try {

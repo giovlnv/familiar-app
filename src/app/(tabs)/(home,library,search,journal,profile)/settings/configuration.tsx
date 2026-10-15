@@ -1,12 +1,10 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { Alert, Pressable, Text, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { fetchAllGenres } from '../../../../genres';
 import { defaultDeck, deleteDeck, downloadRws, importDeckFromFiles, importDeckFromUrl, listDecks, setDefaultDeck } from '../../../../decks';
 import { CardImage, CardPicker, useDecks } from '../../../../components/Cards';
 import { c } from '../../../../theme';
-import { bookSizes, cacheSize, clearCache, listBooks, mb } from '../../../../storage';
-import { Btn, MenuRow, Page, ss } from '../../../../components/settings-ui';
+import { Btn, Page, ss } from '../../../../components/settings-ui';
 
 export default function Configuration() {
   useDecks();
@@ -26,29 +24,8 @@ export default function Configuration() {
     r && setDeckMsg(`${r.matched} of 78 cards found${r.skipped.length ? ` · ${r.skipped.length} files not recognised` : ''}`);
   const askName = (then: (name: string) => void) => Alert.prompt('Deck name', undefined, (n) => n?.trim() && then(n.trim()), 'plain-text', '');
 
-  const [genreMsg, setGenreMsg] = useState('');
-  const genreRun = useRef({ stop: false });
-  const genresAll = async () => {
-    if (genreMsg && !genreMsg.startsWith('Done')) return void (genreRun.current.stop = true);
-    genreRun.current = { stop: false };
-    const n = await fetchAllGenres((d, t, title) => setGenreMsg(d < t ? `${d + 1}/${t} · ${title}` : `Done · ${t} books checked`), genreRun.current);
-    if (!n) setGenreMsg('Done · every book already has genres');
-  };
-
   return (
     <Page>
-      <View style={ss.menu}>
-        <MenuRow icon="paw-outline" title="Your familiars" sub="Add, edit, link to paths" to="/familiars" />
-      </View>
-      <Text style={ss.h2}>Storage</Text>
-      <Text style={ss.p}>
-        Audiobooks: {mb(listBooks().reduce((n, b) => n + bookSizes(b.folder).audio, 0))} of audio on this iPhone. To free space, open a book’s page → ⋯ → Remove downloaded audio; it then streams from GitHub.
-      </Text>
-      <Btn
-        label={`Clear temporary files (${mb(cacheSize())})`}
-        onPress={() => (clearCache(), setDeckMsg(''), Alert.alert('Cleared', 'Temporary files removed. Decks, books and notes are untouched.'))}
-      />
-      <Text style={ss.h2}>Decks</Text>
       <Text style={ss.p}>The default deck is used for every card in the app. Changing it updates all your readings. The default deck is always kept: to remove it, choose another default first.</Text>
       <View style={[ss.card, { gap: 2 }]}>
         {decks.map((d) => (
@@ -97,16 +74,6 @@ export default function Configuration() {
         </Text>
       </View>
       <CardPicker visible={!!browse} deck={browse ?? undefined} title="Cards" onClose={() => setBrowse(null)} />
-      <Text style={ss.h2}>Genres</Text>
-      <Text style={ss.p}>
-        Fetch the top 5 genres for every book that has none yet (Goodreads, Amazon, Open Library). Books whose genres you edited are skipped.
-      </Text>
-      <View style={ss.card}>
-        {!!genreMsg && <Text style={ss.meta}>{genreMsg}</Text>}
-        <View style={ss.row}>
-          <Btn label={genreMsg && !genreMsg.startsWith('Done') ? 'Stop' : 'Fetch genres for all books'} primary onPress={genresAll} />
-        </View>
-      </View>
     </Page>
   );
 }

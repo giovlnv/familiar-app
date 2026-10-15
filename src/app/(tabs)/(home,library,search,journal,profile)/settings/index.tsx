@@ -13,16 +13,22 @@ export default function Settings() {
   const sync = getState();
   return (
     <Page>
-      <Text style={ss.label}>You</Text>
+      <Text style={ss.label}>Appearance</Text>
       <View style={[ss.menu, { marginTop: 6 }]}>
-        <MenuRow icon="person-circle-outline" title="Edit profile" sub={p.name ? `${p.name}${p.username ? ` · @${p.username}` : ''}` : 'Photo, name, birth details'} to="/settings/profile" />
-        <MenuRow icon="color-palette-outline" title="Appearance" sub={`${PALETTES.find((x) => x.id === paletteId)?.name ?? ''} · app icon`} to="/settings/appearance" />
-        <MenuRow icon="key-outline" title="Account" sub="GitHub key, Claude chat" to="/settings/account" />
+        <MenuRow icon="color-palette-outline" title="App" sub={`${PALETTES.find((x) => x.id === paletteId)?.name ?? ''} · mode · app icon`} to="/settings/appearance" />
+        <MenuRow icon="person-circle-outline" title="Profile" sub={p.name ? `${p.name}${p.username ? ` · @${p.username}` : ''}` : 'Photo, name, birth details'} to="/settings/profile" />
+        <MenuRow icon="paw-outline" title="Familiar" sub="Your familiars, linked paths" to="/familiars" />
+        <MenuRow icon="albums-outline" title="Decks" sub="Default deck, custom decks" to="/settings/configuration" />
+      </View>
+      <Text style={ss.label}>Account</Text>
+      <View style={[ss.menu, { marginTop: 6 }]}>
+        <MenuRow icon="logo-github" title="GitHub" sub="Key for books and streaming" to="/settings/account" />
+        <MenuRow icon="sparkles-outline" title="Claude" sub="Chat for explanations and consults" to="/settings/account" />
+        <MenuRow icon="cloud-upload-outline" title="Backups" sub={`Last GitHub sync: ${when(sync.lastGithub)}`} to="/settings/backups" />
       </View>
       <Text style={ss.label}>App</Text>
       <View style={[ss.menu, { marginTop: 6 }]}>
-        <MenuRow icon="cloud-upload-outline" title="Backups" sub={`Last GitHub sync: ${when(sync.lastGithub)}`} to="/settings/backups" />
-        <MenuRow icon="options-outline" title="Configuration" sub="Decks, genres, familiars" to="/settings/configuration" />
+        <MenuRow icon="server-outline" title="Storage" sub="Audio on this iPhone, temporary files" to="/settings/storage" />
         <MenuRow icon="construct-outline" title="Development" sub="Setup, voice lab, version" to="/settings/development" />
       </View>
     </Page>

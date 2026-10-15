@@ -29,10 +29,11 @@ export default function TabStack({ segment }: { segment: string }) {
       />
       <Stack.Screen name="settings/index" options={{ title: "Settings" }} />
       <Stack.Screen name="settings/profile" options={{ title: "Edit profile" }} />
-      <Stack.Screen name="settings/appearance" options={{ title: "Appearance" }} />
-      <Stack.Screen name="settings/account" options={{ title: "Account" }} />
+      <Stack.Screen name="settings/appearance" options={{ title: "App" }} />
+      <Stack.Screen name="settings/account" options={{ title: "GitHub & Claude" }} />
       <Stack.Screen name="settings/backups" options={{ title: "Backups" }} />
-      <Stack.Screen name="settings/configuration" options={{ title: "Configuration" }} />
+      <Stack.Screen name="settings/configuration" options={{ title: "Decks" }} />
+      <Stack.Screen name="settings/storage" options={{ title: "Storage" }} />
       <Stack.Screen name="settings/development" options={{ title: "Development" }} />
       <Stack.Screen name="book/[id]" options={{ title: "" }} />
       <Stack.Screen name="title/[id]" options={{ title: "" }} />

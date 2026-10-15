@@ -11,7 +11,7 @@ import { backupToFile, getState, getToken, setToken } from '../sync';
 import { getProfile, setProfile } from '../tracker';
 import { parseDate, showDate } from '../journal';
 import { c, F, themed } from '../theme';
-import { maskDate, maskTime } from '../format';
+import { DateInput, TimeInput } from '../components/SplitInput';
 import { Place, PlaceField } from '../components/PlaceField';
 
 const STEPS = ['welcome', 'paths', 'species', 'shape', 'eyes', 'name', 'claude', 'about', 'backups', 'book'] as const;
@@ -180,9 +180,9 @@ export default function Onboarding() {
           <>
             <Head title="A little about you" sub="Optional. Used for astrology and numerology, never shared." />
             <Label>BIRTH DATE</Label>
-            <TextInput style={fs.input} value={dob} onChangeText={(t) => setDob(maskDate(t))} placeholder="DD/MM/YYYY" placeholderTextColor={c.dim} keyboardType="number-pad" maxLength={10} />
+            <DateInput style={fs.input} value={dob} onChange={setDob} />
             <Label>BIRTH TIME</Label>
-            <TextInput style={fs.input} value={birthTime} onChangeText={(t) => setBirthTime(maskTime(t))} placeholder="HH:MM" placeholderTextColor={c.dim} keyboardType="number-pad" maxLength={5} />
+            <TimeInput style={[fs.input, { maxWidth: 160 }]} value={birthTime} onChange={setBirthTime} />
             <Label>BIRTH PLACE</Label>
             <PlaceField value={place?.label ?? ''} onPick={setPlace} language={language} />
             <Label>LANGUAGE</Label>

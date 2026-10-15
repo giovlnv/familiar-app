@@ -1,6 +1,6 @@
 import { createContext, ReactNode, useContext, useEffect, useRef, useState } from 'react';
 import { AudioPlayer, AudioStatus, setAudioModeAsync, useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
-import { audioSource, LibraryItem, loadProgress, refreshStreamingBooks, saveProgress, setStreamToken } from './storage';
+import { audioSource, clearOldExplanationAudio, LibraryItem, loadProgress, refreshStreamingBooks, saveProgress, setStreamToken } from './storage';
 import { getToken } from './sync';
 import { addListening } from './tracker';
 import { explainStart, explanationsOn, useExplanations } from './explanations';
@@ -62,6 +62,7 @@ export function PlaybackProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     setAudioModeAsync({ playsInSilentMode: true, shouldPlayInBackground: true, interruptionMode: 'doNotMix' });
     getToken().then((t) => (setStreamToken(t), refreshStreamingBooks().catch(() => {})));
+    clearOldExplanationAudio();
   }, []);
 
   useEffect(() => {

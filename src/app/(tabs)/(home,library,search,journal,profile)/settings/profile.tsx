@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import { getProfile, setProfile } from '../../../../tracker';
 import { getOnboarding, setOnboarding } from '../../../../familiar';
 import { parseDate, showDate } from '../../../../journal';
-import { maskDate, maskTime } from '../../../../format';
+import { DateInput, TimeInput } from '../../../../components/SplitInput';
 import { Avatar, pickPhoto } from '../../../../components/ProfileHeader';
 import { Place, PlaceField } from '../../../../components/PlaceField';
 import { c } from '../../../../theme';
@@ -53,25 +53,9 @@ export default function EditProfile() {
       </View>
       <View style={ss.card}>
         <Text style={ss.label}>Birth date</Text>
-        <TextInput
-          style={ss.input}
-          value={dob}
-          onChangeText={(t) => setDob(maskDate(t))}
-          placeholder="DD/MM/YYYY"
-          placeholderTextColor={c.dim}
-          keyboardType="number-pad"
-          maxLength={10}
-        />
+        <DateInput style={ss.input} value={dob} onChange={setDob} />
         <Text style={ss.label}>Birth time</Text>
-        <TextInput
-          style={ss.input}
-          value={time}
-          onChangeText={(t) => setTime(maskTime(t))}
-          placeholder="HH:MM"
-          placeholderTextColor={c.dim}
-          keyboardType="number-pad"
-          maxLength={5}
-        />
+        <TimeInput style={[ss.input, { maxWidth: 160 }]} value={time} onChange={setTime} />
         <Text style={ss.label}>Birth place</Text>
         <PlaceField value={place?.label ?? ''} onPick={setPlace} language={ob.language} />
         <Text style={ss.meta}>Used for your element vial, astrology and the personality, essence and year cards in the Journal.</Text>

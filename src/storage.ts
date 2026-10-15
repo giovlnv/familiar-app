@@ -136,6 +136,51 @@ export function dirSize(d: Directory): number {
   return n;
 }
 
+const voiceDir = () => new Directory(Paths.document, 'react-native-executorch');
+
+const VOICE_LANGS: Record<string, RegExp> = { pt: /^(pf_|pm_|phonemizer_pt)/i, es: /^(ef_|em_|phonemizer_es)/i, fr: /^(ff_|phonemizer_fr)/i };
+
+export function bookLanguages() {
+  const langs = new Set(['en']);
+  for (const b of listBooks()) {
+    const l = (b.book as Book & { lang?: string }).lang;
+    if (l) langs.add(l);
+  }
+  return langs;
+}
+
+export function unusedVoices() {
+  const d = voiceDir();
+  if (!d.exists) return [] as File[];
+  const keep = bookLanguages();
+  return d.list().filter((x): x is File => {
+    if (!(x instanceof File)) return false;
+    if (/xnnpack/i.test(x.name)) return true;
+    return Object.entries(VOICE_LANGS).some(([lang, re]) => !keep.has(lang) && re.test(x.name.replace(/^\d+_/, '')));
+  });
+}
+
+export function removeUnusedVoices() {
+  let freed = 0;
+  for (const f of unusedVoices()) {
+    freed += f.size ?? 0;
+    f.delete();
+  }
+  return freed;
+}
+
+export function clearOldExplanationAudio(days = 7) {
+  const d = new Directory(Paths.cache);
+  if (!d.exists) return;
+  const cutoff = Date.now() - days * 86400000;
+  for (const x of d.list())
+    if (x instanceof File && x.name.startsWith('explain-') && (x.modificationTime ?? Date.now()) < cutoff) {
+      try {
+        x.delete();
+      } catch {}
+    }
+}
+
 export function storageBreakdown() {
   let audio = 0, books = 0;
   for (const b of listBooks()) {
@@ -144,10 +189,11 @@ export function storageBreakdown() {
     books += z.other;
   }
   const decks = dirSize(new Directory(Paths.document, 'decks'));
+  const voices = dirSize(voiceDir());
   const temp = dirSize(new Directory(Paths.cache));
   const all = dirSize(new Directory(Paths.document));
-  const other = Math.max(0, all - audio - books - decks);
-  return { audio, books, decks, other, temp, total: all + temp };
+  const other = Math.max(0, all - audio - books - decks - voices);
+  return { audio, books, decks, voices, other, temp, total: all + temp };
 }
 
 export const totalSpace = () => {

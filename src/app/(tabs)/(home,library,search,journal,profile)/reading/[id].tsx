@@ -29,7 +29,8 @@ import { shareToClaude } from '../../../../components/Consults';
 import { Button, Chip, DateStepper, fmtDate } from '../../../../components/ui';
 import { usePad } from '../../../../playback';
 import { c, F, themed } from '../../../../theme';
-import { maskDate, maskTime } from '../../../../format';
+import { maskTime } from '../../../../format';
+import { DateInput } from '../../../../components/SplitInput';
 
 const short = (id: string) => cardName(id).split(' · ').pop()!;
 
@@ -342,15 +343,8 @@ function PersonSheet({
       <View style={s.sheet}>
         <Text style={s.h2}>Reading for someone</Text>
         <TextInput style={s.input} value={name} onChangeText={setName} placeholder="Name" placeholderTextColor={c.dim} />
-        <TextInput
-          style={s.input}
-          value={dob}
-          onChangeText={(t) => setDob(maskDate(t))}
-          placeholder="Birth date DD/MM/YYYY (optional)"
-          placeholderTextColor={c.dim}
-          keyboardType="number-pad"
-          maxLength={10}
-        />
+        <Text style={s.dim}>Birth date (optional)</Text>
+        <DateInput style={s.input} value={dob} onChange={setDob} />
         <TextInput
           style={[s.input, { minHeight: 70 }]}
           value={bg}

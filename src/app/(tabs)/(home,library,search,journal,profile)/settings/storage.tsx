@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Alert, Switch, Text, View } from 'react-native';
-import { bookSizes, clearCache, freeSpace, listBooks, mb, storageBreakdown, totalSpace } from '../../../../storage';
+import { bookSizes, clearCache, freeSpace, listBooks, mb, removeUnusedVoices, storageBreakdown, totalSpace, unusedVoices } from '../../../../storage';
 import { Btn, Page, ss } from '../../../../components/settings-ui';
 import { c, read, themed, write } from '../../../../theme';
 
@@ -15,6 +15,7 @@ export default function Storage() {
     { label: 'Audio', bytes: z.audio, color: c.gold },
     { label: 'Books & notes', bytes: z.books, color: c.explain },
     { label: 'Decks', bytes: z.decks, color: c.claude },
+    { label: 'Voices', bytes: z.voices, color: c.text },
     { label: 'Temporary', bytes: z.temp, color: c.dim },
     { label: 'Other app data', bytes: z.other, color: c.line },
   ].filter((p) => p.bytes > 0);
@@ -97,6 +98,15 @@ export default function Storage() {
         </>
       ) : null}
       <Text style={ss.p}>To free space, open a book’s page → ⋯ → Remove downloaded audio; it then streams from GitHub.</Text>
+      {(() => {
+        const unused = unusedVoices().reduce((n, f) => n + (f.size ?? 0), 0);
+        return unused > 0 ? (
+          <Btn
+            label={`Remove unused voices (${mb(unused)})`}
+            onPress={() => (Alert.alert('Removed', `${mb(removeUnusedVoices())} freed. Voices for languages in your library are kept and download again if needed.`), tick((n) => n + 1))}
+          />
+        ) : null;
+      })()}
       <Btn
         label={`Clear temporary files (${mb(z.temp)})`}
         onPress={() => (clearCache(), tick((n) => n + 1), Alert.alert('Cleared', 'Temporary files removed. Decks, books and notes are untouched.'))}

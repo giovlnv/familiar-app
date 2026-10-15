@@ -34,7 +34,8 @@ export default function TabStack({ segment }: { segment: string }) {
       <Stack.Screen name="settings/appearance" options={{ title: "App" }} />
       <Stack.Screen name="settings/account" options={{ title: "Keys" }} />
       <Stack.Screen name="settings/backups" options={{ title: "Backups" }} />
-      <Stack.Screen name="settings/configuration" options={{ title: "Decks" }} />
+      <Stack.Screen name="settings/configuration" options={{ title: "Tarot decks" }} />
+      <Stack.Screen name="settings/decks/[path]" options={{ title: "" }} />
       <Stack.Screen name="settings/storage" options={{ title: "Storage" }} />
       <Stack.Screen name="settings/languages" options={{ title: "Languages" }} />
       <Stack.Screen name="settings/numerology" options={{ title: "Numerology" }} />

@@ -19,16 +19,16 @@ export default function Settings() {
         <MenuRow icon="color-palette-outline" title="App" sub={`${PALETTES.find((x) => x.id === paletteId)?.name ?? ''} · mode · app icon`} to="/settings/appearance" />
         <MenuRow icon="person-circle-outline" title="Profile" sub={p.name ? `${p.name}${p.username ? ` · @${p.username}` : ''}` : 'Photo, name, birth details'} to="/settings/profile" />
         <MenuRow icon="paw-outline" title="Familiar" sub="Your familiars, linked paths" to="/familiars" />
-        <MenuRow icon="albums-outline" title="Decks" sub="Default deck, custom decks" to="/settings/configuration" />
       </View>
-      {(getOnboarding().paths ?? []).includes('numerology') && (
-        <>
-          <Text style={ss.label}>Paths</Text>
-          <View style={[ss.menu, { marginTop: 6 }]}>
-            <MenuRow icon="keypad-outline" title="Numerology" sub={`Pythagorean · Y as ${getOnboarding().yVowel ? 'vowel' : 'consonant'}`} to="/settings/numerology" />
-          </View>
-        </>
-      )}
+      <Text style={ss.label}>Paths</Text>
+      <View style={[ss.menu, { marginTop: 6 }]}>
+        <MenuRow icon="albums-outline" title="Tarot" sub="Decks: default deck, custom decks" to="/settings/configuration" />
+        <MenuRow icon="albums-outline" title="Lenormand" sub="Decks" to="/settings/decks/lenormand" />
+        <MenuRow icon="albums-outline" title="Make your own" sub="Decks: build your own system" to="/settings/decks/custom" />
+        {(getOnboarding().paths ?? []).includes('numerology') && (
+          <MenuRow icon="keypad-outline" title="Numerology" sub={`Pythagorean · Y as ${getOnboarding().yVowel ? 'vowel' : 'consonant'}`} to="/settings/numerology" />
+        )}
+      </View>
       <Text style={ss.label}>Account</Text>
       <View style={[ss.menu, { marginTop: 6 }]}>
         <MenuRow icon="key-outline" title="Keys" sub="GitHub and Claude" to="/settings/account" />

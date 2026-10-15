@@ -54,8 +54,8 @@ export default function Home() {
         router.push({ pathname: '/reading/[id]', params: { id: entry.id } });
       } else router.push({ pathname: '/reading/[id]', params: { id: 'draft', card, reversed: rev ? '1' : '0' } });
     }, 450);
-  const { width: W, height: H } = useWindowDimensions();
-  const cardW = Math.min((W - 32) / 4, (H * 0.3 - 90) / 1.72);
+  const { width: W } = useWindowDimensions();
+  const cw = Math.min(64, (W - 32) / 6);
   const [how, setHow] = useState(false);
   const mark = (p: { section: number; time: number }) => `${p.section}:${Math.floor(p.time)}`;
   const hide = (folder: string, p: { section: number; time: number }) => {
@@ -93,70 +93,70 @@ export default function Home() {
         </View>
       </Pressable>
       <View style={s.todayBox}>
-      <View style={s.daily}>
-        <View style={s.slot}>
-          <Text style={s.tag}>Calculated</Text>
-          <Pressable onPress={() => setAbout(daily)} accessibilityLabel={`About ${cardName(daily)}`}>
-            <CardImage id={daily} width={cardW} />
-          </Pressable>
-          <Text style={s.cardName} numberOfLines={2}>{cardName(daily).split(' · ').pop()}</Text>
-          <Pressable style={s.logBtn} onPress={openCotd}>
-            <Ionicons name="create-outline" size={14} color={c.bg} />
-            <Text style={s.logBtnText}>Write about it</Text>
-          </Pressable>
-        </View>
-        <View style={s.mid}>
-          <Text style={s.midDay}>{new Date().toLocaleDateString(undefined, { weekday: 'short' })}</Text>
-          <Text style={s.midDate}>{new Date().getDate()}</Text>
-          <Text style={s.midDay}>{new Date().toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}</Text>
-          <View style={{ marginTop: 6 }}>
-            <MoonIcon frac={moon.frac} size={26} />
+        <View style={s.tHead}>
+          <View>
+            <Text style={s.midDay}>{new Date().toLocaleDateString(undefined, { weekday: 'long' })}</Text>
+            <Text style={s.tDate}>{new Date().toLocaleDateString(undefined, { day: 'numeric', month: 'long' })}</Text>
           </View>
-          <Text style={s.moonName}>{moon.name}</Text>
-          <Text style={s.midDay}>{moon.lit}% lit</Text>
+          <View style={s.tMoon}>
+            <MoonIcon frac={moon.frac} size={22} />
+            <View>
+              <Text style={s.moonName}>{moon.name}</Text>
+              <Text style={s.midDay}>{moon.lit}% lit</Text>
+            </View>
+          </View>
         </View>
-        <View style={s.slot}>
-          <Text style={s.tag}>Yours</Text>
+        {!!skyLine && (
+          <Pressable onPress={() => router.push('/astrology')}>
+            <Text style={s.today}>{skyLine}</Text>
+          </Pressable>
+        )}
+        {pn && (
+          <Pressable onPress={() => router.push('/numerology')}>
+            <Text style={s.today}>
+              Personal day {pn.day} · month {pn.month} · year {pn.year}
+            </Text>
+          </Pressable>
+        )}
+        <View style={s.tCards}>
+          <Pressable onPress={() => setAbout(daily)} accessibilityLabel={`About ${cardName(daily)}`}>
+            <CardImage id={daily} width={cw} />
+          </Pressable>
           {mine && mineCard?.card ? (
-            <>
-              <Pressable onPress={() => router.push({ pathname: '/reading/[id]', params: { id: mine.id } })} accessibilityLabel="Your card of the day">
-                <CardImage id={mineCard.card} reversed={mineCard.reversed} width={cardW} />
-              </Pressable>
-              <Text style={s.cardName} numberOfLines={2}>
-                {cardName(mineCard.card).split(' · ').pop()}
-                {mineCard.reversed ? ' (rev.)' : ''}
-              </Text>
-              <Pressable style={[s.logBtn, s.logBtnAlt]} onPress={() => router.push({ pathname: '/reading/[id]', params: { id: mine.id } })}>
-                <Ionicons name="book-outline" size={14} color={c.gold} />
-                <Text style={[s.logBtnText, { color: c.gold }]}>Open entry</Text>
-              </Pressable>
-            </>
+            <Pressable onPress={() => router.push({ pathname: '/reading/[id]', params: { id: mine.id } })} accessibilityLabel="Your card of the day">
+              <CardImage id={mineCard.card} reversed={mineCard.reversed} width={cw} />
+            </Pressable>
           ) : (
-            <>
-              <Pressable style={[s.blank, { width: cardW, height: cardW * 1.72, borderRadius: cardW * 0.06 }]} onPress={() => setPicking(true)}>
-                <Ionicons name="add" size={28} color={c.gold} />
-              </Pressable>
-              <Text style={s.cardName}>Not drawn yet</Text>
-              <Pressable style={[s.logBtn, s.logBtnAlt]} onPress={() => setPicking(true)}>
-                <Ionicons name="add" size={14} color={c.gold} />
-                <Text style={[s.logBtnText, { color: c.gold }]}>Log yours</Text>
-              </Pressable>
-            </>
+            <Pressable style={[s.blank, { width: cw, height: cw * 1.72, borderRadius: cw * 0.06 }]} onPress={() => setPicking(true)} accessibilityLabel="Log the card you drew">
+              <Ionicons name="add" size={22} color={c.gold} />
+            </Pressable>
           )}
+          <View style={{ flex: 1, gap: 2 }}>
+            <Text style={s.tag}>Calculated</Text>
+            <Text style={s.tName} numberOfLines={1}>{cardName(daily).split(' · ').pop()}</Text>
+            <Text style={[s.tag, { marginTop: 6 }]}>Yours</Text>
+            <Text style={s.tName} numberOfLines={1}>
+              {mine && mineCard?.card ? `${cardName(mineCard.card).split(' · ').pop()}${mineCard.reversed ? ' (rev.)' : ''}` : 'Not drawn yet'}
+            </Text>
+            <View style={s.tBtns}>
+              {mine && mineCard?.card ? (
+                <Pressable style={[s.logBtn, s.logBtnAlt]} onPress={() => router.push({ pathname: '/reading/[id]', params: { id: mine.id } })}>
+                  <Ionicons name="book-outline" size={14} color={c.gold} />
+                  <Text style={[s.logBtnText, { color: c.gold }]}>Open entry</Text>
+                </Pressable>
+              ) : (
+                <Pressable style={[s.logBtn, s.logBtnAlt]} onPress={() => setPicking(true)}>
+                  <Ionicons name="add" size={14} color={c.gold} />
+                  <Text style={[s.logBtnText, { color: c.gold }]}>Log yours</Text>
+                </Pressable>
+              )}
+              <Pressable style={s.logBtn} onPress={openCotd}>
+                <Ionicons name="create-outline" size={14} color={c.bg} />
+                <Text style={s.logBtnText}>Write</Text>
+              </Pressable>
+            </View>
+          </View>
         </View>
-      </View>
-      {!!skyLine && (
-        <Pressable onPress={() => router.push('/astrology')} style={{ alignSelf: 'center', marginTop: 8 }}>
-          <Text style={s.today}>{skyLine}</Text>
-        </Pressable>
-      )}
-      {pn && (
-        <Pressable onPress={() => router.push('/numerology')} style={{ alignSelf: 'center', marginTop: skyLine ? 2 : 8 }}>
-          <Text style={s.today}>
-            Personal day {pn.day} · month {pn.month} · year {pn.year}
-          </Text>
-        </Pressable>
-      )}
       <Pressable onPress={() => setHow(!how)} style={{ alignSelf: 'center', marginTop: 6 }}>
         <Text style={s.how}>{how ? 'Hide' : 'How is the calculated card chosen?'}</Text>
       </Pressable>
@@ -259,7 +259,13 @@ const s = themed(() => ({
   familiar: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: c.panel, borderRadius: 14, paddingVertical: 8, paddingHorizontal: 10, marginTop: 12 },
   famName: { color: c.text, fontSize: 18, fontFamily: F.heading },
   wrap: { flex: 1, backgroundColor: c.bg, paddingHorizontal: 16 },
-  todayBox: { marginTop: 12, backgroundColor: c.panel, borderRadius: 14, paddingVertical: 12, paddingHorizontal: 8 },
+  todayBox: { marginTop: 12, backgroundColor: c.panel, borderRadius: 14, padding: 14, gap: 6 },
+  tHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 },
+  tDate: { color: c.text, fontSize: 22, fontFamily: F.heading },
+  tMoon: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  tCards: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 6 },
+  tName: { color: c.text, fontSize: 15, fontFamily: F.heading },
+  tBtns: { flexDirection: 'row', gap: 8, marginTop: 6 },
   daily: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   greet: { color: c.text, fontSize: 14, lineHeight: 20, marginTop: 4 },
   slot: { flex: 1, alignItems: 'center', gap: 5 },

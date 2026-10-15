@@ -17,6 +17,7 @@ Status: ✅ done · 🔨 next · 📋 planned · Last revised: 14 Oct 2026 (app 
 - ✅ A tarot card per section (auto from the title or picked by hand); card view instead of the text, with the passage being read in a fixed box
 - ✅ Text size, font, colour, line and paragraph spacing, alignment — for the follow-along text and the card view
 - ✅ Speed, sleep timer, text style, note and Ask grouped in one … menu
+- ✅ Explanations on/off (all books or per book); upload with or without explanations, with directions for how they should be
 - ✅ "About this card": choose which books/paths it draws from; each book collapsed
 
 ### Adding books
@@ -51,10 +52,12 @@ Status: ✅ done · 🔨 next · 📋 planned · Last revised: 14 Oct 2026 (app 
 
 ## Next 🔨
 
-Very important (added 14 Oct):
-- **Explanations on/off** — globally and per book: off hides the explanation text and skips the explanation audio; a book can also be made without explanations
-- **Storage management** — keep the app small: storage screen, remove audio but keep notes/progress, re-download later, auto-remove finished books, clear caches, smaller speech audio
-- **Keep the book itself** — the original sections with pictures and formatting (headings, italics, lists, tables), read alongside the audio
+Very important (added 14 Oct), in this order:
+1. **Storage management** — storage screen, remove audio but keep notes/progress, re-download later, auto-remove finished books, clear caches, smaller speech audio
+2. **To-do: streaming options** — find ways to keep files off the phone (stream from the private repo, rolling download window, iCloud offload, cloud bucket)
+3. **Keep the book itself** — the original sections with pictures and formatting, read alongside the audio
+
+The full backlog order is being decided on a tier list; the list below is the earlier order.
 
 1. First real book through the upload flow
 2. Expressions for familiars (free): angry, silly, happy

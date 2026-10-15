@@ -1,9 +1,9 @@
 import { useCallback, useMemo, useState } from 'react';
-import { Pressable, ScrollView, SectionList, Text, useWindowDimensions, View } from 'react-native';
+import { Pressable, ScrollView, SectionList, Text, View } from 'react-native';
 import { router, Stack, useFocusEffect } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { birthCards, JournalData, loadJournal, mostDrawn, newReading, Reading } from '../../../journal';
-import { getProfile, today } from '../../../tracker';
+import { JournalData, loadJournal, mostDrawn, newReading, Reading } from '../../../journal';
+import { today } from '../../../tracker';
 import { cardName } from '../../../decks';
 import { CardImage } from '../../../components/Cards';
 import ReadingRow from '../../../components/ReadingRow';
@@ -19,16 +19,14 @@ const short = (id: string) => cardName(id).split(' · ').pop()!;
 export default function Journal() {
   const pad = usePad();
   const [j, setJ] = useState<JournalData>(loadJournal);
-  const [dob, setDob] = useState<string | undefined>();
   const [view, setView] = useState<'timeline' | 'calendar'>('timeline');
   const [area, setArea] = useState<string | null>(null);
   const [month, setMonth] = useState(() => today().slice(0, 7));
   const [picked, setPicked] = useState<string | null>(null);
   const [open, setOpen] = useState<{ id: string; role: string } | null>(null);
-  const { width } = useWindowDimensions();
   useFocusEffect(
     useCallback(() => {
-      const refresh = () => (setJ(loadJournal()), setDob(getProfile().dob));
+      const refresh = () => setJ(loadJournal());
       refresh();
       const t = setTimeout(refresh, 400);
       return () => clearTimeout(t);
@@ -40,7 +38,6 @@ export default function Journal() {
     [j, area],
   );
   const areas = [...new Set(j.readings.map((r) => r.area).filter((a): a is string => !!a))];
-  const birth = birthCards(dob);
   const top = mostDrawn(j.readings, 1)[0];
   const thisMonth = j.readings.filter((r) => r.at.startsWith(today().slice(0, 7))).length;
 
@@ -58,22 +55,9 @@ export default function Journal() {
     return out;
   }, [readings, view, month, picked]);
 
-  const ROLE: Record<string, string> = {
-    Personality: 'Your personality card: how you show up in the world and the lessons you meet outwardly. The sum of the digits of your birth date.',
-    Essence: 'Your essence card: the inner core beneath the personality, reduced from it to a single digit.',
-    Year: `Your card for ${new Date().getFullYear()}: the theme of the year, from your birth day and month plus the current year.`,
-  };
-  const born = birth
-    ? [
-        { label: 'Personality', card: birth.personality },
-        { label: 'Essence', card: birth.essence },
-        { label: 'Year', card: birth.yearCard },
-      ]
-    : [];
   const areaCount = new Map<string, number>();
   for (const r of j.readings) if (r.area) areaCount.set(r.area, (areaCount.get(r.area) ?? 0) + 1);
   const topArea = [...areaCount.entries()].sort((a, b) => b[1] - a[1])[0];
-  const third = (width - 32 - 20) / 3;
 
   const header = (
     <View>
@@ -86,26 +70,6 @@ export default function Journal() {
           ),
         }}
       />
-      <Text style={s.h3}>Your cards</Text>
-      {birth ? (
-        <View style={s.birthRow}>
-          {born.map((x) => (
-            <Pressable key={x.label} style={[s.birth, { width: third }]} onPress={() => setOpen({ id: x.card, role: ROLE[x.label] })}>
-              <CardImage id={x.card} width={third * 0.62} />
-              <Text style={s.tileLabel}>{x.label === 'Year' ? `${new Date().getFullYear()}` : x.label}</Text>
-              <Text style={s.tileCard} numberOfLines={2}>
-                {short(x.card)}
-              </Text>
-            </Pressable>
-          ))}
-        </View>
-      ) : (
-        <Pressable style={s.addBirth} onPress={() => router.push('/profile')}>
-          <Ionicons name="sparkles-outline" size={20} color={c.gold} />
-          <Text style={[s.tileLabel, { flex: 1 }]}>Add your birth date in Profile to see your personality, essence and year cards.</Text>
-        </Pressable>
-      )}
-
       <Text style={s.h3}>Readings</Text>
       <View style={s.stats}>
         <View style={{ flex: 1, gap: 2 }}>

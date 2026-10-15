@@ -9,6 +9,7 @@ import { c, F, themed } from '../theme';
 import { birthCards, showDate } from '../journal';
 import { cardName } from '../decks';
 import { CardImage } from './Cards';
+import CardSheet from './CardSheet';
 import { FamiliarArt } from './Familiar';
 import { getOnboarding, nightNow } from '../familiar';
 import { currentGuide } from '../guide';
@@ -59,6 +60,12 @@ export default function ProfileHeader() {
   useFocusEffect(useCallback(() => setP(getProfile()), []));
   const paths = getOnboarding().paths ?? [];
   const playing = usePlayback().status.playing;
+  const [open, setOpen] = useState<{ id: string; role: string } | null>(null);
+  const ROLE: Record<string, string> = {
+    Personality: 'Your personality card: how you show up in the world and the lessons you meet outwardly. The sum of the digits of your birth date.',
+    Essence: 'Your essence card: the inner core beneath the personality, reduced from it to a single digit.',
+  };
+  const roleOf = (label: string) => ROLE[label] ?? `Your card for ${new Date().getFullYear()}: the theme of the year, from your birth day and month plus the current year.`;
   const bc = birthCards(p.dob);
   const sign = p.dob ? sunSign(p.dob) : null;
   const birth: [string, string | undefined][] = bc
@@ -87,17 +94,18 @@ export default function ProfileHeader() {
           {birth
             .filter(([, id]) => id)
             .map(([label, id]) => (
-              <View key={label} style={s.cardCol}>
+              <Pressable key={label} style={s.cardCol} onPress={() => setOpen({ id: id!, role: roleOf(label) })}>
                 <CardImage id={id!} width={54} />
                 <Text style={s.cardLabel}>{label}</Text>
                 <Text style={s.cardName} numberOfLines={2}>
                   {cardName(id!).split(' · ').pop()}
                 </Text>
-              </View>
+              </Pressable>
             ))}
         </View>
       )}
       {!p.dob && <Text style={s.user}>Add your birth date to see your personality cards.</Text>}
+      <CardSheet id={open?.id ?? null} role={open?.role} onClose={() => setOpen(null)} />
     </Pressable>
   );
 }

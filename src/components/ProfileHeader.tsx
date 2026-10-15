@@ -5,7 +5,28 @@ import * as ImagePicker from 'expo-image-picker';
 import { File, Paths } from 'expo-file-system';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { getProfile, Profile } from '../tracker';
-import { c, themed } from '../theme';
+import { c, F, themed } from '../theme';
+import { birthCards, showDate } from '../journal';
+import { cardName } from '../decks';
+import { CardImage } from './Cards';
+import { FamiliarArt } from './Familiar';
+import { getOnboarding, withYou } from '../familiar';
+
+const SIGNS: [string, number, number, string][] = [
+  ['Capricorn', 1, 19, 'Earth'], ['Aquarius', 2, 18, 'Air'], ['Pisces', 3, 20, 'Water'], ['Aries', 4, 19, 'Fire'],
+  ['Taurus', 5, 20, 'Earth'], ['Gemini', 6, 20, 'Air'], ['Cancer', 7, 22, 'Water'], ['Leo', 8, 22, 'Fire'],
+  ['Virgo', 9, 22, 'Earth'], ['Libra', 10, 22, 'Air'], ['Scorpio', 11, 21, 'Water'], ['Sagittarius', 12, 21, 'Fire'],
+];
+const sunSign = (dob: string) => {
+  const [, m, d] = dob.split('-').map(Number);
+  const i = SIGNS.findIndex(([, mm, dd]) => m === mm && d <= dd);
+  return i >= 0 ? SIGNS[i] : SIGNS[m % 12];
+};
+const lifePath = (dob: string) => {
+  let n = [...dob].filter((x) => /\d/.test(x)).reduce((a, x) => a + Number(x), 0);
+  while (n > 9 && ![11, 22, 33].includes(n)) n = [...String(n)].reduce((a, x) => a + Number(x), 0);
+  return n;
+};
 
 export async function pickPhoto() {
   const r = await ImagePicker.launchImageLibraryAsync({ mediaTypes: 'images', allowsEditing: true, quality: 0.7 });
@@ -34,22 +55,61 @@ export function Avatar({ photo, name, size }: { photo?: string; name?: string; s
 export default function ProfileHeader() {
   const [p, setP] = useState<Profile>(getProfile);
   useFocusEffect(useCallback(() => setP(getProfile()), []));
+  const paths = getOnboarding().paths ?? [];
+  const bc = birthCards(p.dob);
+  const sign = p.dob ? sunSign(p.dob) : null;
+  const birth: [string, string | undefined][] = bc
+    ? [['Personality', bc.personality], ['Essence', bc.essence !== bc.personality ? bc.essence : undefined], [`Year ${new Date().getFullYear()}`, bc.yearCard]]
+    : [];
   return (
     <Pressable style={s.head} onPress={() => router.push('/settings/profile')}>
-      <Avatar photo={p.photo} name={p.name} size={64} />
-      <View style={{ flex: 1 }}>
-        <Text style={s.name}>{p.name || 'Set up your profile'}</Text>
-        <Text style={s.user}>{p.username ? `@${p.username}` : 'Add a photo, name and username'}</Text>
+      <View style={s.top}>
+        <Avatar photo={p.photo} name={p.name} size={84} />
+        <FamiliarArt familiar={withYou()} size={84} />
+        <View style={{ flex: 1 }}>
+          <Text style={s.name}>{p.name || 'Set up your profile'}</Text>
+          <Text style={s.user}>{p.username ? `@${p.username}` : 'Add a photo, name and username'}</Text>
+          {!!p.dob && <Text style={s.user}>Born {showDate(p.dob)}</Text>}
+        </View>
+        <Ionicons name="create-outline" size={18} color={c.dim} />
       </View>
-      <Ionicons name="create-outline" size={18} color={c.dim} />
+      {(sign && paths.includes('astrology')) || (p.dob && paths.includes('numerology')) ? (
+        <View style={s.chips}>
+          {sign && paths.includes('astrology') && <Text style={s.chip}>☉ {sign[0]} · {sign[3]}</Text>}
+          {!!p.dob && paths.includes('numerology') && <Text style={s.chip}>Life path {lifePath(p.dob)}</Text>}
+        </View>
+      ) : null}
+      {birth.length > 0 && (
+        <View style={s.cards}>
+          {birth
+            .filter(([, id]) => id)
+            .map(([label, id]) => (
+              <View key={label} style={s.cardCol}>
+                <CardImage id={id!} width={54} />
+                <Text style={s.cardLabel}>{label}</Text>
+                <Text style={s.cardName} numberOfLines={2}>
+                  {cardName(id!).split(' · ').pop()}
+                </Text>
+              </View>
+            ))}
+        </View>
+      )}
+      {!p.dob && <Text style={s.user}>Add your birth date to see your personality cards.</Text>}
     </Pressable>
   );
 }
 
 const s = themed(() => ({
-  head: { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: c.panel, borderRadius: 14, padding: 14, marginTop: 12 },
+  head: { backgroundColor: c.panel, borderRadius: 14, padding: 14, marginTop: 12, gap: 12 },
+  top: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  chip: { color: c.text, backgroundColor: c.raised, borderRadius: 14, paddingVertical: 4, paddingHorizontal: 10, fontSize: 13, overflow: 'hidden' },
+  cards: { flexDirection: 'row', justifyContent: 'space-around', gap: 8 },
+  cardCol: { alignItems: 'center', gap: 4, flex: 1 },
+  cardLabel: { color: c.gold, fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1 },
+  cardName: { color: c.text, fontSize: 13, fontFamily: F.heading, textAlign: 'center' },
   empty: { backgroundColor: c.raised, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: c.line },
   initial: { color: c.gold, fontWeight: '700' },
-  name: { color: c.text, fontSize: 19, fontWeight: '700' },
+  name: { color: c.text, fontSize: 21, fontWeight: '700' },
   user: { color: c.dim, marginTop: 2 },
 }));

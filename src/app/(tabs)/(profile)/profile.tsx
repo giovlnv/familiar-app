@@ -20,7 +20,8 @@ import { loadFamiliars, withYou } from "../../../familiar";
 type Metric = "books" | "pages" | "hours";
 const MONTHS = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
 
-export default function Profile() {
+export default function Profile({ mode }: { mode?: 'stats' }) {
+  const statsMode = mode === 'stats';
   const pad = usePad();
   const [t, setT] = useState<Tracker>({ books: [], logs: [] });
   const [year, setYear] = useState(String(new Date().getFullYear()));
@@ -114,6 +115,8 @@ export default function Profile() {
 
   return (
     <ScrollView style={s.wrap} contentContainerStyle={{ paddingBottom: 40 + pad }}>
+      {!statsMode && (
+        <>
       <Stack.Screen
         options={{
           headerLeft: () => (
@@ -170,6 +173,20 @@ export default function Profile() {
         </>
       )}
 
+      <Pressable style={s.link} onPress={() => router.push("/stats")}>
+        <Ionicons name="stats-chart-outline" size={18} color={c.gold} />
+        <Text style={s.linkText}>Stats · {t.logs.length} books logged</Text>
+        <Ionicons name="chevron-forward" size={16} color={c.dim} />
+      </Pressable>
+      <Pressable style={s.link} onPress={() => router.push("/lists")}>
+        <Ionicons name="list" size={18} color={c.gold} />
+        <Text style={s.linkText}>Lists ({t.lists?.length ?? 0})</Text>
+        <Ionicons name="chevron-forward" size={16} color={c.dim} />
+      </Pressable>
+        </>
+      )}
+      {statsMode && (
+        <>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -295,12 +312,6 @@ export default function Profile() {
         </Pressable>
       )}
 
-      <Pressable style={s.link} onPress={() => router.push("/lists")}>
-        <Ionicons name="list" size={18} color={c.gold} />
-        <Text style={s.linkText}>Lists ({t.lists?.length ?? 0})</Text>
-        <Ionicons name="chevron-forward" size={16} color={c.dim} />
-      </Pressable>
-
       <Text style={s.h2}>Ratings</Text>
       <Bars
         values={dist}
@@ -308,6 +319,8 @@ export default function Profile() {
         fmt={String}
       />
 
+        </>
+      )}
     </ScrollView>
   );
 }

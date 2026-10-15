@@ -10,6 +10,7 @@ export default function Storage() {
   const [, tick] = useState(0);
   const [detail, setDetail] = useState(() => read('storage-detail.txt') === '1');
   const z = storageBreakdown();
+  const pct = (n: number) => `${n && n < z.total / 100 ? '<1' : Math.round((n / (z.total || 1)) * 100)}%`;
   const parts = [
     { label: 'Audio', bytes: z.audio, color: c.gold },
     { label: 'Books & notes', bytes: z.books, color: c.explain },
@@ -62,14 +63,14 @@ export default function Storage() {
       {detail && (
         <>
       <View style={s.card}>
-        <Text style={s.used}>Used by Familiar</Text>
+        <Text style={s.used}>Used by Familiar · 100%</Text>
         <View style={s.row}>
           <Text style={s.big}>{gb(z.total)}</Text>
           <Text style={s.free}>{gb(freeSpace())} free</Text>
         </View>
         <View style={s.bar}>
           {parts.map((p) => (
-            <View key={p.label} style={{ flex: Math.max(p.bytes, z.total * 0.01), backgroundColor: p.color }} />
+            <View key={p.label} style={{ flex: p.bytes / (z.total || 1), minWidth: 3, backgroundColor: p.color }} />
           ))}
         </View>
         <View style={s.legend}>
@@ -77,7 +78,7 @@ export default function Storage() {
             <View key={p.label} style={s.item}>
               <View style={[s.dot, { backgroundColor: p.color }]} />
               <Text style={s.legendText}>
-                {p.label} · {mb(p.bytes)}
+                {p.label} · {mb(p.bytes)} · {pct(p.bytes)}
               </Text>
             </View>
           ))}

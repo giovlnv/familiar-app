@@ -5,9 +5,9 @@ import { router, useFocusEffect } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { getBook as getAudio, installSampleOnce, loadProgress } from '../../../storage';
 import { patchBook, syncAudioBooks, Tracker } from '../../../tracker';
-import { cardOfTheDay } from '../../../journal';
+import { cardOfTheDay, todaysDraw } from '../../../journal';
 import { cardName } from '../../../decks';
-import { CardImage } from '../../../components/Cards';
+import { CardImage, CardPicker } from '../../../components/Cards';
 import CardSheet from '../../../components/CardSheet';
 import { Cover, fmtDate, Stars } from '../../../components/ui';
 import { fmtTime } from '../../../format';
@@ -33,6 +33,11 @@ export default function Home() {
   });
   const [about, setAbout] = useState<string | null>(null);
   const daily = cardOfTheDay();
+  const [picking, setPicking] = useState(false);
+  const [, tick] = useState(0);
+  useFocusEffect(useCallback(() => tick((n) => n + 1), []));
+  const mine = todaysDraw();
+  const mineCard = mine?.cards[0];
   const mark = (p: { section: number; time: number }) => `${p.section}:${Math.floor(p.time)}`;
   const hide = (folder: string, p: { section: number; time: number }) => {
     const next = { ...hidden, [folder]: mark(p) };
@@ -70,12 +75,32 @@ export default function Home() {
         <View style={{ flex: 1, gap: 2 }}>
           <Text style={s.statLabel}>Card of the day</Text>
           <Text style={s.cardName}>{cardName(daily)}</Text>
-          <Pressable style={s.logBtn} onPress={() => router.push({ pathname: '/reading/[id]', params: { id: 'draft', card: daily } })}>
-            <Ionicons name="create-outline" size={15} color={c.bg} />
-            <Text style={s.logBtnText}>Write about it</Text>
-          </Pressable>
+          <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
+            <Pressable style={s.logBtn} onPress={() => router.push({ pathname: '/reading/[id]', params: { id: 'draft', card: daily } })}>
+              <Ionicons name="create-outline" size={15} color={c.bg} />
+              <Text style={s.logBtnText}>Write about it</Text>
+            </Pressable>
+            {!mine && (
+              <Pressable style={[s.logBtn, s.logBtnAlt]} onPress={() => setPicking(true)}>
+                <Ionicons name="add" size={15} color={c.gold} />
+                <Text style={[s.logBtnText, { color: c.gold }]}>Log yours</Text>
+              </Pressable>
+            )}
+          </View>
         </View>
+        {mine && mineCard?.card && (
+          <Pressable style={{ alignItems: 'center', gap: 4 }} onPress={() => router.push({ pathname: '/reading/[id]', params: { id: mine.id } })} accessibilityLabel="Your card of the day">
+            <CardImage id={mineCard.card} reversed={mineCard.reversed} width={44} />
+            <Text style={s.statLabel}>Yours</Text>
+          </Pressable>
+        )}
       </View>
+      <CardPicker
+        visible={picking}
+        title="The card you drew today"
+        onClose={() => setPicking(false)}
+        onPick={(id, rev) => setTimeout(() => router.push({ pathname: '/reading/[id]', params: { id: 'draft', card: id, daily: 'drawn', reversed: rev ? '1' : '0' } }), 450)}
+      />
       <CardSheet id={about} onClose={() => setAbout(null)} />
 
       {listening.length > 0 && (
@@ -167,6 +192,7 @@ const s = themed(() => ({
   cardName: { color: c.text, fontSize: 18, fontFamily: F.heading },
   logBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start', backgroundColor: c.gold, borderRadius: 16, paddingVertical: 6, paddingHorizontal: 12, marginTop: 6 },
   logBtnText: { color: c.bg, fontWeight: '700', fontSize: 13 },
+  logBtnAlt: { backgroundColor: 'transparent', borderWidth: 1, borderColor: c.gold },
   h2: { color: c.text, fontSize: 19, marginTop: 24, marginBottom: 10, fontFamily: F.heading },
   listen: { flexDirection: 'row', gap: 12, alignItems: 'center', backgroundColor: c.panel, borderRadius: 12, padding: 10, marginBottom: 8 },
   title: { color: c.text, fontSize: 15, fontWeight: '600' },

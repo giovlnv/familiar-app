@@ -35,11 +35,11 @@ const short = (id: string) => cardName(id).split(' · ').pop()!;
 
 export default function ReadingScreen() {
   const pad = usePad();
-  const { id, card } = useLocalSearchParams<{ id: string; card?: string }>();
+  const { id, card, daily, reversed } = useLocalSearchParams<{ id: string; card?: string; daily?: 'calculated' | 'drawn'; reversed?: string }>();
   const { width } = useWindowDimensions();
   const [j, setJ] = useState(loadJournal);
   const [draft, setDraft] = useState(id === 'draft');
-  const [r, setR] = useState<Reading | undefined>(() => (id === 'draft' && card ? draftReading(card) : loadJournal().readings.find((x) => x.id === id)));
+  const [r, setR] = useState<Reading | undefined>(() => (id === 'draft' && card ? draftReading(card, daily, reversed === '1') : loadJournal().readings.find((x) => x.id === id)));
   const [slot, setSlot] = useState<number | null>(null);
   const [about, setAbout] = useState<{ id: string; role: string } | null>(null);
   const [personSheet, setPersonSheet] = useState(false);

@@ -21,6 +21,7 @@ export type Reading = {
   keyPoints?: string;
   openQuestions?: string;
   answers?: Answer[];
+  daily?: 'calculated' | 'drawn';
   created: number;
 };
 export type JournalData = { readings: Reading[]; people: Person[]; spreads: Spread[]; areas: string[] };
@@ -60,14 +61,17 @@ const stamp = () => {
   return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
 };
 
-export const draftReading = (card: string): Reading => ({
+export const draftReading = (card: string, daily: 'calculated' | 'drawn' = 'calculated', reversed = false): Reading => ({
   id: uid(),
   at: stamp(),
-  question: 'Card of the day',
+  question: daily === 'drawn' ? 'My card of the day' : 'Card of the day',
   spreadId: 'one',
-  cards: [{ card }],
+  cards: [{ card, reversed }],
+  daily,
   created: Date.now(),
 });
+
+export const todaysDraw = () => loadJournal().readings.filter((r) => r.daily === 'drawn' && r.at.slice(0, 10) === stamp().slice(0, 10)).pop();
 
 export const saveReading = (r: Reading) => updateJournal((j) => j.readings.push(r));
 

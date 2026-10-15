@@ -7,10 +7,8 @@ import {
   Modal,
   Platform,
   Pressable,
-  StyleSheet,
   Text,
   TextInput,
-  useWindowDimensions,
   View,
 } from "react-native";
 import * as Sharing from "expo-sharing";
@@ -37,6 +35,8 @@ import { c, F, read, themed, write } from "../theme";
 import { CardImage, CardPicker } from "./Cards";
 import CardSheet from "./CardSheet";
 import { cardName } from "../decks";
+import TextStyleSheet from "./TextStyleSheet";
+import { bodyText, lineHeight, TextStyle, useTextStyle } from "../textStyle";
 import { Link, loadLinks, sectionCard, setLink } from "../sectionCards";
 import { SleepKind, usePlayback } from "../playback";
 import { FamiliarArt } from "./Familiar";
@@ -88,6 +88,11 @@ export default function Player({
   const [picking, setPicking] = useState(false);
   const [cardInfo, setCardInfo] = useState<string | null>(null);
   const [stage, setStage] = useState({ w: 0, h: 0 });
+  const ts = useTextStyle();
+  const [styling, setStyling] = useState(false);
+  const lineH = lineHeight(ts);
+  const lines = Math.max(3, Math.min(6, Math.floor((stage.h * 0.45 - 20) / lineH)));
+  const passageH = lineH * lines + 20;
   const [panel, setPanel] = useState<
     "none" | "chapters" | "notes" | "consults"
   >("none");
@@ -97,7 +102,6 @@ export default function Player({
   const [ask, setAsk] = useState<AskDraft | null>(null);
   const [notes, setNotes] = useState<Note[]>(() => loadNotes(folder));
   const [draft, setDraft] = useState<Draft | null>(null);
-  const { height: winH } = useWindowDimensions();
   const list = useRef<FlatList<Para>>(null);
   const section = book.sections[sec];
   const card = sectionCard(links, section);
@@ -129,33 +133,23 @@ export default function Player({
       });
   }, [current, follow, showText]);
 
-  const [rateAt, setRateAt] = useState<{ x: number; y: number } | null>(null);
-  const rateBtn = useRef<View>(null);
-  const openRates = () =>
-    rateBtn.current?.measureInWindow((x, y) => setRateAt({ x, y }));
-  const pickRate = (r: number) => {
-    pb.setRate(r);
-    setRateAt(null);
-  };
-  const customRate = () => {
-    setRateAt(null);
-    setTimeout(
-      () =>
-        Alert.prompt(
-          "Custom speed",
-          "Between 0.1 and 2.0",
-          (v) => {
-            const r = Number(v.replace(",", "."));
-            if (r >= 0.1 && r <= 2) pb.setRate(Math.round(r * 100) / 100);
-            else Alert.alert("Speed must be between 0.1 and 2.0");
-          },
-          "plain-text",
-          String(rate),
-          "decimal-pad",
-        ),
-      400,
+  const [more, setMore] = useState(false);
+  const fromMenu = (fn: () => void) => (setMore(false), setTimeout(fn, 450));
+  const customRate = () =>
+    fromMenu(() =>
+      Alert.prompt(
+        "Custom speed",
+        "Between 0.1 and 2.0",
+        (v) => {
+          const r = Number(v.replace(",", "."));
+          if (r >= 0.1 && r <= 2) pb.setRate(Math.round(r * 100) / 100);
+          else Alert.alert("Speed must be between 0.1 and 2.0");
+        },
+        "plain-text",
+        String(rate),
+        "decimal-pad",
+      ),
     );
-  };
 
   const newNote = (para: number, time: number) => {
     const p = section.paras[para];
@@ -318,14 +312,14 @@ export default function Player({
                 <CardImage
                   id={card.card}
                   reversed={card.reversed}
-                  width={Math.max(70, Math.min(stage.w - 48, (stage.h - 50 - PASSAGE_H - 10) / 1.72))}
+                  width={Math.max(70, Math.min(stage.w - 48, (stage.h - 50 - passageH - 10) / 1.72))}
                 />
                 <Text style={s.cardName}>
                   {cardName(card.card)}
                   {card.reversed ? " · reversed" : ""}
                 </Text>
               </Pressable>
-              <Passage para={section.paras[current]} t={t} />
+              <Passage para={section.paras[current]} t={t} ts={ts} height={passageH} />
             </View>
           ) : (
             <View style={{ alignItems: "center", gap: 14 }}>
@@ -359,10 +353,10 @@ export default function Player({
             <Pressable
               onPress={() => goTo(sec, p.start + 0.01)}
               onLongPress={() => paraActions(index, p.start)}
-              style={[s.para, index === current && s.paraOn]}
+              style={[s.para, { marginBottom: ts.gap }, index === current && s.paraOn]}
             >
               <Text
-                style={[s.pText, styleFor(p), index === current && s.pTextOn]}
+                style={[bodyText(ts, index === current), styleFor(p, ts)]}
               >
                 {asked.has(index) && (
                   <Ionicons
@@ -428,34 +422,16 @@ export default function Player({
             onPress={() => sec < book.sections.length - 1 && goTo(sec + 1, 0)}
           />
         </View>
-        <View style={s.row}>
-          <View ref={rateBtn} collapsable={false}>
-            <Btn
-              icon="speedometer-outline"
-              label={fmtRate(rate)}
-              trail="chevron-up"
-              onPress={openRates}
-            />
-          </View>
-          <Btn
-            icon={sleep ? "moon" : "moon-outline"}
-            label={sleepLeft !== null ? fmtLeft(sleepLeft) : undefined}
-            color={sleep ? c.gold : c.text}
-            onPress={() => setSleepOpen(true)}
-          />
-          <Btn
-            icon="create-outline"
-            label="Note here"
-            onPress={() => newNote(current, t)}
-            wide
-          />
-          <Btn
-            icon="sparkles-outline"
-            label="Ask"
-            color={c.claude}
-            onPress={() => startAsk(current, t)}
-          />
-        </View>
+        <Pressable style={s.more} onPress={() => setMore(true)} accessibilityLabel="More options">
+          <Ionicons name="ellipsis-horizontal" size={20} color={c.text} />
+          {rate !== 1 && <Text style={s.moreTag}>{fmtRate(rate)}</Text>}
+          {!!sleep && (
+            <View style={s.iconLink}>
+              <Ionicons name="moon" size={13} color={c.gold} />
+              {sleepLeft !== null && <Text style={[s.moreTag, { color: c.gold }]}>{fmtLeft(sleepLeft)}</Text>}
+            </View>
+          )}
+        </Pressable>
       </View>
 
       <Modal visible={sleepOpen} transparent animationType="slide" onRequestClose={() => setSleepOpen(false)}>
@@ -491,55 +467,32 @@ export default function Player({
         </View>
       </Modal>
 
-      <Modal
-        visible={!!rateAt}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setRateAt(null)}
-      >
-        <Pressable
-          style={StyleSheet.absoluteFill}
-          onPress={() => setRateAt(null)}
-        />
-        {rateAt && (
-          <View
-            style={[s.menu, { left: rateAt.x, bottom: winH - rateAt.y + 8 }]}
-          >
-            <Pressable
-              style={[s.menuItem, !RATES.includes(rate) && s.menuOn]}
-              onPress={customRate}
-            >
-              <Text
-                style={[
-                  s.menuText,
-                  !RATES.includes(rate) && { color: c.gold, fontWeight: "700" },
-                ]}
-              >
-                {RATES.includes(rate) ? "Custom" : `Custom ${fmtRate(rate)}`}
-              </Text>
-              <Ionicons name="keypad-outline" size={16} color={c.dim} />
-            </Pressable>
-            {[...RATES].reverse().map((r) => (
-              <Pressable
-                key={r}
-                style={[s.menuItem, r === rate && s.menuOn]}
-                onPress={() => pickRate(r)}
-              >
-                <Text
-                  style={[
-                    s.menuText,
-                    r === rate && { color: c.gold, fontWeight: "700" },
-                  ]}
-                >
-                  {fmtRate(r)}
-                </Text>
-                {r === rate && (
-                  <Ionicons name="checkmark" size={16} color={c.gold} />
-                )}
+      <Modal visible={more} transparent animationType="slide" onRequestClose={() => setMore(false)}>
+        <Pressable style={{ flex: 1, backgroundColor: "#0008" }} onPress={() => setMore(false)} accessibilityLabel="Close" />
+        <View style={s.sleepSheet}>
+          <Text style={s.moreHead}>Speed</Text>
+          <View style={s.rates}>
+            {RATES.map((r) => (
+              <Pressable key={r} style={[s.rate, r === rate && s.rateOn]} onPress={() => pb.setRate(r)}>
+                <Text style={[s.rateText, r === rate && s.rateTextOn]}>{fmtRate(r)}</Text>
               </Pressable>
             ))}
+            <Pressable style={[s.rate, !RATES.includes(rate) && s.rateOn]} onPress={customRate}>
+              <Text style={[s.rateText, !RATES.includes(rate) && s.rateTextOn]}>
+                {RATES.includes(rate) ? "Custom" : fmtRate(rate)}
+              </Text>
+            </Pressable>
           </View>
-        )}
+          <MenuRow
+            icon={sleep ? "moon" : "moon-outline"}
+            label="Sleep timer"
+            value={sleep ? (sleepLeft !== null ? fmtLeft(sleepLeft) : sleep.kind === "section" ? "End of section" : "End of explanation") : "Off"}
+            onPress={() => fromMenu(() => setSleepOpen(true))}
+          />
+          <MenuRow icon="text-outline" label="Text size and style" onPress={() => fromMenu(() => setStyling(true))} />
+          <MenuRow icon="create-outline" label="Add a note here" onPress={() => fromMenu(() => newNote(current, t))} />
+          <MenuRow icon="sparkles-outline" label="Ask Claude about this" color={c.claude} onPress={() => fromMenu(() => startAsk(current, t))} />
+        </View>
       </Modal>
 
       <Modal
@@ -674,6 +627,7 @@ export default function Player({
         onClose={() => setPicking(false)}
         onPick={(id, reversed) => link({ card: id, reversed })}
       />
+      <TextStyleSheet visible={styling} sample={section.paras[current]?.text} onClose={() => setStyling(false)} />
       <CardSheet id={cardInfo} here={folder} onClose={() => setCardInfo(null)} />
       <AskSheet draft={ask} onCancel={() => setAsk(null)} onSend={sendAsk} />
       <ConsultList
@@ -741,26 +695,26 @@ export default function Player({
   );
 }
 
-const styleFor = (p: Para) =>
-  p.kind === "title"
-    ? s.kTitle
+const styleFor = (p: Para, t: TextStyle) => {
+  const at = (size: number) => ({ fontSize: size, lineHeight: lineHeight(t, size) });
+  return p.kind === "title"
+    ? [s.kTitle, at(t.size + 5)]
     : p.kind === "head"
-      ? s.kHead
+      ? [s.kHead, at(t.size - 2)]
       : p.kind === "explainhead"
-        ? s.kExplainHead
+        ? [s.kExplainHead, at(t.size - 2)]
         : p.kind === "explain"
           ? s.kExplain
           : null;
+};
 
-const LINE = 24;
-const PASSAGE_H = LINE * 6 + 20;
-
-function Passage({ para, t }: { para?: Para; t: number }) {
+function Passage({ para, t, ts, height }: { para?: Para; t: number; ts: TextStyle; height: number }) {
+  const LINE = lineHeight(ts);
   const ref = useRef<ScrollView>(null);
   const [contentH, setContentH] = useState(0);
   const last = useRef(0);
   const frac = para && para.end > para.start ? Math.min(1, Math.max(0, (t - para.start) / (para.end - para.start))) : 0;
-  const room = Math.max(0, contentH - (PASSAGE_H - 20));
+  const room = Math.max(0, contentH - (height - 20));
   const target = Math.floor((room * frac) / LINE) * LINE;
   useEffect(() => {
     if (target === last.current) return;
@@ -772,9 +726,9 @@ function Passage({ para, t }: { para?: Para; t: number }) {
     ref.current?.scrollTo({ y: 0, animated: false });
   }, [para]);
   return (
-    <View style={s.passage}>
+    <View style={[s.passage, { height }]}>
       <ScrollView ref={ref} scrollEnabled={false} showsVerticalScrollIndicator={false} onContentSizeChange={(_, h) => setContentH(h)}>
-        <Text style={[s.passageText, para && styleFor(para), { lineHeight: LINE, fontSize: 17 }]}>{para?.text}</Text>
+        <Text style={[bodyText(ts, true), para && styleFor(para, ts)]}>{para?.text}</Text>
       </ScrollView>
     </View>
   );
@@ -805,6 +759,19 @@ const Btn = ({
   </Pressable>
 );
 
+const MenuRow = ({ icon, label, value, color = c.text, onPress }: { icon: IconName; label: string; value?: string; color?: string; onPress: () => void }) => (
+  <Pressable style={s.sleepRow} onPress={onPress}>
+    <View style={[s.iconLink, { gap: 12 }]}>
+      <Ionicons name={icon} size={20} color={color} />
+      <Text style={[s.menuText, { color }]}>{label}</Text>
+    </View>
+    <View style={s.iconLink}>
+      {!!value && <Text style={s.time}>{value}</Text>}
+      <Ionicons name="chevron-forward" size={16} color={c.dim} />
+    </View>
+  </Pressable>
+);
+
 const Header = ({
   title,
   onClose,
@@ -831,8 +798,15 @@ const Header = ({
 
 const s = themed(() => ({
   stage: { flex: 1, alignItems: "center", justifyContent: "center" },
-  passage: { height: PASSAGE_H, alignSelf: "stretch", backgroundColor: c.panel, borderRadius: 12, paddingVertical: 10, paddingHorizontal: 14, overflow: "hidden" },
-  passageText: { color: c.text },
+  passage: { alignSelf: "stretch", backgroundColor: c.panel, borderRadius: 12, paddingVertical: 10, paddingHorizontal: 14, overflow: "hidden" },
+  more: { alignSelf: "center", flexDirection: "row", alignItems: "center", gap: 10, backgroundColor: c.panel, borderRadius: 18, paddingVertical: 8, paddingHorizontal: 22 },
+  moreTag: { color: c.dim, fontSize: 13, fontVariant: ["tabular-nums"] },
+  moreHead: { color: c.dim, fontSize: 12, textTransform: "uppercase", letterSpacing: 1, marginBottom: 2 },
+  rates: { flexDirection: "row", gap: 8, marginBottom: 10 },
+  rate: { flex: 1, alignItems: "center", backgroundColor: c.raised, borderRadius: 10, paddingVertical: 10 },
+  rateOn: { backgroundColor: c.gold },
+  rateText: { color: c.text, fontSize: 15, fontVariant: ["tabular-nums"] },
+  rateTextOn: { color: c.bg, fontWeight: "700" },
   cardName: { color: c.text, fontSize: 18, fontFamily: F.heading, textAlign: "center" },
   linkBtn: { flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: c.panel, paddingVertical: 10, paddingHorizontal: 16, borderRadius: 20 },
   textBtn: { width: 28, height: 24, borderRadius: 6, alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: c.dim },
@@ -929,23 +903,6 @@ const s = themed(() => ({
     justifyContent: "center",
   },
   iconLink: { flexDirection: "row", alignItems: "center", gap: 4 },
-  menu: {
-    position: "absolute",
-    backgroundColor: c.raised,
-    borderRadius: 12,
-    paddingVertical: 6,
-    minWidth: 140,
-    borderWidth: 1,
-    borderColor: c.line,
-  },
-  menuItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-  },
-  menuOn: { backgroundColor: c.panel },
   menuText: { color: c.text, fontSize: 16, fontVariant: ["tabular-nums"] },
   btnText: { color: c.text, fontSize: 16 },
   play: {
